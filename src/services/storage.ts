@@ -38,6 +38,22 @@ export const storage = {
     await SecureStore.deleteItemAsync(USER_KEY);
   },
 
+  async getRememberedEmail(): Promise<string | null> {
+    try {
+      return await SecureStore.getItemAsync('rememberedEmail');
+    } catch {
+      return null;
+    }
+  },
+
+  async setRememberedEmail(email: string | null): Promise<void> {
+    if (email) {
+      await SecureStore.setItemAsync('rememberedEmail', email);
+    } else {
+      await SecureStore.deleteItemAsync('rememberedEmail');
+    }
+  },
+
   async clear(): Promise<void> {
     await this.removeToken();
     await this.removeUser();

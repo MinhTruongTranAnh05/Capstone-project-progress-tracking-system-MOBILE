@@ -8,6 +8,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@/contexts/AuthContext';
 import { colors, spacing, borderRadius } from '@/constants/colors';
 
@@ -17,8 +18,8 @@ export default function ProfileScreen() {
 
   const handleLogout = () => {
     Alert.alert(
-      'Đăng xuất',
-      'Bạn có chắc chắn muốn đăng xuất?',
+      'Xác nhận đăng xuất',
+      'Bạn có chắc chắn muốn đăng xuất khỏi tài khoản?',
       [
         { text: 'Hủy', style: 'cancel' },
         {
@@ -36,15 +37,13 @@ export default function ProfileScreen() {
   const getRoleLabel = () => {
     switch (user?.role) {
       case 'ADMIN':
-        return 'Quản trị viên';
+        return 'Quản trị viên (Admin)';
       case 'INSTRUCTOR':
-        return 'Giảng viên';
-      case 'COUNCIL':
-        return 'Hội đồng';
+        return 'Giảng viên hướng dẫn';
       case 'GROUP_LEADER':
-        return 'Trưởng nhóm';
+        return 'Trưởng nhóm (Group Leader)';
       default:
-        return 'Sinh viên';
+        return 'Sinh viên (Student)';
     }
   };
 
@@ -61,109 +60,105 @@ export default function ProfileScreen() {
       case 'QUY_NHON':
         return 'Quy Nhơn';
       default:
-        return user?.campus || 'Chưa cập nhật';
+        return user?.campus || 'TP. Hồ Chí Minh';
     }
   };
 
+  const getInitials = (name?: string) => {
+    if (!name) return 'SV';
+    const words = name.trim().split(' ');
+    return words.length > 1
+      ? words[words.length - 2][0] + words[words.length - 1][0]
+      : words[0].slice(0, 2).toUpperCase();
+  };
+
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      {/* Avatar */}
-      <View style={styles.avatarContainer}>
-        <View style={styles.avatar}>
-          <Text style={styles.avatarText}>
-            {user?.fullName?.charAt(0)?.toUpperCase() || 'U'}
-          </Text>
+    <ScrollView style={styles.container} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      {/* Banner */}
+      <View style={styles.banner}>
+        <View style={styles.bannerTag}>
+          <Text style={styles.bannerTagText}>Hồ sơ cá nhân · Account Settings</Text>
         </View>
-        <Text style={styles.userName}>{user?.fullName}</Text>
-        <Text style={styles.userEmail}>{user?.email}</Text>
-        <View style={styles.roleBadge}>
-          <Text style={styles.roleText}>{getRoleLabel()}</Text>
+        <Text style={styles.bannerTitle}>Thông tin tài khoản & Chức vụ</Text>
+        <Text style={styles.bannerDesc}>
+          Xem thông tin định danh và vai trò trong hệ thống đồ án.
+        </Text>
+      </View>
+
+      {/* Avatar & Role Card */}
+      <View style={styles.avatarCard}>
+        <View style={styles.avatarBadge}>
+          <Text style={styles.avatarText}>{getInitials(user?.fullName)}</Text>
+        </View>
+
+        <View style={styles.avatarInfo}>
+          <Text style={styles.userName}>{user?.fullName || 'Người dùng'}</Text>
+          <Text style={styles.userEmail}>{user?.email}</Text>
+        </View>
+
+        <View style={styles.rolePill}>
+          <Text style={styles.rolePillText}>{user?.role || 'STUDENT'}</Text>
         </View>
       </View>
 
-      {/* Info Section */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Thông tin tài khoản</Text>
+      {/* Details Card */}
+      <View style={styles.detailsCard}>
+        <Text style={styles.detailsCardTitle}>Chi tiết tài khoản</Text>
 
-        <View style={styles.infoCard}>
-          <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Email</Text>
-            <Text style={styles.infoValue}>{user?.email}</Text>
+        <View style={styles.row}>
+          <Text style={styles.label}>Họ và tên</Text>
+          <Text style={styles.value}>{user?.fullName || 'Chưa cập nhật'}</Text>
+        </View>
+
+        <View style={styles.row}>
+          <Text style={styles.label}>Email hệ thống</Text>
+          <Text style={styles.value}>{user?.email}</Text>
+        </View>
+
+        {user?.studentCode ? (
+          <View style={styles.row}>
+            <Text style={styles.label}>Mã số sinh viên (MSSV)</Text>
+            <Text style={styles.valueHighlight}>{user.studentCode}</Text>
           </View>
-          <View style={styles.divider} />
-          <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Cơ sở</Text>
-            <Text style={styles.infoValue}>{getCampusLabel()}</Text>
-          </View>
-          {user?.studentCode && (
-            <>
-              <View style={styles.divider} />
-              <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>MSSV</Text>
-                <Text style={styles.infoValue}>{user.studentCode}</Text>
-              </View>
-            </>
-          )}
-          <View style={styles.divider} />
-          <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Vai trò</Text>
-            <Text style={styles.infoValue}>{getRoleLabel()}</Text>
-          </View>
-          <View style={styles.divider} />
-          <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Trạng thái</Text>
-            <View style={[styles.statusBadge, { backgroundColor: colors.successLight }]}>
-              <Text style={[styles.statusText, { color: colors.success }]}>
-                {user?.status === 'ACTIVE' ? 'Hoạt động' : user?.status}
-              </Text>
-            </View>
+        ) : null}
+
+        <View style={styles.row}>
+          <Text style={styles.label}>Khoa / Chuyên ngành</Text>
+          <Text style={styles.value}>{user?.department || 'Kỹ thuật phần mềm'}</Text>
+        </View>
+
+        <View style={styles.row}>
+          <Text style={styles.label}>Cơ sở đào tạo</Text>
+          <Text style={styles.value}>{getCampusLabel()}</Text>
+        </View>
+
+        <View style={styles.row}>
+          <Text style={styles.label}>Vai trò trong hệ thống</Text>
+          <Text style={styles.value}>{getRoleLabel()}</Text>
+        </View>
+
+        <View style={[styles.row, { borderBottomWidth: 0 }]}>
+          <Text style={styles.label}>Trạng thái tài khoản</Text>
+          <View style={styles.statusBadge}>
+            <View style={styles.statusDot} />
+            <Text style={styles.statusText}>Hoạt động (ACTIVE)</Text>
           </View>
         </View>
       </View>
 
-      {/* Bio & Skills */}
-      {(user?.bio || user?.skills) && (
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Giới thiệu</Text>
-          <View style={styles.infoCard}>
-            {user?.bio && (
-              <>
-                <Text style={styles.bioLabel}>Bio</Text>
-                <Text style={styles.bioText}>{user.bio}</Text>
-              </>
-            )}
-            {user?.skills && (
-              <>
-                <Text style={styles.bioLabel}>Kỹ năng</Text>
-                <Text style={styles.bioText}>{user.skills}</Text>
-              </>
-            )}
-          </View>
-        </View>
-      )}
-
-      {/* Actions */}
-      <View style={styles.section}>
-        <TouchableOpacity style={styles.menuItem}>
-          <Text style={styles.menuText}>Chỉnh sửa hồ sơ</Text>
-          <Text style={styles.menuArrow}>›</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.menuItem}>
-          <Text style={styles.menuText}>Cài đặt thông báo</Text>
-          <Text style={styles.menuArrow}>›</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.menuItem}>
-          <Text style={styles.menuText}>Hỗ trợ</Text>
-          <Text style={styles.menuArrow}>›</Text>
-        </TouchableOpacity>
+      {/* Admin Notice */}
+      <View style={styles.noticeCard}>
+        <Ionicons name="information-circle-outline" size={18} color={colors.textSecondary} />
+        <Text style={styles.noticeText}>
+          Để thay đổi thông tin cá nhân hoặc vai trò, vui lòng liên hệ Ban Đào tạo hoặc Quản trị viên (Admin).
+        </Text>
       </View>
 
-      {/* Logout */}
-      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-        <Text style={styles.logoutText}>Đăng xuất</Text>
+      {/* Logout Button */}
+      <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout} activeOpacity={0.8}>
+        <Ionicons name="log-out-outline" size={18} color={colors.error} />
+        <Text style={styles.logoutBtnText}>Đăng xuất khỏi hệ thống</Text>
       </TouchableOpacity>
-
-      <Text style={styles.version}>Phiên bản 1.0.0</Text>
     </ScrollView>
   );
 }
@@ -175,133 +170,183 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: spacing.lg,
+    gap: spacing.md,
+    paddingBottom: spacing['3xl'],
   },
-  avatarContainer: {
+  banner: {
+    backgroundColor: colors.surface,
+    padding: spacing.lg,
+    borderRadius: borderRadius['2xl'],
+    borderWidth: 1,
+    borderColor: colors.border,
+    gap: 4,
+  },
+  bannerTag: {
+    alignSelf: 'flex-start',
+    backgroundColor: colors.primary50,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+    marginBottom: 4,
+  },
+  bannerTagText: {
+    color: colors.primary,
+    fontSize: 10.5,
+    fontWeight: '800',
+  },
+  bannerTitle: {
+    fontSize: 18,
+    fontWeight: '900',
+    color: colors.text,
+    letterSpacing: -0.3,
+  },
+  bannerDesc: {
+    fontSize: 12,
+    color: colors.textSecondary,
+    lineHeight: 16,
+  },
+  avatarCard: {
+    backgroundColor: colors.surface,
+    borderRadius: borderRadius['2xl'],
+    borderWidth: 1,
+    borderColor: colors.border,
+    padding: spacing.xl,
     alignItems: 'center',
-    paddingVertical: spacing.xl,
+    gap: spacing.sm,
   },
-  avatar: {
-    width: 88,
-    height: 88,
-    borderRadius: 44,
-    backgroundColor: colors.primary,
+  avatarBadge: {
+    width: 68,
+    height: 68,
+    borderRadius: 22,
+    backgroundColor: colors.primary50,
+    borderWidth: 2,
+    borderColor: colors.primary100,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: spacing.md,
   },
   avatarText: {
-    fontSize: 36,
-    fontWeight: '800',
-    color: '#fff',
-  },
-  userName: {
     fontSize: 22,
-    fontWeight: '800',
-    color: colors.text,
-    marginBottom: 4,
-  },
-  userEmail: {
-    fontSize: 14,
-    color: colors.textSecondary,
-    marginBottom: spacing.md,
-  },
-  roleBadge: {
-    backgroundColor: colors.primaryLight,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs,
-    borderRadius: borderRadius.full,
-  },
-  roleText: {
-    fontSize: 13,
-    fontWeight: '700',
+    fontWeight: '900',
     color: colors.primary,
   },
-  section: {
-    marginBottom: spacing.xl,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: colors.text,
-    marginBottom: spacing.md,
-  },
-  infoCard: {
-    backgroundColor: colors.surface,
-    borderRadius: borderRadius.lg,
-    padding: spacing.lg,
-  },
-  infoRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  avatarInfo: {
     alignItems: 'center',
-    paddingVertical: spacing.sm,
+    gap: 2,
   },
-  infoLabel: {
-    fontSize: 14,
-    color: colors.textSecondary,
-  },
-  infoValue: {
-    fontSize: 14,
-    fontWeight: '600',
+  userName: {
+    fontSize: 17,
+    fontWeight: '900',
     color: colors.text,
   },
-  divider: {
-    height: 1,
-    backgroundColor: colors.border,
-  },
-  statusBadge: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: 4,
-    borderRadius: borderRadius.full,
-  },
-  statusText: {
+  userEmail: {
     fontSize: 12,
-    fontWeight: '700',
-  },
-  bioLabel: {
-    fontSize: 14,
     color: colors.textSecondary,
-    marginBottom: 4,
   },
-  bioText: {
-    fontSize: 15,
-    color: colors.text,
-    marginBottom: spacing.md,
+  rolePill: {
+    backgroundColor: colors.primary50,
+    borderWidth: 1,
+    borderColor: colors.primary100,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: borderRadius.md,
+    marginTop: 2,
   },
-  menuItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+  rolePillText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: colors.primary,
+    letterSpacing: 0.5,
+  },
+  detailsCard: {
     backgroundColor: colors.surface,
+    borderRadius: borderRadius['2xl'],
+    borderWidth: 1,
+    borderColor: colors.border,
     padding: spacing.lg,
-    borderRadius: borderRadius.lg,
+  },
+  detailsCardTitle: {
+    fontSize: 12.5,
+    fontWeight: '900',
+    color: colors.textMuted,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
     marginBottom: spacing.sm,
   },
-  menuText: {
-    fontSize: 15,
-    color: colors.text,
-    fontWeight: '500',
-  },
-  menuArrow: {
-    fontSize: 20,
-    color: colors.textSecondary,
-  },
-  logoutButton: {
-    backgroundColor: colors.errorLight,
-    padding: spacing.lg,
-    borderRadius: borderRadius.lg,
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: spacing.lg,
+    paddingVertical: 11,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.borderLight,
   },
-  logoutText: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: colors.error,
-  },
-  version: {
-    textAlign: 'center',
+  label: {
     fontSize: 12,
+    fontWeight: '600',
     color: colors.textSecondary,
-    marginBottom: spacing.xl,
+  },
+  value: {
+    fontSize: 12.5,
+    fontWeight: '800',
+    color: colors.text,
+  },
+  valueHighlight: {
+    fontSize: 12.5,
+    fontWeight: '900',
+    color: colors.primary,
+  },
+  statusBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    backgroundColor: colors.success50,
+    borderWidth: 1,
+    borderColor: colors.successBorder,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: borderRadius.sm,
+  },
+  statusDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: colors.success,
+  },
+  statusText: {
+    fontSize: 10.5,
+    fontWeight: '800',
+    color: colors.success,
+  },
+  noticeCard: {
+    backgroundColor: colors.surfaceMuted,
+    borderRadius: borderRadius.lg,
+    borderWidth: 1,
+    borderColor: colors.borderLight,
+    padding: spacing.md,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  noticeText: {
+    flex: 1,
+    fontSize: 11.5,
+    color: colors.textSecondary,
+    lineHeight: 16,
+  },
+  logoutBtn: {
+    backgroundColor: colors.error50,
+    borderWidth: 1,
+    borderColor: colors.errorBorder,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 6,
+    paddingVertical: 12,
+    borderRadius: borderRadius.lg,
+  },
+  logoutBtnText: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: colors.error,
   },
 });

@@ -1,7 +1,7 @@
 import api from './api';
 import { Notification } from '@/types/models';
 import { storage } from './storage';
-import Constants from 'expo-constants';
+import { config } from '@/constants/config';
 
 export const notificationService = {
   async getNotifications(params?: {
@@ -30,7 +30,8 @@ export const notificationService = {
 
   async getSseUrl(): Promise<string> {
     const token = await storage.getToken();
-    const apiUrl = Constants.expoConfig?.extra?.API_URL || 'http://10.0.2.2:8080/api/v1';
+    const apiUrl = config.API_URL;
     return `${apiUrl}/notifications/stream?access_token=${token}`;
   },
 };
+

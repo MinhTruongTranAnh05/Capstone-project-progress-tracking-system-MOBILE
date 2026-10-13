@@ -13,6 +13,7 @@ export const groupService = {
     supervisorId?: string;
     topicId?: string;
     available?: boolean;
+    memberId?: string;
     page?: number;
     size?: number;
   }): Promise<any> {
@@ -37,6 +38,21 @@ export const groupService = {
 
   async getGroupMembers(groupId: string): Promise<any[]> {
     const response = await api.get(`/groups/${groupId}/members`);
+    return response.data;
+  },
+
+  async joinGroup(groupId: string): Promise<any> {
+    const response = await api.post(`/groups/${groupId}/join`);
+    return response.data;
+  },
+
+  async addGroupMember(groupId: string, data: { userId?: string; email?: string; isLeader?: boolean }): Promise<any> {
+    const response = await api.post(`/groups/${groupId}/members`, data);
+    return response.data;
+  },
+
+  async removeGroupMember(groupId: string, memberId: string): Promise<any> {
+    const response = await api.delete(`/groups/${groupId}/members/${memberId}`);
     return response.data;
   },
 

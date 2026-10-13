@@ -18,6 +18,7 @@ export interface RegisterRequest {
   password: string;
   studentCode?: string;
   campus: Campus;
+  department?: string;
   role?: Role;
 }
 
@@ -34,6 +35,7 @@ export interface User {
   fullName: string;
   role: Role;
   campus: Campus;
+  department?: string;
   status: string;
   avatarUrl?: string;
   studentCode?: string;

@@ -6,3 +6,4 @@ export { scheduleService } from './scheduleService';
 export { topicService } from './topicService';
 export { progressService } from './progressService';
 export { notificationService } from './notificationService';
+export { documentService } from './documentService';

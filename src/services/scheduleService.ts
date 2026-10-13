@@ -10,6 +10,7 @@ export interface CreateSlotRequest {
 }
 
 export interface BookSlotRequest {
+  groupId?: string;
   notes?: string;
 }
 
