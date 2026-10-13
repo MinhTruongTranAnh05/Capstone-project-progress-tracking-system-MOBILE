@@ -33,9 +33,6 @@
     ],
     "experiments": {
       "typedRoutes": true
-    },
-    "extra": {
-      "API_URL": "https://capstone-project-progress-tracking-system-be-production-afa9.up.railway.app/api/v1"
     }
   }
 }

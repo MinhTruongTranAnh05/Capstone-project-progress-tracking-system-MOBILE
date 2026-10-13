@@ -65,6 +65,29 @@ npm run android
 npm run ios
 ```
 
+### Cài đặt
+
+```bash
+# 1. Tạo file .env từ mẫu
+cp .env.example .env
+
+# 2. Mở .env và điền EXPO_PUBLIC_API_URL (URL backend, ví dụ https://your-backend.up.railway.app/api/v1)
+
+# 3. Cài dependencies
+npm install
+
+# 4. Chạy app (xoá cache để nạp biến môi trường mới)
+npx expo start -c
+```
+
+> **Lưu ý:** App sẽ báo lỗi khi khởi động nếu thiếu `EXPO_PUBLIC_API_URL`.
+
+### Build bằng EAS
+
+File `.env` **không được commit** lên Git, nên khi build bằng EAS bạn phải khai báo
+`EXPO_PUBLIC_API_URL` trong **EAS Environment Variables** (trên expo.dev hoặc bằng
+`eas env:create`) cho từng môi trường (development / preview / production).
+
 ### Environment Configuration
 
 The app connects to the backend at:
