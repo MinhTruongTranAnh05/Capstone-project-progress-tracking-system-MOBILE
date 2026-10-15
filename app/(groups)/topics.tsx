@@ -11,6 +11,7 @@ import {
   Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '@/contexts/AuthContext';
 import { topicService } from '@/services/topicService';
 import { groupService } from '@/services/groupService';
@@ -19,6 +20,7 @@ import { Topic } from '@/types/models';
 
 export default function TopicsScreen() {
   const { user } = useAuth();
+  const insets = useSafeAreaInsets();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Tất cả');
   const [topics, setTopics] = useState<Topic[]>([]);
@@ -186,7 +188,7 @@ export default function TopicsScreen() {
         <FlatList
           data={filteredTopics}
           keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.listContent}
+          contentContainerStyle={[styles.listContent, { paddingBottom: insets.bottom + 24 }]}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[colors.primary]} />}
           renderItem={({ item }) => {
             const isCurrentTopic =

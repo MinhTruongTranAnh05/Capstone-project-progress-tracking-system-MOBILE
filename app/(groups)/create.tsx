@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { groupService } from '@/services/groupService';
 import { topicService } from '@/services/topicService';
 import { colors, spacing, borderRadius } from '@/constants/colors';
@@ -26,6 +27,7 @@ export default function CreateGroupScreen() {
   const [inviteCode, setInviteCode] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const insets = useSafeAreaInsets();
 
   useEffect(() => {
     topicService.getTopics({ status: 'PUBLISHED' }).then((res) => {
@@ -92,7 +94,11 @@ export default function CreateGroupScreen() {
   };
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 24 }]}
+      keyboardShouldPersistTaps="handled"
+    >
       {/* Sub Tabs */}
       <View style={styles.tabBar}>
         <TouchableOpacity

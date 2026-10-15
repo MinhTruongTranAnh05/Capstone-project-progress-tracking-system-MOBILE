@@ -13,11 +13,13 @@ import {
   ScrollView,
 } from 'react-native';
 import { useRouter, Link } from 'expo-router';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@/contexts/AuthContext';
 import { storage } from '@/services/storage';
 import { colors, spacing, borderRadius } from '@/constants/colors';
 import { AuthPromoBanner } from '@/components/AuthPromoBanner';
+import { GoogleAuthSection } from '@/components/GoogleAuthSection';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -25,6 +27,7 @@ export default function LoginScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const { login } = useAuth();
   const router = useRouter();
 
@@ -38,6 +41,7 @@ export default function LoginScreen() {
   }, []);
 
   const handleLogin = async () => {
+    if (loading || googleLoading) return;
     if (!email || !password) {
       Alert.alert('Thông báo', 'Vui lòng nhập đầy đủ email và mật khẩu');
       return;
@@ -81,14 +85,16 @@ export default function LoginScreen() {
       {/* Dark overlay with slight blur feel */}
       <View style={styles.overlay} />
 
+      <SafeAreaView style={styles.keyboardContainer}>
       <KeyboardAvoidingView
         style={styles.keyboardContainer}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         <ScrollView
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
         >
           {/* Unified Card Container */}
           <View style={styles.cardWrapper}>
@@ -176,9 +182,9 @@ export default function LoginScreen() {
 
               {/* Submit Button */}
               <TouchableOpacity
-                style={[styles.button, loading && styles.buttonDisabled]}
+                style={[styles.button, (loading || googleLoading) && styles.buttonDisabled]}
                 onPress={handleLogin}
-                disabled={loading}
+                disabled={loading || googleLoading}
                 activeOpacity={0.85}
               >
                 {loading ? (
@@ -187,6 +193,8 @@ export default function LoginScreen() {
                   <Text style={styles.buttonText}>Đăng nhập</Text>
                 )}
               </TouchableOpacity>
+
+              <GoogleAuthSection disabled={loading} onBusyChange={setGoogleLoading} />
 
               {/* Register Link */}
               <View style={styles.registerRow}>
@@ -211,6 +219,7 @@ export default function LoginScreen() {
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
+      </SafeAreaView>
   </ImageBackground>
 );
 }
@@ -239,7 +248,10 @@ const styles = StyleSheet.create({
     paddingVertical: spacing['2xl'],
   },
   cardWrapper: {
-    borderRadius: 28,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    borderBottomLeftRadius: 40,
+    borderBottomRightRadius: 40,
     overflow: 'hidden',
     borderWidth: 1.5,
     borderColor: 'rgba(255, 255, 255, 0.65)',
@@ -429,6 +441,8 @@ const styles = StyleSheet.create({
   },
   cardFooter: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingTop: spacing.md,

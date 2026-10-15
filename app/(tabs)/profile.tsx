@@ -6,11 +6,15 @@ import {
   TouchableOpacity,
   Alert,
   ScrollView,
+  Platform,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '@/contexts/AuthContext';
 import { colors, spacing, borderRadius } from '@/constants/colors';
+
+const TAB_BAR_HEIGHT = Platform.OS === 'ios' ? 88 : 64;
 
 export default function ProfileScreen() {
   const { user, logout } = useAuth();
@@ -72,8 +76,20 @@ export default function ProfileScreen() {
       : words[0].slice(0, 2).toUpperCase();
   };
 
+  const insets = useSafeAreaInsets();
+
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={[
+        styles.content,
+        {
+          paddingTop: insets.top + spacing.md,
+          paddingBottom: TAB_BAR_HEIGHT + 24,
+        },
+      ]}
+      showsVerticalScrollIndicator={false}
+    >
       {/* Banner */}
       <View style={styles.banner}>
         <View style={styles.bannerTag}>
@@ -171,7 +187,7 @@ const styles = StyleSheet.create({
   content: {
     padding: spacing.lg,
     gap: spacing.md,
-    paddingBottom: spacing['3xl'],
+    // paddingTop & paddingBottom are applied dynamically via insets (see render)
   },
   banner: {
     backgroundColor: colors.surface,

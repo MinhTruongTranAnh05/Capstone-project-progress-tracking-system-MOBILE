@@ -10,14 +10,18 @@ import {
   Alert,
   TextInput,
   ScrollView,
+  Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '@/contexts/AuthContext';
 import { scheduleService } from '@/services/scheduleService';
 import { topicService } from '@/services/topicService';
 import { groupService } from '@/services/groupService';
 import { colors, spacing, borderRadius } from '@/constants/colors';
 import { Slot } from '@/types/models';
+
+const TAB_BAR_HEIGHT = Platform.OS === 'ios' ? 88 : 64;
 
 type TabType = 'available' | 'booked' | 'questions';
 
@@ -188,10 +192,13 @@ export default function ScheduleScreen() {
     });
   };
 
+  const insets = useSafeAreaInsets();
+  const listBottomPad = TAB_BAR_HEIGHT + 24;
+
   return (
     <View style={styles.container}>
-      {/* 1. Header Banner */}
-      <View style={styles.banner}>
+      {/* 1. Header Banner — paddingTop accounts for Dynamic Island / notch */}
+      <View style={[styles.banner, { paddingTop: insets.top + spacing.md }]}>
         <View style={styles.bannerTag}>
           <Text style={styles.bannerTagText}>Lịch hẹn GVHD · Booking & Meetings</Text>
         </View>
@@ -247,7 +254,7 @@ export default function ScheduleScreen() {
         <FlatList
           data={slots}
           keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.listContent}
+          contentContainerStyle={[styles.listContent, { paddingBottom: listBottomPad }]}
           refreshControl={<RefreshControl refreshing={loading} onRefresh={loadData} />}
           renderItem={({ item }) => (
             <View style={styles.card}>
@@ -323,7 +330,7 @@ export default function ScheduleScreen() {
         <FlatList
           data={myBookings}
           keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.listContent}
+          contentContainerStyle={[styles.listContent, { paddingBottom: listBottomPad }]}
           refreshControl={<RefreshControl refreshing={loading} onRefresh={loadData} />}
           renderItem={({ item }) => (
             <View style={styles.card}>
@@ -384,7 +391,7 @@ export default function ScheduleScreen() {
           }
         />
       ) : (
-        <ScrollView contentContainerStyle={styles.qnaContent}>
+        <ScrollView contentContainerStyle={[styles.qnaContent, { paddingBottom: listBottomPad }]}>
           {/* Question submission box */}
           <View style={styles.qnaBox}>
             <Text style={styles.qnaBoxTitle}>Gửi câu hỏi trước buổi họp</Text>
@@ -459,7 +466,7 @@ const styles = StyleSheet.create({
   banner: {
     backgroundColor: colors.surface,
     paddingHorizontal: spacing.lg,
-    paddingTop: spacing.xl,
+    // paddingTop is applied dynamically via insets.top (see render)
     paddingBottom: spacing.md,
     borderBottomWidth: 1,
     borderBottomColor: colors.borderLight,

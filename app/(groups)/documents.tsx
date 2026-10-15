@@ -12,6 +12,7 @@ import {
   Linking,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '@/contexts/AuthContext';
 import { groupService } from '@/services/groupService';
 import { documentService } from '@/services/documentService';
@@ -19,6 +20,7 @@ import { colors, spacing, borderRadius } from '@/constants/colors';
 
 export default function DocumentsScreen() {
   const { user } = useAuth();
+  const insets = useSafeAreaInsets();
   const [userGroup, setUserGroup] = useState<any>(null);
   const [documents, setDocuments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -138,7 +140,7 @@ export default function DocumentsScreen() {
       <FlatList
         data={documents}
         keyExtractor={(item, index) => item.id || String(index)}
-        contentContainerStyle={styles.listContent}
+        contentContainerStyle={[styles.listContent, { paddingBottom: insets.bottom + 24 }]}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[colors.primary]} />}
         ListHeaderComponent={
           <View style={styles.headerBlock}>

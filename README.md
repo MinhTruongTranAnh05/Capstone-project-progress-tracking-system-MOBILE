@@ -103,6 +103,35 @@ The mobile app connects to these backend APIs:
 - `POST /auth/login` - User login
 - `POST /auth/register` - User registration
 - `GET /auth/me` - Get current user
+- `GET /auth/google/config` - Google sign-in availability and Web OAuth client ID
+- `POST /auth/google` - Exchange `{ idToken, campus }` for the app session
+
+### Google sign-in (login and registration screens)
+
+The backend must configure `GOOGLE_CLIENT_IDS` with the Web OAuth client ID used
+by the app. The app loads it from `/auth/google/config`; optionally override it
+with `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID`. No client secret belongs in the app.
+
+- **Android:** Create an Android OAuth client in the same Google Cloud project
+  for `com.fpt.capstone.mobile` and register the SHA-1 of each signing certificate
+  (development and production). Install a native development/production build,
+  e.g. `npx expo run:android` after installing the Android SDK.
+- **iOS:** Create an iOS OAuth client for `com.fpt.capstone.mobile` and set
+  `EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID` before building. `app.config.js` registers
+  the reversed client ID URL scheme. Rebuild after changing this value.
+- **Web:** Add the app origin (including the development port) to the Web OAuth
+  client's Authorized JavaScript origins. The app uses Google's official sign-in button.
+- **Expo Go:** The Google native SDK requires a development build; tapping the
+  button in Expo Go explains this requirement. Email/password remains available.
+
+Choose the correct campus before signing in. On the registration screen, Google
+uses the selected campus and signs into an existing account. It does not submit
+the registration form or create an account: the current backend requires personal
+email accounts to register with a student code and receive admin approval first.
+Backend role, approval, account status, and campus checks apply to both screens.
+
+Setup references: [Expo Google authentication](https://docs.expo.dev/guides/google-authentication/)
+and [Google Sign-In Expo setup](https://react-native-google-signin.github.io/docs/setting-up/expo).
 
 ### Groups
 - `GET /groups` - List groups

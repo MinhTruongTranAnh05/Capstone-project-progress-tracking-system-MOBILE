@@ -13,11 +13,13 @@ import {
   ImageBackground,
 } from 'react-native';
 import { useRouter, Link } from 'expo-router';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { authService } from '@/services';
 import { Campus } from '@/types/models';
 import { colors, spacing, borderRadius } from '@/constants/colors';
 import { AuthPromoBanner } from '@/components/AuthPromoBanner';
+import { GoogleAuthSection } from '@/components/GoogleAuthSection';
 
 const CAMPUSES: { label: string; value: Campus }[] = [
   { label: 'TP. HCM', value: 'HO_CHI_MINH' },
@@ -47,9 +49,11 @@ export default function RegisterScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const router = useRouter();
 
   const handleRegister = async () => {
+    if (loading || googleLoading) return;
     if (!agreeTerms) {
       Alert.alert('Thông báo', 'Vui lòng đồng ý với Điều khoản sử dụng và Quy định đào tạo!');
       return;
@@ -122,14 +126,16 @@ export default function RegisterScreen() {
     >
       <View style={styles.overlay} />
 
+      <SafeAreaView style={styles.keyboardContainer}>
       <KeyboardAvoidingView
         style={styles.keyboardContainer}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         <ScrollView
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
         >
           {/* Main Unified Card */}
           <View style={styles.cardWrapper}>
@@ -341,9 +347,9 @@ export default function RegisterScreen() {
 
               {/* Submit Button */}
               <TouchableOpacity
-                style={[styles.button, loading && styles.buttonDisabled]}
+                style={[styles.button, (loading || googleLoading) && styles.buttonDisabled]}
                 onPress={handleRegister}
-                disabled={loading}
+                disabled={loading || googleLoading}
                 activeOpacity={0.85}
               >
                 {loading ? (
@@ -352,6 +358,8 @@ export default function RegisterScreen() {
                   <Text style={styles.buttonText}>Tạo tài khoản</Text>
                 )}
               </TouchableOpacity>
+
+              <GoogleAuthSection campus={campus} disabled={loading} onBusyChange={setGoogleLoading} />
 
               {/* Back to Login Link */}
               <View style={styles.loginRow}>
@@ -376,6 +384,7 @@ export default function RegisterScreen() {
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
+      </SafeAreaView>
   </ImageBackground>
 );
 }
@@ -403,7 +412,10 @@ const styles = StyleSheet.create({
     paddingVertical: spacing['2xl'],
   },
   cardWrapper: {
-    borderRadius: 28,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    borderBottomLeftRadius: 40,
+    borderBottomRightRadius: 40,
     overflow: 'hidden',
     borderWidth: 1.5,
     borderColor: 'rgba(255, 255, 255, 0.65)',
@@ -646,6 +658,8 @@ const styles = StyleSheet.create({
   },
   cardFooter: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingTop: spacing.md,

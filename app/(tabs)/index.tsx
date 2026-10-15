@@ -10,9 +10,13 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '@/contexts/AuthContext';
 import { groupService } from '@/services/groupService';
 import { colors, spacing, borderRadius } from '@/constants/colors';
+import { Platform } from 'react-native';
+
+const TAB_BAR_HEIGHT = Platform.OS === 'ios' ? 88 : 64;
 
 export default function HomeScreen() {
   const { user } = useAuth();
@@ -86,10 +90,18 @@ export default function HomeScreen() {
 
   const roleConfig = getRoleConfig();
 
+  const insets = useSafeAreaInsets();
+
   return (
     <ScrollView
       style={styles.container}
-      contentContainerStyle={styles.content}
+      contentContainerStyle={[
+        styles.content,
+        {
+          paddingTop: insets.top + spacing.md,
+          paddingBottom: TAB_BAR_HEIGHT + 24,
+        },
+      ]}
       showsVerticalScrollIndicator={false}
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[colors.primary]} />
@@ -358,8 +370,7 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingHorizontal: spacing.lg,
-    paddingTop: spacing.xl,
-    paddingBottom: spacing['3xl'],
+    // paddingTop & paddingBottom are applied dynamically via insets (see render)
   },
   topHeader: {
     flexDirection: 'row',

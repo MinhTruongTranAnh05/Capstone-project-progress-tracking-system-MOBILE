@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { storage, authService } from '@/services';
-import { User } from '@/types/auth';
+import { GoogleLoginRequest, User } from '@/types/auth';
 
 interface AuthContextType {
   user: User | null;
@@ -8,6 +8,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
+  loginWithGoogle: (data: GoogleLoginRequest) => Promise<void>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
 }
@@ -50,6 +51,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setAccessToken(null);
   };
 
+  const loginWithGoogle = async (data: GoogleLoginRequest) => {
+    const response = await authService.loginWithGoogle(data);
+    setUser(response.user);
+    setAccessToken(response.accessToken);
+  };
+
   const refreshUser = async () => {
     try {
       const currentUser = await authService.getCurrentUser();
@@ -68,6 +75,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isAuthenticated: !!accessToken && !!user,
         isLoading,
         login,
+        loginWithGoogle,
         logout,
         refreshUser,
       }}

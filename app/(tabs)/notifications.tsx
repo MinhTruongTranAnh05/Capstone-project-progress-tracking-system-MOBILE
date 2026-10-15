@@ -8,11 +8,15 @@ import {
   RefreshControl,
   ActivityIndicator,
   Alert,
+  Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { notificationService } from '@/services/notificationService';
 import { colors, spacing, borderRadius } from '@/constants/colors';
 import { Notification } from '@/types/models';
+
+const TAB_BAR_HEIGHT = Platform.OS === 'ios' ? 88 : 64;
 
 export default function NotificationsScreen() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -100,10 +104,12 @@ export default function NotificationsScreen() {
     return date.toLocaleDateString('vi-VN', { day: 'numeric', month: 'short' });
   };
 
+  const insets = useSafeAreaInsets();
+
   return (
     <View style={styles.container}>
-      {/* Banner */}
-      <View style={styles.banner}>
+      {/* Banner — paddingTop clears Dynamic Island / notch / status bar */}
+      <View style={[styles.banner, { paddingTop: insets.top + spacing.md }]}>
         <View style={styles.bannerTopRow}>
           <View style={styles.bannerTitleGroup}>
             <View style={styles.titleRow}>
@@ -138,7 +144,7 @@ export default function NotificationsScreen() {
         <FlatList
           data={notifications}
           keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.listContent}
+          contentContainerStyle={[styles.listContent, { paddingBottom: TAB_BAR_HEIGHT + 24 }]}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[colors.primary]} />}
           renderItem={({ item }) => {
             const iconConfig = getTypeIcon(item.type);
@@ -201,7 +207,7 @@ const styles = StyleSheet.create({
   banner: {
     backgroundColor: colors.surface,
     paddingHorizontal: spacing.lg,
-    paddingTop: spacing.xl,
+    // paddingTop is applied dynamically via insets.top (see render)
     paddingBottom: spacing.md,
     borderBottomWidth: 1,
     borderBottomColor: colors.borderLight,

@@ -5,6 +5,16 @@ export interface LoginRequest {
   password: string;
 }
 
+export interface GoogleLoginRequest {
+  idToken: string;
+  campus: Campus;
+}
+
+export interface GoogleLoginConfig {
+  enabled: boolean;
+  clientId: string | null;
+}
+
 export interface LoginResponse {
   accessToken: string;
   tokenType: string;
