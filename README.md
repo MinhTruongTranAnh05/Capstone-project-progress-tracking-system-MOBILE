@@ -4,6 +4,8 @@ Native mobile application for the Capstone Project Progress Tracking System, bui
 
 ## Features
 
+Authentication/session behavior and verification: [Phase B](docs/PHASE_B_AUTH.md).
+
 - **Authentication**: Login, Register with email/password
 - **Role-based access**: STUDENT, GROUP_LEADER (mobile scope)
 - **Group Management**: Create group, join group, manage members

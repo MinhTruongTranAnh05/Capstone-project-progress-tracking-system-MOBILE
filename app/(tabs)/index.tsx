@@ -58,13 +58,6 @@ export default function HomeScreen() {
 
   const getRoleConfig = () => {
     switch (user?.role) {
-      case 'ADMIN':
-        return {
-          label: '🛡️ ADMIN',
-          bg: colors.error50,
-          color: colors.error,
-          border: colors.errorBorder,
-        };
       case 'GROUP_LEADER':
         return {
           label: '👑 GROUP LEADER',

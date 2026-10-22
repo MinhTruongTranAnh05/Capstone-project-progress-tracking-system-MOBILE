@@ -7,7 +7,6 @@ import {
   ScrollView,
   Platform,
 } from 'react-native';
-import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '@/contexts/AuthContext';
@@ -17,7 +16,6 @@ const TAB_BAR_HEIGHT = Platform.OS === 'ios' ? 88 : 64;
 
 export default function ProfileScreen() {
   const { user, logout } = useAuth();
-  const router = useRouter();
 
   const handleLogout = () => {
     Alert.alert(
@@ -30,7 +28,6 @@ export default function ProfileScreen() {
           style: 'destructive',
           onPress: async () => {
             await logout();
-            router.replace('/(auth)/login');
           },
         },
       ]
@@ -39,8 +36,6 @@ export default function ProfileScreen() {
 
   const getRoleLabel = () => {
     switch (user?.role) {
-      case 'ADMIN':
-        return 'Quản trị viên (Admin)';
       case 'GROUP_LEADER':
         return 'Trưởng nhóm (Group Leader)';
       default:

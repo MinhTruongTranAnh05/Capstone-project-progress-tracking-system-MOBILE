@@ -1,5 +1,6 @@
 import api from './api';
-import { storage } from './storage';
+import { sessionStore } from './sessionStore';
+import { SessionError } from './apiError';
 import { config } from '@/constants/config';
 
 export const notificationService = {
@@ -28,9 +29,10 @@ export const notificationService = {
   },
 
   async getSseUrl(): Promise<string> {
-    const token = await storage.getToken();
+    const { token, user } = sessionStore.getSnapshot();
+    if (!token || !user) throw new SessionError('UNAUTHORIZED', 'Vui lòng đăng nhập lại.');
     const apiUrl = config.API_URL;
-    return `${apiUrl}/notifications/stream?access_token=${token}`;
+    return `${apiUrl}/notifications/stream?access_token=${encodeURIComponent(token)}`;
   },
 };
 

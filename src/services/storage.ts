@@ -1,15 +1,12 @@
 import * as SecureStore from 'expo-secure-store';
+import type { User } from '@/types/auth';
 
 const TOKEN_KEY = 'accessToken';
 const USER_KEY = 'user';
 
 export const storage = {
   async getToken(): Promise<string | null> {
-    try {
-      return await SecureStore.getItemAsync(TOKEN_KEY);
-    } catch {
-      return null;
-    }
+    return SecureStore.getItemAsync(TOKEN_KEY);
   },
 
   async setToken(token: string): Promise<void> {
@@ -20,7 +17,7 @@ export const storage = {
     await SecureStore.deleteItemAsync(TOKEN_KEY);
   },
 
-  async getUser(): Promise<any | null> {
+  async getUser(): Promise<User | null> {
     try {
       const userStr = await SecureStore.getItemAsync(USER_KEY);
       return userStr ? JSON.parse(userStr) : null;
@@ -29,7 +26,7 @@ export const storage = {
     }
   },
 
-  async setUser(user: any): Promise<void> {
+  async setUser(user: User): Promise<void> {
     await SecureStore.setItemAsync(USER_KEY, JSON.stringify(user));
   },
 
@@ -54,7 +51,6 @@ export const storage = {
   },
 
   async clear(): Promise<void> {
-    await this.removeToken();
-    await this.removeUser();
+    await Promise.all([this.removeToken(), this.removeUser()]);
   },
 };

@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { useRouter } from 'expo-router';
 import axios from 'axios';
 import { GoogleSignInButton } from './GoogleSignInButton';
 import { useAuth } from '@/contexts/AuthContext';
@@ -8,6 +7,7 @@ import { authService } from '@/services';
 import { GoogleLoginConfig } from '@/types/auth';
 import { Campus } from '@/types/models';
 import { colors, borderRadius, spacing } from '@/constants/colors';
+import { getErrorMessage, SessionError } from '@/services/apiError';
 
 const CAMPUSES: { label: string; value: Campus }[] = [
   { label: 'TP. HCM', value: 'HO_CHI_MINH' },
@@ -40,7 +40,6 @@ export function GoogleAuthSection({ campus, disabled, onBusyChange }: {
   const [busy, setBusy] = useState(false);
   const mounted = useRef(true);
   const { loginWithGoogle } = useAuth();
-  const router = useRouter();
   const effectiveCampus = campus ?? selectedCampus;
 
   const loadSettings = async () => {
@@ -71,9 +70,8 @@ export function GoogleAuthSection({ campus, disabled, onBusyChange }: {
 
   const handleError = (error: unknown) => {
     if (!mounted.current) return;
-    if (axios.isAxiosError(error)) {
-      const data = error.response?.data;
-      setError(ERROR_MESSAGES[data?.errorCode] || data?.message || 'Đăng nhập Google thất bại. Vui lòng thử lại.');
+    if (axios.isAxiosError(error) || error instanceof SessionError) {
+      setError(getErrorMessage(error, 'Đăng nhập Google thất bại. Vui lòng thử lại.'));
     } else {
       const nativeError = error as { code?: string; message?: string };
       setError(ERROR_MESSAGES[nativeError?.code ?? ''] || nativeError?.message || 'Không thể đăng nhập Google. Vui lòng thử lại.');
@@ -99,7 +97,6 @@ export function GoogleAuthSection({ campus, disabled, onBusyChange }: {
           onCredential={async (idToken) => {
             if (!effectiveCampus) throw new Error('Vui lòng chọn cơ sở đào tạo.');
             await loginWithGoogle({ idToken, campus: effectiveCampus });
-            if (mounted.current) router.replace('/(tabs)');
           }} />
       : <Text style={styles.muted}>Đăng nhập Google chưa được bật trên hệ thống.</Text>}
     {busy && <ActivityIndicator color={colors.primary} style={{ marginTop: 8 }} />}

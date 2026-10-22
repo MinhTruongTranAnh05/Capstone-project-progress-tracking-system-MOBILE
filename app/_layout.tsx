@@ -2,19 +2,41 @@ import { useEffect } from 'react';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import axios from 'axios';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { AuthProvider } from '@/contexts/AuthContext';
+import { AuthProvider, useAuth } from '@/contexts/AuthContext';
+import { SessionStatus } from '@/components/SessionStatus';
+import { SessionError } from '@/services/apiError';
 import { colors } from '@/constants/colors';
 import { requireOptionalNativeModule } from 'expo';
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: 1,
+      retry: (count, error) => count < 1 && !(error instanceof SessionError)
+        && !(axios.isAxiosError(error) && [401, 403].includes(error.response?.status ?? 0)),
       staleTime: 1000 * 60 * 5,
     },
   },
 });
+
+function RootNavigator() {
+  const { isAuthenticated, isLoading, startupError } = useAuth();
+  if (isLoading || startupError) return <SessionStatus />;
+
+  return (
+    <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.background } }}>
+      <Stack.Screen name="index" />
+      <Stack.Protected guard={!isAuthenticated}>
+        <Stack.Screen name="(auth)" />
+      </Stack.Protected>
+      <Stack.Protected guard={isAuthenticated}>
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="(groups)" />
+      </Stack.Protected>
+    </Stack>
+  );
+}
 
 export default function RootLayout() {
   useEffect(() => {
@@ -40,16 +62,7 @@ export default function RootLayout() {
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <StatusBar style="dark" />
-          <Stack
-            screenOptions={{
-              headerShown: false,
-              contentStyle: { backgroundColor: colors.background },
-            }}
-          >
-            <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            <Stack.Screen name="(groups)" options={{ headerShown: false }} />
-          </Stack>
+          <RootNavigator />
         </AuthProvider>
       </QueryClientProvider>
     </SafeAreaProvider>

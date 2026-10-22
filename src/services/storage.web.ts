@@ -3,7 +3,7 @@ import { User } from '@/types/auth';
 // SecureStore is native-only. Keep the same session API for the Expo web app.
 export const storage = {
   async getToken(): Promise<string | null> {
-    try { return localStorage.getItem('accessToken'); } catch { return null; }
+    return localStorage.getItem('accessToken');
   },
   async setToken(token: string): Promise<void> {
     localStorage.setItem('accessToken', token);

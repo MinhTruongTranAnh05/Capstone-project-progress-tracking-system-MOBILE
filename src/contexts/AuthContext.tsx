@@ -1,12 +1,19 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { storage, authService } from '@/services';
-import { GoogleLoginRequest, User } from '@/types/auth';
+import { createContext, useCallback, useContext, useEffect, useRef, useState, useSyncExternalStore, ReactNode } from 'react';
+import { AppState } from 'react-native';
+import { useQueryClient } from '@tanstack/react-query';
+import { authService } from '@/services/authService';
+import { getErrorMessage, SessionError } from '@/services/apiError';
+import { sessionStore } from '@/services/sessionStore';
+import { GoogleLoginRequest, LoginResponse, MobileUser } from '@/types/auth';
 
 interface AuthContextType {
-  user: User | null;
+  user: MobileUser | null;
   accessToken: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  sessionNotice: string | null;
+  startupError: string | null;
+  restoreSession: () => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
   loginWithGoogle: (data: GoogleLoginRequest) => Promise<void>;
   logout: () => Promise<void>;
@@ -16,64 +23,112 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [accessToken, setAccessToken] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+  const session = useSyncExternalStore(sessionStore.subscribe, sessionStore.getSnapshot, sessionStore.getSnapshot);
   const [isLoading, setIsLoading] = useState(true);
+  const [startupError, setStartupError] = useState<string | null>(null);
+  const restoreAttempt = useRef(0);
 
-  useEffect(() => {
-    checkAuth();
+  const restoreSession = useCallback(async () => {
+    const attempt = ++restoreAttempt.current;
+    const revision = sessionStore.begin();
+    setIsLoading(true);
+    setStartupError(null);
+    try {
+      const token = await sessionStore.restoreToken(revision);
+      if (!token || !sessionStore.isCurrent(revision)) return;
+      // Cached user data never grants access. Ask the server for current role/status.
+      const user = await authService.getCurrentUser();
+      await sessionStore.accept(revision, { accessToken: token, user });
+    } catch (error) {
+      if (!sessionStore.isCurrent(revision)) return;
+      if (error instanceof SessionError) {
+        await sessionStore.invalidate(revision, error.message);
+      } else {
+        // Retain the disk token for Retry without mounting authenticated screens offline.
+        setStartupError(getErrorMessage(error, 'Không thể xác minh phiên đăng nhập. Vui lòng thử lại.'));
+      }
+    } finally {
+      if (attempt === restoreAttempt.current) setIsLoading(false);
+    }
   }, []);
 
-  const checkAuth = async () => {
-    try {
-      const token = await storage.getToken();
-      const storedUser = await storage.getUser();
-      if (token && storedUser) {
-        setAccessToken(token);
-        setUser(storedUser);
+  useEffect(() => {
+    let previous = sessionStore.getSnapshot();
+    const unsubscribe = sessionStore.subscribe(() => {
+      const next = sessionStore.getSnapshot();
+      if (previous.revision !== next.revision || previous.user?.id !== next.user?.id
+        || previous.user?.role !== next.user?.role) {
+        void queryClient.cancelQueries();
+        queryClient.clear();
       }
-    } catch (error) {
-      console.error('Auth check failed:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+      previous = next;
+    });
+    void restoreSession();
+    return unsubscribe;
+  }, [queryClient, restoreSession]);
 
-  const login = async (email: string, password: string) => {
-    const response = await authService.login({ email, password });
-    setUser(response.user);
-    setAccessToken(response.accessToken);
-  };
-
-  const logout = async () => {
-    await authService.logout();
-    setUser(null);
-    setAccessToken(null);
-  };
-
-  const loginWithGoogle = async (data: GoogleLoginRequest) => {
-    const response = await authService.loginWithGoogle(data);
-    setUser(response.user);
-    setAccessToken(response.accessToken);
-  };
-
-  const refreshUser = async () => {
+  const authenticate = useCallback(async (request: () => Promise<LoginResponse>) => {
+    const revision = sessionStore.begin();
+    setStartupError(null);
     try {
-      const currentUser = await authService.getCurrentUser();
-      setUser(currentUser);
-      await storage.setUser(currentUser);
+      const response = await request();
+      await sessionStore.accept(revision, response);
     } catch (error) {
-      console.error('Failed to refresh user:', error);
+      if (sessionStore.isCurrent(revision)) {
+        await sessionStore.invalidate(revision, error instanceof SessionError ? error.message : null);
+      }
+      throw error;
     }
-  };
+  }, []);
+
+  const login = useCallback((email: string, password: string) =>
+    authenticate(() => authService.login({ email, password })), [authenticate]);
+
+  const loginWithGoogle = useCallback((data: GoogleLoginRequest) =>
+    authenticate(() => authService.loginWithGoogle(data)), [authenticate]);
+
+  const logout = useCallback(async () => {
+    restoreAttempt.current += 1;
+    setStartupError(null);
+    setIsLoading(false);
+    await sessionStore.invalidate(sessionStore.getSnapshot().revision);
+  }, []);
+
+  const refreshUser = useCallback(async () => {
+    const current = sessionStore.getSnapshot();
+    if (!current.token || !current.user) return;
+    try {
+      const user = await authService.getCurrentUser();
+      await sessionStore.accept(current.revision, { accessToken: current.token, user });
+    } catch (error) {
+      if (error instanceof SessionError && error.code !== 'SESSION_CHANGED') {
+        await sessionStore.invalidate(current.revision, error.message);
+      }
+      throw error;
+    }
+  }, []);
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (state) => {
+      if (state === 'active') {
+        // Network failures retain a verified session; a 401 still signs out.
+        void refreshUser().catch(() => undefined);
+      }
+    });
+    return () => subscription.remove();
+  }, [refreshUser]);
 
   return (
     <AuthContext.Provider
       value={{
-        user,
-        accessToken,
-        isAuthenticated: !!accessToken && !!user,
+        user: session.user,
+        accessToken: session.token,
+        isAuthenticated: !!session.token && !!session.user,
         isLoading,
+        sessionNotice: session.notice,
+        startupError,
+        restoreSession,
         login,
         loginWithGoogle,
         logout,

@@ -28,3 +28,7 @@ Chưa giả định endpoint mới. Chọn đề tài trực tiếp đang đư�
 - Gỡ lịch tuần mẫu và số thành viên mẫu ở Tổng quan.
 - Dùng chung `MIN_GROUP_MEMBERS = 3`, `MAX_GROUP_MEMBERS = 5`; đổi thêm trực tiếp thành gửi lời mời.
 - Các phần xác thực/route guard, xác định nhóm, error state, form đăng ký hoàn chỉnh và luồng nhóm đầy đủ tiếp tục ở các đợt B–F. Việc gửi Apply/Invite chưa thay thế toàn bộ luồng quản lý lời mời.
+
+## Cập nhật đợt B
+
+Đã triển khai xác thực, route guard và xử lý hết phiên trong Mobile; xem [PHASE_B_AUTH.md](PHASE_B_AUTH.md). Chưa có API refresh/revoke từ BE nên đăng xuất ở phía ứng dụng và yêu cầu đăng nhập lại khi nhận 401. Các yêu cầu API phía trên vẫn còn hiệu lực.

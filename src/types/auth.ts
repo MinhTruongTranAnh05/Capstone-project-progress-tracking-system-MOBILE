@@ -1,4 +1,4 @@
-import { Campus, Role } from '@/types/models';
+import { Campus } from '@/types/models';
 
 export interface LoginRequest {
   email: string;
@@ -41,8 +41,9 @@ export interface User {
   id: string;
   email: string;
   fullName: string;
-  role: Role;
-  campus: Campus;
+  // Treat the server role as untrusted until the mobile access check succeeds.
+  role: string;
+  campus: Campus | null;
   department?: string;
   status: string;
   avatarUrl?: string;
@@ -57,3 +58,6 @@ export interface AuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
 }
+
+export type MobileRole = 'STUDENT' | 'GROUP_LEADER';
+export type MobileUser = Omit<User, 'role'> & { role: MobileRole };

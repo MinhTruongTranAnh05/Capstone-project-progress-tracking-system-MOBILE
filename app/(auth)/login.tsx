@@ -12,7 +12,7 @@ import {
   ImageBackground,
   ScrollView,
 } from 'react-native';
-import { useRouter, Link } from 'expo-router';
+import { Link } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@/contexts/AuthContext';
@@ -20,6 +20,7 @@ import { storage } from '@/services/storage';
 import { colors, spacing, borderRadius } from '@/constants/colors';
 import { AuthPromoBanner } from '@/components/AuthPromoBanner';
 import { GoogleAuthSection } from '@/components/GoogleAuthSection';
+import { getErrorMessage } from '@/services/apiError';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -28,8 +29,7 @@ export default function LoginScreen() {
   const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
-  const { login } = useAuth();
-  const router = useRouter();
+  const { login, sessionNotice } = useAuth();
 
   useEffect(() => {
     storage.getRememberedEmail().then((savedEmail) => {
@@ -51,19 +51,10 @@ export default function LoginScreen() {
     try {
       await login(email.trim().toLowerCase(), password);
 
-      if (rememberMe) {
-        await storage.setRememberedEmail(email.trim().toLowerCase());
-      } else {
-        await storage.setRememberedEmail(null);
-      }
-
-      router.replace('/(tabs)');
-    } catch (error: any) {
-      const message =
-        error.response?.data?.message ||
-        error.response?.data?.error ||
-        'Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin!';
-      Alert.alert('Lỗi đăng nhập', message);
+      // Remembering the email is optional and must not turn a successful sign-in into an error.
+      void storage.setRememberedEmail(rememberMe ? email.trim().toLowerCase() : null).catch(() => undefined);
+    } catch (error) {
+      Alert.alert('Lỗi đăng nhập', getErrorMessage(error, 'Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin!'));
     } finally {
       setLoading(false);
     }
@@ -121,6 +112,7 @@ export default function LoginScreen() {
             </View>
 
             {/* Form Fields */}
+            {!!sessionNotice && <Text accessibilityRole="alert" style={styles.sessionNotice}>{sessionNotice}</Text>}
             <View style={styles.form}>
               <View style={styles.inputGroup}>
                 <Text style={styles.label}>Email trường (FPT)</Text>
@@ -225,6 +217,7 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
+  sessionNotice: { color: colors.error, fontSize: 13, lineHeight: 20, marginBottom: spacing.md },
   backgroundImage: {
     flex: 1,
     width: '100%',
