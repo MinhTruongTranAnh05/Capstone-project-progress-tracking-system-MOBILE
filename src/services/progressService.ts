@@ -28,29 +28,35 @@ export interface ProgressReportResponse {
   doneTasks: number;
   submittedById: string;
   submittedByName: string;
-  instructorFeedback?: string;
+  feedback?: string;
   createdAt: string;
   updatedAt: string;
 }
 
+// Preserve the current wire contract at this boundary until Backend renames the field.
+interface ProgressReportApiResponse extends Omit<ProgressReportResponse, 'feedback'> {
+  instructorFeedback?: string;
+}
+
+function normalizeReport(report: ProgressReportApiResponse): ProgressReportResponse {
+  const { instructorFeedback, ...data } = report;
+  return { ...data, feedback: instructorFeedback };
+}
+
 export const progressService = {
   async getProgressReports(groupId: string): Promise<any> {
-    const response = await api.get(`/groups/${groupId}/progress`);
-    return response.data;
+    const response = await api.get<ProgressReportApiResponse[]>(`/groups/${groupId}/progress`);
+    return response.data.map(normalizeReport);
   },
 
   async submitProgress(groupId: string, data: ProgressReportRequest): Promise<ProgressReportResponse> {
-    const response = await api.post<ProgressReportResponse>(`/groups/${groupId}/progress`, data);
-    return response.data;
+    const response = await api.post<ProgressReportApiResponse>(`/groups/${groupId}/progress`, data);
+    return normalizeReport(response.data);
   },
 
   async updateProgress(reportId: string, data: ProgressReportRequest): Promise<ProgressReportResponse> {
-    const response = await api.put<ProgressReportResponse>(`/progress/${reportId}`, data);
-    return response.data;
+    const response = await api.put<ProgressReportApiResponse>(`/progress/${reportId}`, data);
+    return normalizeReport(response.data);
   },
 
-  async giveFeedback(reportId: string, feedback: string): Promise<ProgressReportResponse> {
-    const response = await api.put<ProgressReportResponse>(`/progress/${reportId}/feedback`, { feedback });
-    return response.data;
-  },
 };

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -9,7 +9,6 @@ import {
   TextInput,
   ActivityIndicator,
   Alert,
-  ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -270,10 +269,10 @@ export default function ProgressScreen() {
                 </View>
               ) : null}
 
-              {item.instructorFeedback || item.feedback ? (
+              {item.feedback ? (
                 <View style={styles.feedbackBox}>
-                  <Text style={styles.feedbackTitle}>Nhận xét của GVHD:</Text>
-                  <Text style={styles.feedbackText}>{item.instructorFeedback || item.feedback}</Text>
+                  <Text style={styles.feedbackTitle}>Nhận xét:</Text>
+                  <Text style={styles.feedbackText}>{item.feedback}</Text>
                 </View>
               ) : null}
 
@@ -293,7 +292,7 @@ export default function ProgressScreen() {
             <Ionicons name="trending-up-outline" size={48} color={colors.gray[300]} />
             <Text style={styles.emptyTitle}>Chưa có báo cáo tiến độ nào</Text>
             <Text style={styles.emptySubtitle}>
-              Trưởng nhóm hãy nộp báo cáo tiến độ hàng tuần để GVHD theo dõi.
+              Trưởng nhóm hãy nộp báo cáo tiến độ hàng tuần để cập nhật tiến độ của nhóm.
             </Text>
           </View>
         }

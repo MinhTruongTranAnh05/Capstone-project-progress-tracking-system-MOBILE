@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -8,7 +8,6 @@ import {
   ActivityIndicator,
   RefreshControl,
   TextInput,
-  Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -27,7 +26,6 @@ export default function TopicsScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [userGroup, setUserGroup] = useState<any>(null);
-  const [selectingId, setSelectingId] = useState<string | null>(null);
 
   const fetchTopicsAndGroup = useCallback(async () => {
     try {
@@ -60,54 +58,6 @@ export default function TopicsScreen() {
     await fetchTopicsAndGroup();
     setRefreshing(false);
   }, [fetchTopicsAndGroup]);
-
-  const isLeader =
-    user?.role === 'GROUP_LEADER' ||
-    userGroup?.members?.some((m: any) => (m.userId === user?.id || m.id === user?.id) && m.isLeader);
-
-  const handleSelectTopic = async (topic: Topic) => {
-    if (!userGroup) {
-      Alert.alert('Chưa có nhóm', 'Bạn cần tham gia hoặc tạo nhóm đồ án trước khi đăng ký đề tài.');
-      return;
-    }
-
-    if (!isLeader) {
-      Alert.alert('Thông báo', 'Chỉ có Trưởng nhóm mới có quyền chọn/đổi đề tài cho nhóm.');
-      return;
-    }
-
-    if (userGroup.status === 'ACTIVE') {
-      Alert.alert('Đã phê duyệt', 'Đề tài hiện tại của nhóm đã được phê duyệt chính thức (ACTIVE). Không thể thay đổi!');
-      return;
-    }
-
-    Alert.alert(
-      'Xác nhận đăng ký đề tài',
-      `Bạn có muốn chọn đề tài "${topic.title}" cho nhóm ${userGroup.groupCode || ''}?`,
-      [
-        { text: 'Hủy', style: 'cancel' },
-        {
-          text: 'Xác nhận chọn',
-          onPress: async () => {
-            setSelectingId(topic.id);
-            try {
-              await groupService.updateGroup(userGroup.id, {
-                topicId: topic.id,
-                status: 'PENDING',
-              } as any);
-
-              Alert.alert('Thành công', 'Đã gửi yêu cầu đăng ký đề tài! Vui lòng chờ Admin/GVHD phê duyệt.');
-              await fetchTopicsAndGroup();
-            } catch (err: any) {
-              Alert.alert('Lỗi', err.response?.data?.message || 'Không thể đăng ký đề tài.');
-            } finally {
-              setSelectingId(null);
-            }
-          },
-        },
-      ]
-    );
-  };
 
   const categories = ['Tất cả', 'Phần mềm', 'AI & Data', 'Bảo mật', 'IoT & Web'];
 
@@ -225,20 +175,9 @@ export default function TopicsScreen() {
                       <Text style={styles.chosenTagText}>Đã được nhóm bạn chọn</Text>
                     </View>
                   ) : (
-                    <TouchableOpacity
-                      style={[
-                        styles.selectButton,
-                        selectingId === item.id && { opacity: 0.6 },
-                      ]}
-                      onPress={() => handleSelectTopic(item)}
-                      disabled={selectingId === item.id}
-                      activeOpacity={0.8}
-                    >
-                      <Ionicons name="checkbox-outline" size={15} color="#fff" />
-                      <Text style={styles.selectButtonText}>
-                        {selectingId === item.id ? 'Đang xử lý...' : 'Đăng ký đề tài này'}
-                      </Text>
-                    </TouchableOpacity>
+                    <View style={styles.chosenTag}>
+                      <Text style={styles.chosenTagText}>Chức năng chọn đề tài đang chờ cập nhật hệ thống.</Text>
+                    </View>
                   )}
                 </View>
               </View>
@@ -421,20 +360,6 @@ const styles = StyleSheet.create({
     borderTopColor: colors.borderLight,
     paddingTop: spacing.sm,
     marginTop: 2,
-  },
-  selectButton: {
-    backgroundColor: colors.primary,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: 9,
-    borderRadius: borderRadius.md,
-    gap: 6,
-  },
-  selectButtonText: {
-    color: '#fff',
-    fontSize: 12.5,
-    fontWeight: '800',
   },
   chosenTag: {
     flexDirection: 'row',

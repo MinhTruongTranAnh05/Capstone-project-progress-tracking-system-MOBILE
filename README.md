@@ -5,17 +5,17 @@ Native mobile application for the Capstone Project Progress Tracking System, bui
 ## Features
 
 - **Authentication**: Login, Register with email/password
-- **Role-based access**: STUDENT, GROUP_LEADER, INSTRUCTOR, COUNCIL, ADMIN
+- **Role-based access**: STUDENT, GROUP_LEADER (mobile scope)
 - **Group Management**: Create group, join group, manage members
-- **Topic Selection**: Browse and select capstone topics
-- **Scheduling**: View and book appointment slots
+- **Topics**: Browse capstone topics; direct selection is awaiting a Backend update
+- **Consultation schedule**: Awaiting the new Backend contract
 - **Progress Tracking**: Submit and view weekly progress reports
 - **Document Management**: Upload and manage project documents
 - **Real-time Notifications**: In-app notifications with SSE
 
 ## Tech Stack
 
-- **Framework**: React Native with Expo SDK 52
+- **Framework**: React Native with Expo SDK 57
 - **Routing**: Expo Router (file-based routing)
 - **State Management**: TanStack Query (React Query)
 - **HTTP Client**: Axios
@@ -144,10 +144,9 @@ and [Google Sign-In Expo setup](https://react-native-google-signin.github.io/doc
 - `GET /topics` - List topics
 - `GET /topics/{id}` - Get topic details
 
-### Schedule
-- `GET /slots` - List available slots
-- `POST /slots` - Create slot (Instructor)
-- `POST /slots/{id}/book` - Book slot
+### Consultation schedule
+The previous booking flow has been removed. The replacement is awaiting the Backend contract.
+See [Backend handoff](docs/BACKEND_HANDOFF.md) for pending contracts and current limitations.
 
 ### Progress
 - `GET /groups/{id}/progress` - Get progress reports

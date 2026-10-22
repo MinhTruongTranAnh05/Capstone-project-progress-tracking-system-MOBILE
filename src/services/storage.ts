@@ -1,5 +1,4 @@
 import * as SecureStore from 'expo-secure-store';
-import { config } from '@/constants/config';
 
 const TOKEN_KEY = 'accessToken';
 const USER_KEY = 'user';

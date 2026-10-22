@@ -1,4 +1,5 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import { MIN_GROUP_MEMBERS, MAX_GROUP_MEMBERS } from '@/constants/group';
+import { useEffect, useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -41,10 +42,10 @@ export default function GroupsIndexScreen() {
         setGroupData(detailed);
       } else {
         setGroupData(null);
-        // Load available groups for joining (< 6 members)
+        // Load groups that still have room for applications.
         const allRes = await groupService.getGroups();
         const allList = allRes?.content || allRes || [];
-        const valid = allList.filter((g: any) => (g.memberCount || g.members?.length || 0) < 6);
+        const valid = allList.filter((g: any) => (g.memberCount || g.members?.length || 0) < MAX_GROUP_MEMBERS);
         setAvailableGroups(valid);
       }
     } catch (err) {
@@ -76,7 +77,7 @@ export default function GroupsIndexScreen() {
 
   const handleAddMember = async () => {
     if (!isLeader) {
-      Alert.alert('Thông báo', 'Chỉ có Trưởng nhóm mới có quyền thêm thành viên!');
+      Alert.alert('Thông báo', 'Chỉ có Trưởng nhóm mới có quyền mời thành viên!');
       return;
     }
     if (!memberInput.trim()) {
@@ -84,23 +85,19 @@ export default function GroupsIndexScreen() {
       return;
     }
 
-    if (groupData?.members && groupData.members.length >= 6) {
-      Alert.alert('Giới hạn thành viên', 'Nhóm đã đạt số lượng tối đa (6 thành viên). Không thể thêm mới!');
+    if ((groupData?.memberCount ?? groupData?.members?.length ?? 0) >= MAX_GROUP_MEMBERS) {
+      Alert.alert('Giới hạn thành viên', `Nhóm đã đủ ${MAX_GROUP_MEMBERS} thành viên. Không thể gửi thêm lời mời.`);
       return;
     }
 
     setAddingMember(true);
     try {
-      await groupService.addGroupMember(groupData.id, {
-        userId: memberInput.trim(),
-        email: memberInput.trim(),
-        isLeader: false,
-      });
-      Alert.alert('Thành công', 'Thêm thành viên vào nhóm thành công!');
+      await groupService.inviteToGroup(groupData.id, { identifier: memberInput.trim() });
+      Alert.alert('Đã gửi lời mời', 'Sinh viên cần chấp nhận lời mời để trở thành thành viên nhóm.');
       setMemberInput('');
       await fetchGroupDetails();
     } catch (err: any) {
-      const msg = err.response?.data?.message || 'Thêm thành viên thất bại. Vui lòng kiểm tra lại Email/MSSV.';
+      const msg = err.response?.data?.message || 'Gửi lời mời thất bại. Vui lòng kiểm tra lại Email/MSSV.';
       Alert.alert('Lỗi', msg);
     } finally {
       setAddingMember(false);
@@ -136,15 +133,15 @@ export default function GroupsIndexScreen() {
   };
 
   const handleJoinGroup = async (groupId: string) => {
-    Alert.alert('Xác nhận tham gia', 'Bạn có chắc chắn muốn tham gia nhóm này không?', [
+    Alert.alert('Xin tham gia nhóm', 'Bạn có muốn gửi yêu cầu tham gia nhóm này không?', [
       { text: 'Hủy', style: 'cancel' },
       {
-        text: 'Tham gia',
+        text: 'Gửi yêu cầu',
         onPress: async () => {
           setJoiningId(groupId);
           try {
-            await groupService.joinGroup(groupId);
-            Alert.alert('Thành công', 'Tham gia nhóm thành công!');
+            await groupService.applyToGroup(groupId);
+            Alert.alert('Đã gửi yêu cầu', 'Vui lòng chờ trưởng nhóm xem xét và gửi lời mời.');
             await fetchGroupDetails();
           } catch (err: any) {
             Alert.alert('Lỗi', err.response?.data?.message || 'Không thể tham gia nhóm.');
@@ -175,7 +172,7 @@ export default function GroupsIndexScreen() {
 
   // SCREEN A: USER HAS GROUP
   if (groupData) {
-    const memberCount = groupData.members?.length || 4;
+    const memberCount = groupData.memberCount ?? groupData.members?.length ?? 0;
 
     return (
       <ScrollView
@@ -205,7 +202,7 @@ export default function GroupsIndexScreen() {
                   groupData.status === 'ACTIVE' ? styles.statusTextActive : styles.statusTextPending,
                 ]}
               >
-                {groupData.status === 'ACTIVE' ? '✓ ACTIVE' : '⏳ PENDING'}
+                {groupData.status}
               </Text>
             </View>
           </View>
@@ -214,7 +211,7 @@ export default function GroupsIndexScreen() {
           <View style={styles.codeRow}>
             <View style={styles.codeInfo}>
               <Text style={styles.codeLabel}>MÃ NHÓM / MÃ MỜI</Text>
-              <Text style={styles.codeValue}>{groupData.groupCode || 'G-2026'}</Text>
+              <Text style={styles.codeValue}>{groupData.groupCode || 'Chưa cập nhật'}</Text>
             </View>
             <TouchableOpacity style={styles.copyBtn} onPress={handleCopyCode} activeOpacity={0.8}>
               <Ionicons name="copy-outline" size={14} color={colors.primary} />
@@ -226,13 +223,7 @@ export default function GroupsIndexScreen() {
           <View style={styles.metaInfoRow}>
             <View style={styles.metaInfoItem}>
               <Text style={styles.metaInfoLabel}>Học kỳ:</Text>
-              <Text style={styles.metaInfoValue}>{groupData.semester || 'Spring 2026'}</Text>
-            </View>
-            <View style={styles.metaInfoItem}>
-              <Text style={styles.metaInfoLabel}>GVHD:</Text>
-              <Text style={styles.metaInfoValue} numberOfLines={1}>
-                {groupData.supervisorName || groupData.supervisor?.fullName || 'Chưa phân công'}
-              </Text>
+              <Text style={styles.metaInfoValue}>{groupData.semester || 'Chưa cập nhật'}</Text>
             </View>
           </View>
         </View>
@@ -241,9 +232,9 @@ export default function GroupsIndexScreen() {
         <View style={styles.sectionCard}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>
-              Thành viên nhóm ({memberCount}/6 người)
+              Thành viên nhóm ({memberCount}/{MAX_GROUP_MEMBERS} thành viên)
             </Text>
-            <Text style={styles.sectionRequirement}>Quy chế: 4-6 thành viên</Text>
+            <Text style={styles.sectionRequirement}>Quy chế: {MIN_GROUP_MEMBERS}–{MAX_GROUP_MEMBERS} thành viên</Text>
           </View>
 
           <View style={styles.memberList}>
@@ -281,29 +272,14 @@ export default function GroupsIndexScreen() {
                 </View>
               ))
             ) : (
-              <View style={styles.memberRow}>
-                <View style={styles.memberLeft}>
-                  <View style={styles.avatarCircle}>
-                    <Text style={styles.avatarText}>{getInitials(user?.fullName)}</Text>
-                  </View>
-                  <View style={styles.memberTextGroup}>
-                    <View style={styles.memberNameRow}>
-                      <Text style={styles.memberName}>{user?.fullName || 'Bạn'}</Text>
-                      <View style={styles.leaderBadge}>
-                        <Text style={styles.leaderBadgeText}>👑 Leader</Text>
-                      </View>
-                    </View>
-                    <Text style={styles.memberEmail}>{user?.email}</Text>
-                  </View>
-                </View>
-              </View>
+              <Text style={styles.emptySubtitle}>Chưa có dữ liệu thành viên.</Text>
             )}
           </View>
 
           {/* Add member box (Leader only) */}
           {isLeader && (
             <View style={styles.addMemberBox}>
-              <Text style={styles.addMemberTitle}>Thêm thành viên mới</Text>
+              <Text style={styles.addMemberTitle}>Mời thành viên mới</Text>
               <View style={styles.addMemberInputRow}>
                 <TextInput
                   style={styles.addMemberInput}
@@ -314,12 +290,12 @@ export default function GroupsIndexScreen() {
                   autoCapitalize="none"
                 />
                 <TouchableOpacity
-                  style={[styles.addMemberBtn, addingMember && { opacity: 0.6 }]}
+                  style={[styles.addMemberBtn, (addingMember || (groupData.memberCount ?? groupData.members?.length ?? 0) >= MAX_GROUP_MEMBERS) && { opacity: 0.6 }]}
                   onPress={handleAddMember}
-                  disabled={addingMember}
+                  disabled={addingMember || (groupData.memberCount ?? groupData.members?.length ?? 0) >= MAX_GROUP_MEMBERS}
                 >
                   <Text style={styles.addMemberBtnText}>
-                    {addingMember ? '...' : '+ Thêm'}
+                    {addingMember ? '...' : '+ Mời'}
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -344,7 +320,7 @@ export default function GroupsIndexScreen() {
         </View>
         <Text style={styles.noGroupHeaderTitle}>Vui lòng chọn hoặc tạo nhóm đồ án</Text>
         <Text style={styles.noGroupHeaderDesc}>
-          Mỗi nhóm cần từ 4-6 thành viên để chính thức đăng ký đề tài Capstone.
+          Mỗi nhóm cần từ {MIN_GROUP_MEMBERS}–{MAX_GROUP_MEMBERS} thành viên để nộp danh sách nhóm.
         </Text>
 
         <TouchableOpacity
@@ -359,7 +335,7 @@ export default function GroupsIndexScreen() {
 
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>Các nhóm đang mở tuyển thành viên</Text>
-        <Text style={styles.sectionRequirement}>Hiển thị nhóm chưa đủ 6 người</Text>
+        <Text style={styles.sectionRequirement}>Hiển thị nhóm chưa đủ {MAX_GROUP_MEMBERS} thành viên</Text>
       </View>
 
       <View style={styles.availableList}>
@@ -368,10 +344,10 @@ export default function GroupsIndexScreen() {
             <View key={g.id} style={styles.availableCard}>
               <View style={styles.availableCardHeader}>
                 <View style={styles.availableGroupCodeBadge}>
-                  <Text style={styles.availableGroupCodeText}>{g.groupCode || 'GRP-2026'}</Text>
+                  <Text style={styles.availableGroupCodeText}>{g.groupCode || 'Chưa cập nhật'}</Text>
                 </View>
                 <Text style={styles.availableCountText}>
-                  {g.memberCount || g.members?.length || 1}/6 thành viên
+                  {g.memberCount ?? g.members?.length ?? 0}/{MAX_GROUP_MEMBERS} thành viên
                 </Text>
               </View>
 
@@ -379,11 +355,6 @@ export default function GroupsIndexScreen() {
                 {g.topicTitle || g.topic?.title || 'Chưa chọn đề tài'}
               </Text>
 
-              {g.supervisorName && (
-                <Text style={styles.availableSupervisorText}>
-                  GVHD: {g.supervisorName}
-                </Text>
-              )}
 
               <TouchableOpacity
                 style={[styles.joinBtn, joiningId === g.id && { opacity: 0.6 }]}
@@ -391,7 +362,7 @@ export default function GroupsIndexScreen() {
                 disabled={joiningId === g.id}
               >
                 <Text style={styles.joinBtnText}>
-                  {joiningId === g.id ? 'Đang tham gia...' : 'Tham gia nhóm này'}
+                  {joiningId === g.id ? 'Đang gửi...' : 'Xin tham gia nhóm'}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -765,10 +736,6 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: colors.text,
     marginTop: 2,
-  },
-  availableSupervisorText: {
-    fontSize: 11.5,
-    color: colors.textSecondary,
   },
   joinBtn: {
     backgroundColor: colors.surfaceMuted,

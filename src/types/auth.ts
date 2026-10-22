@@ -26,10 +26,8 @@ export interface RegisterRequest {
   email: string;
   fullName: string;
   password: string;
-  studentCode?: string;
+  studentCode: string;
   campus: Campus;
-  department?: string;
-  role?: Role;
 }
 
 export interface RegisterResponse {

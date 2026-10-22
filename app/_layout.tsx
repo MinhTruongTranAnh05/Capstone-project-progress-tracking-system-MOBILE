@@ -39,9 +39,7 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
-          {/* translucent={false} keeps the status bar opaque; our
-              ScreenHeader adds paddingTop = insets.top for each screen */}
-          <StatusBar style="dark" translucent={false} />
+          <StatusBar style="dark" />
           <Stack
             screenOptions={{
               headerShown: false,

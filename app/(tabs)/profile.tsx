@@ -1,4 +1,3 @@
-import React from 'react';
 import {
   View,
   Text,
@@ -42,8 +41,6 @@ export default function ProfileScreen() {
     switch (user?.role) {
       case 'ADMIN':
         return 'Quản trị viên (Admin)';
-      case 'INSTRUCTOR':
-        return 'Giảng viên hướng dẫn';
       case 'GROUP_LEADER':
         return 'Trưởng nhóm (Group Leader)';
       default:

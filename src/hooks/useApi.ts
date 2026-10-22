@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { authService, groupService, scheduleService, topicService } from '@/services';
+import { authService, groupService, topicService } from '@/services';
 
 export function useCurrentUser() {
   return useQuery({
@@ -30,35 +30,6 @@ export function useCreateGroup() {
     mutationFn: groupService.createGroup,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['groups'] });
-    },
-  });
-}
-
-export function useUpdateGroup() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: any }) =>
-      groupService.updateGroup(id, data),
-    onSuccess: (_, { id }) => {
-      queryClient.invalidateQueries({ queryKey: ['group', id] });
-    },
-  });
-}
-
-export function useSlots(params?: any) {
-  return useQuery({
-    queryKey: ['slots', params],
-    queryFn: () => scheduleService.getSlots(params),
-  });
-}
-
-export function useBookSlot() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: ({ slotId, data }: { slotId: string; data?: any }) =>
-      scheduleService.bookSlot(slotId, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['slots'] });
     },
   });
 }

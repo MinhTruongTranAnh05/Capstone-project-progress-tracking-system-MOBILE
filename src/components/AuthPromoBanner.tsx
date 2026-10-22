@@ -10,20 +10,20 @@ interface AuthPromoBannerProps {
 
 const FEATURES = [
   {
-    title: 'Quản lý điều kiện sinh viên',
-    description: 'Import danh sách đầu kỳ · Kiểm tra điều kiện · Quản lý cờ không đủ điều kiện',
+    title: 'Bắt đầu hành trình đồ án',
+    description: 'Đăng ký tài khoản sinh viên và theo dõi trạng thái phê duyệt',
   },
   {
     title: 'Tạo nhóm & quản lý thành viên',
-    description: 'Tạo nhóm · Phân công Leader · Quy mô hợp lệ từ 3–5 thành viên',
+    description: 'Tạo nhóm · Tham gia nhóm · Theo dõi thông tin thành viên',
   },
   {
     title: 'Tuyển thành viên vào nhóm',
     description: 'Apply vào nhóm · Gửi lời mời · Duyệt hoặc từ chối · Chấp nhận hoặc thu hồi',
   },
   {
-    title: 'Quản lý thay đổi nhóm',
-    description: 'Xin rời nhóm · Xóa thành viên · Thay đổi Leader · Admin can thiệp khi cần',
+    title: 'Theo dõi đồ án',
+    description: 'Xem danh mục đề tài, tiến độ tuần và tài liệu của nhóm',
   },
 ];
 

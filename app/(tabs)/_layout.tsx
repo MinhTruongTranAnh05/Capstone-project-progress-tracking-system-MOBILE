@@ -55,20 +55,6 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="schedule"
-        options={{
-          title: 'Lịch hẹn',
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons
-              name={focused ? 'calendar' : 'calendar-outline'}
-              size={22}
-              color={color}
-            />
-          ),
-          headerShown: false,
-        }}
-      />
-      <Tabs.Screen
         name="notifications"
         options={{
           title: 'Thông báo',

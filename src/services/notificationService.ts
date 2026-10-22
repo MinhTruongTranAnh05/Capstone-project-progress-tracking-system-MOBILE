@@ -1,5 +1,4 @@
 import api from './api';
-import { Notification } from '@/types/models';
 import { storage } from './storage';
 import { config } from '@/constants/config';
 

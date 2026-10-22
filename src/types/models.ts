@@ -1,12 +1,8 @@
-export type Role = 'STUDENT' | 'GROUP_LEADER' | 'INSTRUCTOR' | 'COUNCIL' | 'ADMIN';
+export type Role = 'STUDENT' | 'GROUP_LEADER' | 'ADMIN';
 
 export type Campus = 'HA_NOI' | 'HO_CHI_MINH' | 'DA_NANG' | 'CAN_THO' | 'QUY_NHON';
 
 export type GroupStatus = 'ARCHIVED' | 'FORMED' | 'ACTIVE' | 'COMPLETED' | 'FAILED';
-
-export type SlotStatus = 'AVAILABLE' | 'BOOKED' | 'CANCELLED';
-
-export type LocationType = 'ONLINE' | 'OFFLINE' | 'HYBRID';
 
 export interface GroupMember {
   id: string;
@@ -35,20 +31,6 @@ export interface StudentGroup {
   locked: boolean;
   lockedByAdmin: boolean;
   members?: GroupMember[];
-}
-
-export interface Slot {
-  id: string;
-  instructorId: string;
-  instructorName: string;
-  startTime: string;
-  endTime: string;
-  durationMinutes: number;
-  capacity: number;
-  bookedCount: number;
-  locationType: LocationType;
-  meetingUrl?: string;
-  status: SlotStatus;
 }
 
 export interface Topic {

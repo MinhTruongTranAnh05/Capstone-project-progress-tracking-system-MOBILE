@@ -1,4 +1,5 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import { MIN_GROUP_MEMBERS, MAX_GROUP_MEMBERS } from '@/constants/group';
+import { useEffect, useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -64,13 +65,6 @@ export default function HomeScreen() {
           color: colors.error,
           border: colors.errorBorder,
         };
-      case 'INSTRUCTOR':
-        return {
-          label: '👨‍🏫 INSTRUCTOR',
-          bg: colors.blue50,
-          color: colors.blue,
-          border: colors.blueLight,
-        };
       case 'GROUP_LEADER':
         return {
           label: '👑 GROUP LEADER',
@@ -122,7 +116,7 @@ export default function HomeScreen() {
         </View>
 
         <View style={styles.semesterPill}>
-          <Text style={styles.semesterText}>Spring 2026</Text>
+          <Text style={styles.semesterText}>{groupData?.semester || 'Chưa có học kỳ'}</Text>
         </View>
       </View>
 
@@ -168,7 +162,7 @@ export default function HomeScreen() {
                     : styles.statusTextPending,
                 ]}
               >
-                {groupData.status === 'ACTIVE' ? '✓ ĐÃ PHÊ DUYỆT' : '⏳ CHỜ DUYỆT'}
+                {groupData.status}
               </Text>
             </View>
           ) : null}
@@ -186,24 +180,18 @@ export default function HomeScreen() {
               <View style={styles.metaItem}>
                 <Text style={styles.metaLabel}>Mã nhóm:</Text>
                 <Text style={styles.metaValueHighlight}>
-                  {groupData.groupCode || 'G-2026'}
+                  {groupData.groupCode || 'Chưa cập nhật'}
                 </Text>
               </View>
               <View style={styles.metaDivider} />
               <View style={styles.metaItem}>
                 <Text style={styles.metaLabel}>Thành viên:</Text>
                 <Text style={styles.metaValue}>
-                  {groupData.members ? `${groupData.members.length}/6 người` : '4/6 người'}
+                  {groupData.memberCount ?? groupData.members?.length ?? 0}/{MAX_GROUP_MEMBERS} thành viên
                 </Text>
               </View>
             </View>
 
-            <View style={styles.supervisorRow}>
-              <Ionicons name="person-circle-outline" size={16} color={colors.textSecondary} />
-              <Text style={styles.supervisorText}>
-                GVHD: <Text style={styles.supervisorName}>{groupData.supervisorName || groupData.supervisor?.fullName || 'Chờ Admin phân công'}</Text>
-              </Text>
-            </View>
 
             <TouchableOpacity
               style={styles.viewGroupBtn}
@@ -221,7 +209,7 @@ export default function HomeScreen() {
             </View>
             <Text style={styles.noGroupTitle}>Chưa tham gia nhóm đồ án</Text>
             <Text style={styles.noGroupDesc}>
-              Tham gia hoặc tạo nhóm mới (yêu cầu 4-6 người) để đăng ký đề tài chính thức.
+              Tham gia hoặc tạo nhóm mới. Nhóm cần {MIN_GROUP_MEMBERS}–{MAX_GROUP_MEMBERS} thành viên để nộp danh sách nhóm.
             </Text>
             <View style={styles.noGroupActions}>
               <TouchableOpacity
@@ -272,17 +260,6 @@ export default function HomeScreen() {
           <Text style={styles.actionCardDesc}>Xem danh mục đề tài</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.actionCard}
-          onPress={() => router.push('/(tabs)/schedule')}
-          activeOpacity={0.8}
-        >
-          <View style={[styles.actionIconBox, { backgroundColor: colors.warning50 }]}>
-            <Ionicons name="calendar" size={22} color={colors.warning} />
-          </View>
-          <Text style={styles.actionCardTitle}>Lịch hẹn GVHD</Text>
-          <Text style={styles.actionCardDesc}>Đặt & quản lý lịch hẹn</Text>
-        </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.actionCard}
@@ -321,44 +298,6 @@ export default function HomeScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* 5. Weekly Schedule Widget (Mirroring Website Preview) */}
-      <View style={styles.scheduleWidget}>
-        <View style={styles.widgetHeader}>
-          <View style={styles.widgetHeaderLeft}>
-            <View style={styles.widgetDot} />
-            <Text style={styles.widgetTitle}>Lịch hẹn tuần này (Calendar)</Text>
-          </View>
-          <View style={styles.widgetBadge}>
-            <Text style={styles.widgetBadgeText}>Spring 2026</Text>
-          </View>
-        </View>
-
-        <View style={styles.widgetCardsRow}>
-          <View style={[styles.dayCard, styles.dayCardOrange]}>
-            <Text style={[styles.dayCardTitle, { color: colors.primary }]}>Thứ Hai</Text>
-            <Text style={styles.dayCardTime}>09:00</Text>
-            <Text style={styles.dayCardDesc} numberOfLines={2}>
-              Duyệt đề cương
-            </Text>
-          </View>
-
-          <View style={[styles.dayCard, styles.dayCardNeutral]}>
-            <Text style={[styles.dayCardTitle, { color: colors.textSecondary }]}>Thứ Tư</Text>
-            <Text style={styles.dayCardTime}>14:00</Text>
-            <Text style={styles.dayCardDesc} numberOfLines={2}>
-              Báo cáo tiến độ
-            </Text>
-          </View>
-
-          <View style={[styles.dayCard, styles.dayCardGreen]}>
-            <Text style={[styles.dayCardTitle, { color: colors.success }]}>Thứ Sáu</Text>
-            <Text style={styles.dayCardTime}>10:30</Text>
-            <Text style={styles.dayCardDesc} numberOfLines={2}>
-              Chấm hội đồng
-            </Text>
-          </View>
-        </View>
-      </View>
     </ScrollView>
   );
 }
@@ -582,20 +521,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.border,
     marginHorizontal: 8,
   },
-  supervisorRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingVertical: 4,
-  },
-  supervisorText: {
-    fontSize: 12,
-    color: colors.textSecondary,
-  },
-  supervisorName: {
-    fontWeight: '700',
-    color: colors.text,
-  },
   viewGroupBtn: {
     backgroundColor: colors.primary,
     flexDirection: 'row',
@@ -719,91 +644,5 @@ const styles = StyleSheet.create({
   actionCardDesc: {
     fontSize: 10.5,
     color: colors.textSecondary,
-  },
-  scheduleWidget: {
-    backgroundColor: colors.surface,
-    borderRadius: borderRadius['2xl'],
-    borderWidth: 1,
-    borderColor: colors.border,
-    padding: spacing.lg,
-    shadowColor: '#2C2825',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 6,
-    elevation: 2,
-  },
-  widgetHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    borderBottomWidth: 1,
-    borderBottomColor: colors.borderLight,
-    paddingBottom: spacing.sm,
-    marginBottom: spacing.md,
-  },
-  widgetHeaderLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  widgetDot: {
-    width: 7,
-    height: 7,
-    borderRadius: 3.5,
-    backgroundColor: colors.primary,
-  },
-  widgetTitle: {
-    fontSize: 12.5,
-    fontWeight: '800',
-    color: colors.text,
-  },
-  widgetBadge: {
-    backgroundColor: colors.primary50,
-    paddingHorizontal: 7,
-    paddingVertical: 2,
-    borderRadius: 5,
-  },
-  widgetBadgeText: {
-    fontSize: 10,
-    fontWeight: '800',
-    color: colors.primary,
-  },
-  widgetCardsRow: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  dayCard: {
-    flex: 1,
-    padding: spacing.sm,
-    borderRadius: borderRadius.md,
-    borderWidth: 1,
-    gap: 2,
-  },
-  dayCardOrange: {
-    backgroundColor: colors.primary50,
-    borderColor: colors.primary100,
-  },
-  dayCardNeutral: {
-    backgroundColor: colors.surfaceMuted,
-    borderColor: colors.borderLight,
-  },
-  dayCardGreen: {
-    backgroundColor: colors.success50,
-    borderColor: colors.successBorder,
-  },
-  dayCardTitle: {
-    fontSize: 10.5,
-    fontWeight: '800',
-  },
-  dayCardTime: {
-    fontSize: 9.5,
-    color: colors.textSecondary,
-    fontWeight: '600',
-  },
-  dayCardDesc: {
-    fontSize: 10,
-    color: colors.text,
-    fontWeight: '700',
-    marginTop: 2,
   },
 });

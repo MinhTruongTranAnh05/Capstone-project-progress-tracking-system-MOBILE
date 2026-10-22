@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   View,
   Text,
@@ -17,6 +17,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { authService } from '@/services';
 import { Campus } from '@/types/models';
+import { RegisterRequest } from '@/types/auth';
 import { colors, spacing, borderRadius } from '@/constants/colors';
 import { AuthPromoBanner } from '@/components/AuthPromoBanner';
 import { GoogleAuthSection } from '@/components/GoogleAuthSection';
@@ -29,19 +30,10 @@ const CAMPUSES: { label: string; value: Campus }[] = [
   { label: 'Quy Nhơn', value: 'QUY_NHON' },
 ];
 
-const DEPARTMENTS = [
-  'Kỹ thuật phần mềm',
-  'An toàn thông tin',
-  'Trí tuệ nhân tạo',
-  'Thiết kế đồ họa',
-];
-
 export default function RegisterScreen() {
-  const [role, setRole] = useState<'STUDENT' | 'TEACHER'>('STUDENT');
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [studentCode, setStudentCode] = useState('');
-  const [department, setDepartment] = useState('Kỹ thuật phần mềm');
   const [campus, setCampus] = useState<Campus>('HO_CHI_MINH');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -64,7 +56,7 @@ export default function RegisterScreen() {
       return;
     }
 
-    if (role === 'STUDENT' && !studentCode.trim()) {
+    if (!studentCode.trim()) {
       Alert.alert('Lỗi', 'Vui lòng nhập Mã số sinh viên (MSSV)');
       return;
     }
@@ -87,25 +79,21 @@ export default function RegisterScreen() {
 
     setLoading(true);
     try {
-      const payload: any = {
+      const payload: RegisterRequest = {
         fullName: fullName.trim(),
         email: email.trim().toLowerCase(),
         password,
-        role: role === 'STUDENT' ? 'STUDENT' : 'INSTRUCTOR',
         campus,
-        department,
+        studentCode: studentCode.trim().toUpperCase(),
       };
 
-      if (role === 'STUDENT') {
-        payload.studentCode = studentCode.trim().toUpperCase();
-      }
 
       await authService.register(payload);
 
       Alert.alert(
         'Thành công',
-        'Đăng ký tài khoản thành công! Vui lòng đăng nhập để tiếp tục.',
-        [{ text: 'Đăng nhập ngay', onPress: () => router.replace('/(auth)/login') }]
+        'Đã gửi đăng ký. Vui lòng chờ quản trị viên phê duyệt tài khoản trước khi đăng nhập.',
+        [{ text: 'Về đăng nhập', onPress: () => router.replace('/(auth)/login') }]
       );
     } catch (error: any) {
       const message =
@@ -161,32 +149,6 @@ export default function RegisterScreen() {
               </Text>
             </View>
 
-            {/* Role Switcher Tabs */}
-            <View style={styles.roleTabs}>
-              <TouchableOpacity
-                style={[styles.roleTab, role === 'STUDENT' && styles.roleTabActive]}
-                onPress={() => setRole('STUDENT')}
-                activeOpacity={0.8}
-              >
-                <Text
-                  style={[styles.roleTabText, role === 'STUDENT' && styles.roleTabTextActive]}
-                >
-                  Sinh viên
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.roleTab, role === 'TEACHER' && styles.roleTabActive]}
-                onPress={() => setRole('TEACHER')}
-                activeOpacity={0.8}
-              >
-                <Text
-                  style={[styles.roleTabText, role === 'TEACHER' && styles.roleTabTextActive]}
-                >
-                  Giảng viên
-                </Text>
-              </TouchableOpacity>
-            </View>
-
             {/* Form */}
             <View style={styles.form}>
               <View style={styles.inputGroup}>
@@ -200,45 +162,16 @@ export default function RegisterScreen() {
                 />
               </View>
 
-              {role === 'STUDENT' && (
-                <View style={styles.inputGroup}>
-                  <Text style={styles.label}>Mã số sinh viên (MSSV) *</Text>
-                  <TextInput
-                    style={styles.input}
-                    placeholder="SE171245"
-                    placeholderTextColor={colors.textMuted}
-                    value={studentCode}
-                    onChangeText={setStudentCode}
-                    autoCapitalize="characters"
-                  />
-                </View>
-              )}
-
-              {/* Department Selector */}
               <View style={styles.inputGroup}>
-                <Text style={styles.label}>Khoa / Chuyên ngành</Text>
-                <View style={styles.chipsRow}>
-                  {DEPARTMENTS.map((dept) => (
-                    <TouchableOpacity
-                      key={dept}
-                      style={[
-                        styles.chip,
-                        department === dept && styles.chipActive,
-                      ]}
-                      onPress={() => setDepartment(dept)}
-                      activeOpacity={0.7}
-                    >
-                      <Text
-                        style={[
-                          styles.chipText,
-                          department === dept && styles.chipTextActive,
-                        ]}
-                      >
-                        {dept}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
+                <Text style={styles.label}>Mã số sinh viên (MSSV) *</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="SE171245"
+                  placeholderTextColor={colors.textMuted}
+                  value={studentCode}
+                  onChangeText={setStudentCode}
+                  autoCapitalize="characters"
+                />
               </View>
 
               {/* Campus Selector */}
@@ -491,37 +424,6 @@ const styles = StyleSheet.create({
     fontSize: 12.5,
     color: colors.textSecondary,
     lineHeight: 17,
-  },
-  roleTabs: {
-    flexDirection: 'row',
-    backgroundColor: colors.surfaceMuted,
-    borderRadius: borderRadius.md,
-    padding: 3,
-    borderWidth: 1,
-    borderColor: colors.border,
-    marginBottom: spacing.lg,
-  },
-  roleTab: {
-    flex: 1,
-    paddingVertical: 8,
-    alignItems: 'center',
-    borderRadius: borderRadius.sm,
-  },
-  roleTabActive: {
-    backgroundColor: colors.primary,
-    shadowColor: colors.primary,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
-    elevation: 2,
-  },
-  roleTabText: {
-    fontSize: 12.5,
-    fontWeight: '700',
-    color: colors.textSecondary,
-  },
-  roleTabTextActive: {
-    color: '#FFFFFF',
   },
   form: {
     marginBottom: spacing.md,

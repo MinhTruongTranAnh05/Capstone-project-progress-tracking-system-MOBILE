@@ -4,8 +4,6 @@ import { StudentGroup } from '@/types/models';
 export interface CreateGroupRequest {
   groupCode?: string;
   semester: string;
-  topicId?: string;
-  supervisorId?: string;
 }
 
 export const groupService = {
@@ -31,23 +29,8 @@ export const groupService = {
     return response.data;
   },
 
-  async updateGroup(id: string, data: Partial<StudentGroup>): Promise<StudentGroup> {
-    const response = await api.put<StudentGroup>(`/groups/${id}`, data);
-    return response.data;
-  },
-
   async getGroupMembers(groupId: string): Promise<any[]> {
     const response = await api.get(`/groups/${groupId}/members`);
-    return response.data;
-  },
-
-  async joinGroup(groupId: string): Promise<any> {
-    const response = await api.post(`/groups/${groupId}/join`);
-    return response.data;
-  },
-
-  async addGroupMember(groupId: string, data: { userId?: string; email?: string; isLeader?: boolean }): Promise<any> {
-    const response = await api.post(`/groups/${groupId}/members`, data);
     return response.data;
   },
 
@@ -92,10 +75,4 @@ export const groupService = {
     return response.data;
   },
 
-  async getMyGroups(userId: string): Promise<StudentGroup[]> {
-    const response = await api.get('/groups', {
-      params: { memberId: userId },
-    });
-    return response.data.content || response.data;
-  },
 };

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -121,7 +121,7 @@ export default function NotificationsScreen() {
               )}
             </View>
             <Text style={styles.bannerDesc}>
-              Cập nhật tin tức, lịch hẹn và đánh giá từ GVHD và hệ thống.
+              Cập nhật thông báo và tiến độ đồ án từ hệ thống.
             </Text>
           </View>
 

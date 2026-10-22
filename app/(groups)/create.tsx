@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import { MIN_GROUP_MEMBERS, MAX_GROUP_MEMBERS } from '@/constants/group';
+import { useState } from 'react';
 import {
   View,
   Text,
@@ -13,7 +14,6 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { groupService } from '@/services/groupService';
-import { topicService } from '@/services/topicService';
 import { colors, spacing, borderRadius } from '@/constants/colors';
 
 const SEMESTERS = ['Spring 2026', 'Summer 2026', 'Fall 2026', 'Spring 2027'];
@@ -22,18 +22,10 @@ export default function CreateGroupScreen() {
   const [activeTab, setActiveTab] = useState<'create' | 'join'>('create');
   const [groupCode, setGroupCode] = useState('');
   const [semester, setSemester] = useState('Spring 2026');
-  const [selectedTopicId, setSelectedTopicId] = useState('');
-  const [topics, setTopics] = useState<any[]>([]);
   const [inviteCode, setInviteCode] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const insets = useSafeAreaInsets();
-
-  useEffect(() => {
-    topicService.getTopics({ status: 'PUBLISHED' }).then((res) => {
-      setTopics(res?.content || res || []);
-    }).catch(() => {});
-  }, []);
 
   const handleCreate = async () => {
     if (!semester) {
@@ -46,7 +38,6 @@ export default function CreateGroupScreen() {
       await groupService.createGroup({
         groupCode: groupCode.trim() || undefined,
         semester,
-        topicId: selectedTopicId || undefined,
       });
 
       Alert.alert('Thành công', 'Nhóm đồ án đã được tạo thành công! Bạn là Trưởng nhóm.', [
@@ -82,8 +73,8 @@ export default function CreateGroupScreen() {
         return;
       }
 
-      await groupService.joinGroup(target.id);
-      Alert.alert('Thành công', 'Tham gia nhóm thành công!', [
+      await groupService.applyToGroup(target.id);
+      Alert.alert('Đã gửi yêu cầu', 'Trưởng nhóm sẽ xem xét và gửi lời mời. Bạn chỉ trở thành thành viên sau khi chấp nhận lời mời.', [
         { text: 'OK', onPress: () => router.replace('/(groups)') },
       ]);
     } catch (err: any) {
@@ -158,43 +149,15 @@ export default function CreateGroupScreen() {
             </View>
           </View>
 
-          {/* Topic Selector */}
-          <View style={styles.field}>
-            <Text style={styles.label}>Đề tài dự kiến (Tùy chọn)</Text>
-            <Text style={styles.hint}>Có thể chọn ngay hoặc chọn sau khi nhóm đủ thành viên</Text>
-            <View style={styles.topicList}>
-              {topics.slice(0, 5).map((t) => (
-                <TouchableOpacity
-                  key={t.id}
-                  style={[styles.topicChip, selectedTopicId === t.id && styles.topicChipActive]}
-                  onPress={() => setSelectedTopicId(selectedTopicId === t.id ? '' : t.id)}
-                >
-                  <Ionicons
-                    name={selectedTopicId === t.id ? 'radio-button-on' : 'radio-button-off'}
-                    size={16}
-                    color={selectedTopicId === t.id ? colors.primary : colors.textSecondary}
-                  />
-                  <Text
-                    style={[styles.topicChipText, selectedTopicId === t.id && styles.topicChipTextActive]}
-                    numberOfLines={1}
-                  >
-                    {t.topicCode ? `[${t.topicCode}] ` : ''}
-                    {t.title}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          </View>
-
           {/* Info Banner */}
           <View style={styles.infoBox}>
             <View style={styles.infoBoxHeader}>
               <Ionicons name="information-circle-outline" size={18} color={colors.primary} />
               <Text style={styles.infoTitle}>Quy chế thành lập nhóm:</Text>
             </View>
-            <Text style={styles.infoText}>• Số lượng thành viên hợp lệ: từ 4 đến 6 sinh viên.</Text>
+            <Text style={styles.infoText}>• Số lượng thành viên hợp lệ: từ {MIN_GROUP_MEMBERS} đến {MAX_GROUP_MEMBERS} sinh viên, kể cả trưởng nhóm.</Text>
             <Text style={styles.infoText}>• Người tạo nhóm sẽ giữ vai trò Trưởng nhóm (Group Leader).</Text>
-            <Text style={styles.infoText}>• Sau khi tạo nhóm, dùng Mã nhóm để mời các thành viên tham gia.</Text>
+            <Text style={styles.infoText}>• Sau khi tạo nhóm, gửi lời mời bằng Email hoặc MSSV của sinh viên.</Text>
           </View>
 
           {/* Submit Button */}
@@ -345,33 +308,6 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
   },
   chipTextActive: {
-    color: colors.primary,
-    fontWeight: '800',
-  },
-  topicList: {
-    gap: 6,
-  },
-  topicChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    backgroundColor: colors.background,
-    borderWidth: 1,
-    borderColor: colors.border,
-    padding: spacing.md,
-    borderRadius: borderRadius.md,
-  },
-  topicChipActive: {
-    backgroundColor: colors.primary50,
-    borderColor: colors.primary,
-  },
-  topicChipText: {
-    fontSize: 12,
-    color: colors.text,
-    fontWeight: '600',
-    flex: 1,
-  },
-  topicChipTextActive: {
     color: colors.primary,
     fontWeight: '800',
   },
