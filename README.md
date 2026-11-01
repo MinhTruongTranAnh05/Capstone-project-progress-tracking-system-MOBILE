@@ -13,14 +13,16 @@
 
 ## Vai trò và giới hạn
 
-- Mobile chỉ dành cho Sinh viên và Trưởng nhóm. Cả hai có account role `STUDENT`; Trưởng nhóm xác định từ `leaderId` **và** membership `leader` của nhóm đã xác minh.
+- Cập nhật theo xác nhận mới nhất của người dùng: màn login có thêm Email/Mật khẩu cho `ADMIN` và `LECTURER`, gọi POST `/auth/login`. Sau đăng nhập, staff chỉ có màn xác nhận tài khoản/làm mới/đăng xuất; không mở portal quản trị hoặc các màn/API nhóm sinh viên. Quyết định này thay thế việc từ chối toàn bộ staff ở các checkpoint cũ.
+- Các luồng nghiệp vụ nhóm chỉ dành cho Sinh viên và Trưởng nhóm. Cả hai có account role `STUDENT`; Trưởng nhóm xác định từ `leaderId` **và** membership `leader` của nhóm đã xác minh. Staff có phiên đăng nhập/xác nhận tài khoản riêng theo phê duyệt mới.
 - Người điều phối trong BE là account `LECTURER` được gán cho học kỳ qua `moderatorId`. `ADMIN` có quyền thực hiện các tác vụ điều phối tương ứng. Không ánh xạ Người điều phối thành `COUNCIL`.
 - Không có portal quản trị/điều phối trên mobile. Không có luồng đặt/hủy lịch hẹn, vai trò hoặc giao diện Instructor.
 - Nhóm hợp lệ **3–5 người**, tối đa 5 bao gồm Trưởng nhóm. Quy tắc dùng constants chung và kiểm tra lại từ server.
 
 ## Chức năng hiện có
 
-- Google sign-in cho tài khoản có trong danh sách nhà trường; kiểm tra lại `/auth/me`, trạng thái và vai trò trước khi mở màn hình đăng nhập thành công.
+- Google sign-in cho tài khoản có trong danh sách nhà trường; xác minh trạng thái/vai trò từ phản hồi BE và kiểm tra lại `/auth/me` khi khôi phục phiên.
+- Login theo mẫu ảnh: card trong mờ, logo nhỏ, tiêu đề đậm, Email/Mật khẩu có Hiện/Ẩn, nút cam và phần Google riêng. Không lưu mật khẩu. Form staff và Google cùng khóa khi một luồng đang xử lý; lỗi BE được giữ nguyên.
 - Chọn học kỳ/môn học từ `/me/semesters`; xác minh membership/scope khi lấy nhóm. Known group ID lưu theo user chỉ là gợi ý chọn scope, không cấp quyền từ cache và không đoán nhóm từ danh sách tuyển.
 - Tạo nhóm, tìm nhóm/sinh viên, Apply/Invite, chấp nhận/từ chối/thu hồi, Like tư vấn. Theo v2.9, chấp nhận Apply hoặc Invite qua `/requests/{id}/accept` làm sinh viên gia nhập ngay; không dùng quy trình approve → invite của BE cũ.
 - Khóa/mở khóa, mời/xóa thành viên, rời nhóm/yêu cầu/thu hồi/khiếu nại, chuyển Trưởng nhóm theo quyền và phase thực tế.

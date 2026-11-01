@@ -1,5 +1,9 @@
 # Phase 2 progress — 2026-11-01
 
+## Latest login screenshot approval
+
+The user explicitly approved the Admin/Coordinator email/password form. Mobile now calls the deployed public `/auth/login`, accepts active ADMIN/LECTURER sessions, and routes staff to a separate account-confirmation/refresh/logout screen. Student group routes and automatic group queries stay STUDENT-only. Login is restyled to the screenshot's compact translucent card, inputs, password visibility toggle, orange action, Google separator and footer; the mobile introduction panel stays removed. Existing auth race/storage/401 tests remain, with role/method and password-request coverage added: 35 tests, lint, strict types and three-platform exports pass. Real account/device validation is not claimed. See [login-layout.md](login-layout.md).
+
 ## Newly cloned Frontend recheck
 
 Rechecked actual FE `main` at `7078a14` and the approved deployed OpenAPI (HTTP 200, still 76 paths; audited mobile schemas unchanged). Mobile now matches the membership-aware menu, create/discover workspace, request wording, overview roster/lock warning/shortcuts and login/profile wording. Request counters use actual deployed states and retain errors; applications require saved skills with a default introduction; invitation normalization is shared. Notification labels and unread-counter error states are aligned. Existing request history and compatible optional custom messages remain accessible.

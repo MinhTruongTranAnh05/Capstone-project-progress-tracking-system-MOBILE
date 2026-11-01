@@ -1,5 +1,7 @@
 # Mobile parity gap report — current target: deployed v2.9
 
+Latest explicit scope update: the user approved the screenshot's Admin/Coordinator password form. POST `/auth/login` is now implemented for ADMIN/LECTURER, with a separate identity/refresh/logout landing screen. Student formation routes and automatic group queries remain STUDENT-only; no staff portal is included. Earlier statements that all staff sessions are refused are superseded by this approval. Login styling follows the supplied screenshot and retains the requested removal of the orange introduction on mobile.
+
 Latest actual-FE recheck: the newly cloned `main` is `7078a14`. Remaining navigation, overview, validation, notification and identity differences have been corrected in mobile; see [frontend-recheck.md](frontend-recheck.md) for the comparison and specific Web defects excluded. The deployed contract still exposes the same 76 path/method sets and eight audited mobile schemas. Required capstone APIs remain absent; authenticated and device checks are not signed off.
 
 ## Lecturer review and retarget decision — 2026-11-01

@@ -1,5 +1,7 @@
 # Feature parity matrix — deployed v2.9
 
+Latest user-approved extension: Admin/Coordinator password login is allowed, with an account confirmation screen only. Staff business portals remain outside scope; student group routes and automatic queries are role-guarded. This supersedes earlier blanket staff-login exclusion.
+
 Target changed by explicit user decision on 2026-11-01. API contract: public `/v3/api-docs` at the supplied test tunnel, HTTP 200, 76 paths. Role wording: Student/Leader on mobile; Leader is membership, account remains STUDENT. Coordinator is LECTURER assigned to a semester, with ADMIN fallback; COUNCIL is not a deployed role. No staff portal is in scope.
 
 Rechecked against the newly cloned FE `main` at `7078a14`; see [frontend-recheck.md](frontend-recheck.md). The latest public contract has the same path/method sets and audited mobile-facing schemas.
@@ -10,6 +12,7 @@ Rechecked against the newly cloned FE `main` at `7078a14`; see [frontend-recheck
 | Membership-aware menu / create-discover tabs | Verified membership from GET `/groups/{id}` | Student; Leader membership | Shared shell / create-discover workspace | Implemented with current FE labels; own request history preserved; device navigation not tested |
 | Group overview | GET `/groups/{id}`, `/groups/{id}/requests`, `/groups/{id}/leave-requests` | Member (own leaves); Leader (all leaves) | Overview | Added roster/vacancies, lock warning and quick links; counts respect expiry and deployed leave statuses; live reads not tested |
 | Google login | GET `/auth/google/config`, POST `/auth/google` `{idToken}`, GET `/auth/me` | STUDENT; Leader membership | Login | Implemented and unit/contract checked; real Google login not tested |
+| Admin/Coordinator password login (new approval) | POST `/auth/login` `{email,password}`, GET `/auth/me` | ADMIN, LECTURER | Login → Staff session confirmation | Implemented; exact password preserved, public request omits Bearer, role-specific routing and session checks covered; real login not tested |
 | Create account | POST `/auth/register` absent; `/auth/campuses` absent | Neither Student nor Leader exposed | Account-access / registration explanation | **blocked by BE**: no self-registration controller; latest web register is inactive |
 | Semester/subject context | GET `/me/semesters`, GET `/groups/{id}` | Student; Leader membership | Shared scope selector | Implemented: per-user known hint, fresh membership/scope verification, no guessing; unit tests pass |
 | Create/discover groups | `/subjects/{id}/groups`, `/open-groups`, `/candidates` | Eligible student; recruitment restrictions | Create / Members | Implemented with shared validation; contract tests pass; real read/write not tested |
