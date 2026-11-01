@@ -3,6 +3,7 @@ import { Platform, Share, Text, View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import { useFormation } from '@/contexts/FormationContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { Avatar, Badge, Button, Card, ConfirmButton, Empty, ErrorState, Field, FormationPage, ProfileDetails, SectionHeading, ui, useAction } from '@/components/FormationUI';
 import { GroupInvitationForm } from '@/components/GroupInvitationForm';
 import { LeaderTransferRequests } from '@/components/LeaderTransferRequests';
@@ -12,15 +13,19 @@ import { colors } from '@/constants/colors';
 import { groupService } from '@/services/groupService';
 import { canInvite, GROUP_LABELS, isPending } from '@/constants/formation';
 import { MAX_GROUP_MEMBERS, isValidGroupSize } from '@/constants/group';
+import { GroupWorkspaceTabs } from './GroupWorkspaceTabs';
+import { applicationSchema } from '@/core/validation/groups';
 
 export default function MembersScreen() {
   const f = useFormation();
   return <FormationPage title={f.group ? 'Thành viên nhóm (3–5 người)' : 'Hồ sơ & Đăng ký vào nhóm'}>
+    {!f.group && <GroupWorkspaceTabs mode="find" />}
     {f.subject ? <MembersBody key={f.subject.scopeId} /> : <Empty text="Chưa có môn học để lập nhóm." />}
   </FormationPage>;
 }
 export function MembersBody() {
   const f = useFormation();
+  const { user } = useAuth();
   const action = useAction();
   const router = useRouter();
   const [q, setQ] = useState('');
@@ -33,6 +38,7 @@ export function MembersBody() {
   const detail = useQuery({ queryKey: [...f.key, 'publicGroup', expanded], queryFn: ({ signal }) => groupService.getGroup(expanded!, signal), enabled: !!expanded && !f.group });
   const full = !canInvite(f.group);
   const pendingCount = (mine.data ?? []).filter(r => r.type === 'APPLY' && isPending(r)).length;
+  const savedSkills = user?.skills?.trim() ?? '';
   return <>
     {action.feedback}
     {f.group ? <>
@@ -50,8 +56,10 @@ export function MembersBody() {
       <ProfileEditor />
       {mine.isSuccess && <><Card><Text style={ui.eyebrow}>📬 Lời mời tham gia nhóm từ Trưởng nhóm ({mine.data.filter(r => r.type === 'INVITE' && isPending(r)).length})</Text>{mine.data.filter(r => r.type === 'INVITE' && isPending(r)).length === 0 && <Text style={ui.text}>Hiện tại bạn không có lời mời tham gia nhóm nào từ Trưởng nhóm.</Text>}{mine.data.filter(r => r.type === 'INVITE' && isPending(r)).map(r => <RequestCard key={r.id} request={r} action={action} inset />)}</Card>
         <Card><SectionHeading title={`⚡ Đơn Apply của tôi (${pendingCount}/3 đơn đang chờ)`} subtitle="Giới hạn tối đa 3 đơn gửi song song để đảm bảo tỷ lệ phản hồi tốt nhất." />{mine.data.filter(r => r.type === 'APPLY').length === 0 && <Text style={ui.text}>Bạn chưa gửi đơn Apply nào.</Text>}{mine.data.filter(r => r.type === 'APPLY').map(r => <RequestCard key={r.id} request={r} action={action} inset />)}</Card></>}
+      <Button title="Xem toàn bộ đơn ứng tuyển & Lời mời" secondary onPress={() => router.push('/(tabs)/requests')} />
       <Card><SectionHeading title="Tìm nhóm phù hợp" subtitle="Khám phá các nhóm đang mở tuyển trong môn học của bạn." /><Button title="Tạo nhóm mới" secondary disabled={!f.canAct} onPress={() => router.push('/(groups)/create')} />
-        <Field label="Lời giới thiệu khi gửi Apply" value={message} onChangeText={setMessage} maxLength={1000} multiline />
+        <Field label="Lời giới thiệu khi gửi Apply (mặc định dùng kỹ năng đã lưu)" value={message} onChangeText={setMessage} placeholder={savedSkills || 'Cập nhật và lưu hồ sơ năng lực trước khi gửi đơn.'} maxLength={1000} multiline />
+        {!savedSkills && <Text style={ui.notice}>Bạn cần điền và lưu thông tin Thế mạnh kỹ năng, ưu điểm & nhược điểm ở phía trên trước khi gửi đơn ứng tuyển!</Text>}
       </Card>
     </>}
     {(!f.group || f.isLeader) && <Card><Text style={ui.heading}>{f.group ? 'Sinh viên đang tìm nhóm' : 'Các nhóm đang mở tuyển'}</Text>
@@ -68,8 +76,8 @@ export function MembersBody() {
         <View style={ui.divider} /><Text style={ui.eyebrow}>Kỹ năng & Công nghệ cần tuyển</Text><View style={ui.row}>{group.wantedSkills ? group.wantedSkills.split(',').filter(Boolean).map((value, index) => <Badge key={index}>{value.trim()}</Badge>) : <Text style={ui.text}>Chưa cập nhật</Text>}</View>
         <Button title={expanded === group.id ? 'Ẩn chi tiết' : 'Xem chi tiết nhóm'} secondary onPress={() => setExpanded(expanded === group.id ? null : group.id)} />
         {expanded === group.id && <>{detail.isPending ? <Text style={ui.text}>Đang tải chi tiết...</Text> : detail.error ? <ErrorState error={detail.error} retry={() => void detail.refetch()} /> : detail.data?.members.map(member => <ProfileDetails key={member.userId} profile={member.profile} />)}</>}
-        <ConfirmButton title="🚀 NỘP ĐƠN APPLY" secondary={false} message={`Gửi đơn ứng tuyển vào nhóm ${group.code}?`} busy={action.busy} disabled={!f.canAct || !canInvite(group) || group.locked || pendingCount >= 3 || !mine.isSuccess || mine.data.some(r => r.groupId === group.id && r.type === 'APPLY' && isPending(r))}
-          onConfirm={() => action.run(() => groupService.apply(group.id, message.trim()))} />
+        <ConfirmButton title="🚀 NỘP ĐƠN APPLY" secondary={false} message={`Gửi đơn ứng tuyển vào nhóm ${group.code}?`} busy={action.busy} disabled={!savedSkills || !f.canAct || !canInvite(group) || group.locked || pendingCount >= 3 || !mine.isSuccess || mine.data.some(r => r.groupId === group.id && r.type === 'APPLY' && isPending(r))}
+          onConfirm={() => action.run(() => groupService.apply(group.id, applicationSchema.parse({ skills: savedSkills, message }).message))} />
       </Card>)}
     </>}
     {f.group && f.isLeader && <>

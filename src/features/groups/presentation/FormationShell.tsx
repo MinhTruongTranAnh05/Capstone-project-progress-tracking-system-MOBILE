@@ -9,7 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useFormation } from './GroupContext';
 import { notificationService } from '@/services/notificationService';
 import { colors } from '@/constants/colors';
-import { studentPages } from '@/core/navigation';
+import { getStudentNavigation } from '@/core/navigation';
 import { PHASE_LABELS, formatDate } from '../domain/rules';
 import { Avatar, Badge, Card, ConfirmButton, ErrorState, ui } from '@/core/ui/primitives';
 function DashboardSidebar({ onNavigate }: { onNavigate: () => void }) {
@@ -17,18 +17,22 @@ function DashboardSidebar({ onNavigate }: { onNavigate: () => void }) {
   const f = useFormation();
   const router = useRouter();
   const pathname = usePathname();
-  const nav = studentPages.filter(page => !page.grouped || !!f.group);
+  const nav = getStudentNavigation(!!f.group);
   return <View style={{ flex: 1, backgroundColor: colors.surface, borderRightWidth: 1, borderColor: colors.border }}>
     <ScrollView contentContainerStyle={{ padding: 24, gap: 24, flexGrow: 1 }}>
-      <View style={[ui.row, { flexWrap: 'nowrap', gap: 12 }]}><View style={shell.logo}><Text style={{ color: 'white', fontWeight: '900', fontSize: 20 }}>✓</Text></View><View style={{ flex: 1 }}><Text style={[ui.heading, { fontSize: 14 }]}>Quản Lý Sinh Viên</Text><Text style={[ui.text, { fontSize: 11 }]}>MatchPoint FPT Capstone.</Text></View></View>
+      <View style={[ui.row, { flexWrap: 'nowrap', gap: 12 }]}><View style={shell.logo}><Text style={{ color: 'white', fontWeight: '900', fontSize: 20 }}>✓</Text></View><View style={{ flex: 1 }}><Text style={[ui.heading, { fontSize: 14 }]}>Quản lý Sinh viên</Text><Text style={[ui.text, { fontSize: 11 }]}>Hệ thống Quản lý Đồ án FPT</Text></View></View>
       <View style={ui.inset}><View style={shell.between}><Text style={ui.label}>Mã nhóm:</Text><Text style={[ui.strong, { color: colors.primary }]}>{f.group?.code || 'Chưa có'}</Text></View>
         <View style={shell.between}><Text style={ui.label}>Thành viên:</Text><Text style={ui.strong}>{f.group ? `${f.group.size}/5 người` : '0/5 (Cần 3–5 người)'}</Text></View><View style={ui.divider} />
-        <View style={shell.between}><Text style={ui.label}>Chức vụ:</Text><Badge tone={!f.group ? 'warning' : f.isLeader ? 'success' : 'orange'}>{!f.group ? 'Chưa tham gia' : f.isLeader ? '👑 Nhóm trưởng' : '👤 Thành viên'}</Badge></View>
+        <View style={shell.between}><Text style={ui.label}>Chức vụ:</Text><Badge tone={!f.group ? 'warning' : f.isLeader ? 'success' : 'orange'}>{!f.group ? 'Chưa tham gia' : f.isLeader ? '👑 Trưởng nhóm' : '👤 Thành viên'}</Badge></View>
       </View>
-      <View style={{ gap: 6 }}>{nav.map(item => {
+      <View style={{ gap: 6 }}>{nav.main.map(item => {
         const active = pathname === item.path || (!f.group && item.path === '/' && ['/create', '/members'].includes(pathname));
         return <TouchableOpacity key={item.path} accessibilityRole="button" accessibilityState={{ selected: active }} onPress={() => { onNavigate(); router.navigate(item.href); }} style={{ flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14, minHeight: 48, borderRadius: 16, backgroundColor: active ? colors.primary : 'transparent' }}><Text>{item.icon}</Text><Text style={{ fontSize: 12, lineHeight: 19, fontWeight: '700', color: active ? 'white' : colors.textSecondary, flex: 1 }}>{item.label}</Text></TouchableOpacity>;
       })}</View>
+      <View style={{ borderTopWidth: 1, borderColor: colors.border, paddingTop: 16, gap: 6 }}>
+        <Text style={ui.eyebrow}>Chức năng đồ án · Chưa khả dụng</Text>
+        {nav.capstone.map(item => <TouchableOpacity key={item.path} accessibilityRole="button" accessibilityState={{ selected: pathname === item.path }} onPress={() => { onNavigate(); router.navigate(item.href); }} style={{ flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14, minHeight: 48, borderRadius: 16, backgroundColor: pathname === item.path ? colors.primary50 : 'transparent' }}><Text>{item.icon}</Text><Text style={{ flex: 1, fontSize: 12, lineHeight: 19, color: colors.textSecondary }}>{item.label}</Text></TouchableOpacity>)}
+      </View>
       <View style={{ flex: 1 }} />
       <View style={{ borderTopWidth: 1, borderColor: colors.border, paddingTop: 18, gap: 16 }}><View style={[ui.row, { flexWrap: 'nowrap' }]}><Avatar name={user?.fullName} uri={user?.avatarUrl} /><View style={{ flex: 1 }}><Text numberOfLines={1} style={ui.strong}>{user?.fullName}</Text><Text numberOfLines={1} style={[ui.text, { fontSize: 10 }]}>{user?.email}</Text></View></View><ConfirmButton title="Đăng xuất" tone="danger" message="Bạn có muốn đăng xuất khỏi MatchPoint FPT?" onConfirm={() => void logout()} /></View>
     </ScrollView>
@@ -54,7 +58,7 @@ export function FormationPage({ title, children, back = false, requiresFormation
         <View style={{ flex: 1, gap: 2 }}><Text style={[ui.label, { color: colors.primary }]}>Đợt Lập Nhóm Đầu Kỳ</Text><Text style={{ fontSize: 10, color: colors.textSecondary }}>Khoa CNTT - Đại học FPT</Text></View>
         <TouchableOpacity accessibilityRole="button" accessibilityLabel="Làm mới nhóm" disabled={!!f.refreshing} onPress={() => void f.refresh()} style={shell.iconButton}>{f.refreshing ? <ActivityIndicator color={colors.primary} size="small" /> : <Ionicons name="refresh-outline" size={20} color={colors.primary} />}</TouchableOpacity>
         <TouchableOpacity accessibilityRole="button" accessibilityLabel={`Thông báo, ${unread.data?.unread ?? 0} chưa đọc`} onPress={() => router.push('/(tabs)/notifications')} style={shell.iconButton}><Ionicons name="notifications-outline" size={22} color={colors.textSecondary} />{!!unread.data?.unread && <View style={shell.counter}><Text style={{ color: 'white', fontSize: 9, fontWeight: '800' }}>{unread.data.unread > 99 ? '99+' : unread.data.unread}</Text></View>}</TouchableOpacity>
-        {width >= 650 && <><View style={{ borderLeftWidth: 1, borderColor: colors.border, paddingLeft: 14 }}><Text style={ui.strong}>{user?.fullName}</Text><Text style={{ fontSize: 10, color: colors.textSecondary }}>{user?.email}</Text></View><Badge tone={f.isLeader ? 'success' : 'orange'}>{f.isLeader ? '👑 Nhóm trưởng' : '🎓 STUDENT'}</Badge></>}
+        {width >= 650 && <><View style={{ borderLeftWidth: 1, borderColor: colors.border, paddingLeft: 14 }}><Text style={ui.strong}>{user?.fullName}</Text><Text style={{ fontSize: 10, color: colors.textSecondary }}>{user?.email}</Text></View><Badge tone={f.isLeader ? 'success' : f.group ? 'orange' : 'warning'}>{!f.group ? '🎓 SINH VIÊN' : f.isLeader ? '👑 Trưởng nhóm' : '👤 Thành viên'}</Badge></>}
       </View>
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: wide ? 32 : 16, paddingBottom: insets.bottom + 28, gap: 20, width: '100%', maxWidth: 1344, alignSelf: 'center' }} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag" refreshControl={<RefreshControl refreshing={!!f.refreshing} onRefresh={() => void f.refresh()} colors={[colors.primary]} />}>
         {f.group && <View style={[shell.roster, { backgroundColor: validSize ? colors.success50 : colors.warning50, borderColor: validSize ? colors.successBorder : colors.warningBorder }]}><View style={{ gap: 4, flex: 1 }}><Text style={[ui.eyebrow, { color: validSize ? colors.successDark : colors.warningDark }]}>Trạng thái sĩ số nhóm</Text><Text style={[ui.strong, { fontSize: 12, color: validSize ? colors.successDark : colors.warningDark }]}>{validSize ? `Nhóm đã đạt sĩ số hợp lệ (${f.group.size}/5 thành viên)` : `Nhóm hiện có ${f.group.size}/5 thành viên (Yêu cầu tối thiểu 3 thành viên)`}</Text></View><Badge tone={validSize ? 'success' : 'warning'}>{validSize ? '✓ Đạt chuẩn' : 'Cần bổ sung thành viên'}</Badge></View>}

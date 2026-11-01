@@ -38,6 +38,17 @@ test('requests past their lifetime are disabled before the backend sweeper updat
   }
 });
 
+test('overview counts exclude expired applications and use actual leave states for the current group', () => {
+  const { getGroupOverviewCounts } = createHarness().load('src/features/groups/domain/overview.ts');
+  const pending = { groupId: 'my-group', type: 'APPLY', status: 'PENDING', expiresAt: new Date(now + 1000).toISOString() };
+  const requests = [pending, { ...pending, expiresAt: new Date(now).toISOString() },
+    { ...pending, status: 'ACCEPTED' }, { ...pending, type: 'INVITE' }, { ...pending, groupId: 'other-group' }];
+  const leaves = ['PENDING_LEADER', 'PENDING_MODERATOR', 'APPROVED', 'REJECTED', 'WITHDRAWN', 'CLOSED']
+    .map(status => ({ groupId: 'my-group', status }));
+  leaves.push({ groupId: 'other-group', status: 'PENDING_LEADER' });
+  assert.deepEqual(getGroupOverviewCounts('my-group', requests, leaves, now), { applications: 1, leaves: 2 });
+});
+
 test('Google payload contains only idToken and has no Bearer header', async () => {
   const h = createHarness();
   h.api.defaults.adapter = async config => {
@@ -47,6 +58,13 @@ test('Google payload contains only idToken and has no Bearer header', async () =
     return { config, status: 200, statusText: 'OK', headers: {}, data: {} };
   };
   await h.authService.loginWithGoogle({ idToken: 'google-credential' });
+});
+
+test('applying requires a saved skills introduction and defaults to it without sending extra profile fields', () => {
+  const { applicationSchema } = createHarness().load('src/core/validation/groups.ts');
+  assert.equal(applicationSchema.safeParse({ skills: '  ', message: 'Custom introduction' }).success, false);
+  assert.deepEqual(applicationSchema.parse({ skills: ' React, teamwork ', message: ' ' }), { message: 'React, teamwork' });
+  assert.deepEqual(applicationSchema.parse({ skills: 'React', message: ' A specific introduction ' }), { message: 'A specific introduction' });
 });
 
 test('current group is supplied by me/semesters even for full and locked groups', async () => {
@@ -73,7 +91,7 @@ test('create, invite, accept, kick, leave and transfer use v2.9 request contract
     return { config, status: 200, statusText: 'OK', headers: {}, data: {} };
   };
   await service.createGroup('subject-1', { name: 'Team', wantedSkills: 'React' });
-  await service.invite('group-1', 'SE123456', 'Hello');
+  await service.invite('group-1', ' se123456 ', 'Hello');
   await service.answer('request-1', 'accept');
   await service.kick('group-1', 'user-2');
   await service.leave('group-1', 'Reason');

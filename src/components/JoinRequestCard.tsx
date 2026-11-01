@@ -30,7 +30,7 @@ export function RequestCard({ request: r, action, inset = false }: { request: Jo
     </>}
     {canWithdraw && <ConfirmButton title={r.type === 'INVITE' ? 'Thu hồi lời mời' : 'Rút đơn Apply'} tone="danger" message="Bạn có chắc chắn muốn thu hồi yêu cầu này không?" busy={action.busy} onConfirm={() => action.run(() => groupService.answer(r.id, 'withdraw'))} />}
     {f.group && r.type === 'APPLY' && <Button title={`${r.likedByMe ? '♥ Bỏ Like' : '♡ Like ứng viên'} (${r.likes ?? 0})`} secondary disabled={!f.canAct || !pending} busy={action.busy} onPress={() => action.run(() => groupService.like(r.id, !r.likedByMe))} />}
-    {pending && f.group && !f.isLeader && <Text style={[ui.text, { fontSize: 11 }]}>Chờ Nhóm Trưởng xử lý</Text>}
+    {pending && f.group && !f.isLeader && <Text style={[ui.text, { fontSize: 11 }]}>Chờ Trưởng nhóm xử lý</Text>}
   </>;
   return inset ? <View style={[ui.inset, { gap: 12 }]}>{body}</View> : <Card>{body}</Card>;
 }

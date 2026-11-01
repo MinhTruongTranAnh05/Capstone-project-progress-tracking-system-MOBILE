@@ -9,7 +9,7 @@ import { isPending } from '@/constants/formation';
 
 export default function RequestsScreen() {
   const f = useFormation();
-  return <FormationPage title="Đơn Apply & Vote">{f.subject ? <RequestsBody key={f.subject.scopeId} /> : <Empty text="Chưa có môn học." />}</FormationPage>;
+  return <FormationPage title="Đơn ứng tuyển & Lời mời" back={!f.group}>{f.subject ? <RequestsBody key={f.subject.scopeId} /> : <Empty text="Chưa có môn học." />}</FormationPage>;
 }
 function RequestsBody() {
   const f = useFormation();
