@@ -4,7 +4,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { authService } from '@/services/authService';
 import { getErrorMessage, SessionError } from '@/services/apiError';
 import { sessionStore } from '@/services/sessionStore';
-import { GoogleLoginRequest, LoginRequest, LoginResponse, MobileUser } from '@/types/auth';
+import { GoogleLoginRequest, LoginResponse, MobileUser } from '@/types/auth';
 
 interface AuthContextType {
   user: MobileUser | null;
@@ -15,7 +15,6 @@ interface AuthContextType {
   startupError: string | null;
   restoreSession: () => Promise<void>;
   loginWithGoogle: (data: GoogleLoginRequest) => Promise<void>;
-  login: (data: LoginRequest) => Promise<void>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
 }
@@ -85,8 +84,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const loginWithGoogle = useCallback((data: GoogleLoginRequest) =>
     authenticate(() => authService.loginWithGoogle(data)), [authenticate]);
 
-  const login = useCallback((data: LoginRequest) => authenticate(() => authService.login(data)), [authenticate]);
-
   const logout = useCallback(async () => {
     restoreAttempt.current += 1;
     setStartupError(null);
@@ -129,7 +126,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         startupError,
         restoreSession,
         loginWithGoogle,
-        login,
         logout,
         refreshUser,
       }}

@@ -5,7 +5,7 @@ export function AuthPromoBanner() {
     <View style={{ position: 'absolute', right: -40, bottom: -40, width: 192, height: 192, borderRadius: 96, backgroundColor: 'rgba(255,255,255,0.08)' }} />
     <Text style={{ color: '#FFFFFF', fontSize: 10, fontWeight: '800', letterSpacing: 0.8, backgroundColor: 'rgba(255,255,255,0.2)', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8, alignSelf: 'flex-start' }}>CỔNG THÔNG TIN CAPSTONE</Text>
     <Text style={{ color: '#FFFFFF', fontSize: 24, lineHeight: 33, fontWeight: '800' }}>Hệ thống ghép nhóm Đồ án tốt nghiệp chuyên ngành</Text>
-    {['Ghép nhóm chuyên ngành khép kín đảm bảo tính chính xác cao.', 'Quy mô nhóm chuẩn mực từ 3 đến 5 thành viên chính thức.', 'Điều phối và kiểm duyệt minh bạch toàn bộ học kỳ bởi Moderator.'].map(text => <View key={text}
+    {['Ghép nhóm chuyên ngành khép kín đảm bảo tính chính xác cao.', 'Quy mô nhóm chuẩn mực từ 3 đến 5 thành viên chính thức.', 'Điều phối và kiểm duyệt minh bạch toàn bộ học kỳ bởi người điều phối.'].map(text => <View key={text}
       style={{ flexDirection: 'row', alignItems: 'center', gap: 14, padding: 14, backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.15)' }}>
       <View style={{ width: 28, height: 28, borderRadius: 10, backgroundColor: 'white', alignItems: 'center', justifyContent: 'center' }}><Text style={{ color: '#E65100', fontWeight: '900', fontSize: 12 }}>✓</Text></View><Text style={{ color: '#FFFFFF', flex: 1, fontSize: 12, lineHeight: 20 }}>{text}</Text>
     </View>)}
