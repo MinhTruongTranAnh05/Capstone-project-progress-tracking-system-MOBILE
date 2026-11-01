@@ -9,6 +9,7 @@
 - Swagger: `https://quick-collecting-studies-apparently.trycloudflare.com/swagger-ui/index.html`.
 - Bằng chứng contract đã đọc: [deployed-v29.json](docs/contracts/deployed-v29.json). Tunnel có thể thay đổi; cần xác nhận lại trước khi kiểm thử thật.
 - Web tham chiếu: FE `origin/main` đang lưu cục bộ, commit `7078a14`, đọc bằng `git show`, không checkout hay chỉnh sửa FE.
+- Đã đối chiếu lại bản FE vừa clone: `main`, `7078a14`; chi tiết chênh lệch và các lỗi Web không sao chép nằm trong [frontend-recheck.md](docs/frontend-recheck.md).
 
 ## Vai trò và giới hạn
 
@@ -26,6 +27,8 @@
 - Hồ sơ phone/skills/strengths/weaknesses/profilePrivate theo BE; dữ liệu riêng tư hiển thị theo `full` từ server. Không gửi field `bio` của BE cũ.
 - Thông báo phân trang, chưa đọc, đánh dấu đọc, retry và refresh. Hồ sơ/thông báo không bị chặn hiển thị chỉ vì nhóm tải lỗi.
 - Bảng màu, ảnh nền và shell responsive hiện có được giữ lại; menu dùng một định nghĩa chung.
+- Menu chưa có nhóm theo workspace Tạo nhóm mới/Tìm nhóm đang tuyển của Web; menu có nhóm gồm Tổng quan, Thành viên, Đơn ứng tuyển & Lời mời, Quản lý trạng thái và Hồ sơ. Lịch sử đơn vẫn truy cập được từ màn tìm nhóm.
+- Tổng quan hiển thị thành viên/vị trí trống, cảnh báo khóa và bộ đếm yêu cầu thật; không gán 0 khi API lỗi. Trước khi Apply cần lưu kỹ năng; lời giới thiệu mặc định dùng kỹ năng đã lưu.
 
 ## Chức năng bị BE chặn
 

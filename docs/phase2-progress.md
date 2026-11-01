@@ -1,5 +1,11 @@
 # Phase 2 progress — 2026-11-01
 
+## Newly cloned Frontend recheck
+
+Rechecked actual FE `main` at `7078a14` and the approved deployed OpenAPI (HTTP 200, still 76 paths; audited mobile schemas unchanged). Mobile now matches the membership-aware menu, create/discover workspace, request wording, overview roster/lock warning/shortcuts and login/profile wording. Request counters use actual deployed states and retain errors; applications require saved skills with a default introduction; invitation normalization is shared. Notification labels and unread-counter error states are aligned. Existing request history and compatible optional custom messages remain accessible.
+
+Final repository checks for this pass: zero-warning lint, strict types, 30 tests and Web/Android/iOS exports pass. No login, authenticated request or write was performed. Required capstone features remain blocked by absent BE APIs; the unavailable entries are kept separately. See [frontend-recheck.md](frontend-recheck.md) and [verification.md](verification.md). No BE/FE source modifications.
+
 ## Current status after lecturer review and explicit retarget
 
 The user selected **the deployed v2.9 BE**. The earlier deployment-mismatch pause below is historical and resolved by that decision. The checked-out BE remains untouched and is no longer the implementation contract.

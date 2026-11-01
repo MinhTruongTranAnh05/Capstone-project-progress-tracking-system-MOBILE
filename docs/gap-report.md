@@ -1,5 +1,7 @@
 # Mobile parity gap report — current target: deployed v2.9
 
+Latest actual-FE recheck: the newly cloned `main` is `7078a14`. Remaining navigation, overview, validation, notification and identity differences have been corrected in mobile; see [frontend-recheck.md](frontend-recheck.md) for the comparison and specific Web defects excluded. The deployed contract still exposes the same 76 path/method sets and eight audited mobile schemas. Required capstone APIs remain absent; authenticated and device checks are not signed off.
+
 ## Lecturer review and retarget decision — 2026-11-01
 
 **This section supersedes the historical Phase 1 target and removal list below.** The user explicitly chose the deployed v2.9 BE after the deployment mismatch was identified. Existing commits/snapshot are retained; incompatible checked-out-BE adapters will not remain in active mobile flows. BE and FE repositories stay read-only.
