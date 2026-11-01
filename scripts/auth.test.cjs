@@ -21,7 +21,7 @@ function deferred() {
   return { promise, resolve };
 }
 
-for (const role of ['STUDENT']) {
+for (const role of ['STUDENT', 'ADMIN', 'LECTURER']) {
   test(`accepts an active ${role} and persists a verified session`, async () => {
     const h = createHarness();
     await signIn(h, { ...student, role });
@@ -30,10 +30,10 @@ for (const role of ['STUDENT']) {
   });
 }
 
-test('denies Admin/Coordinator and any unknown role before credentials are stored', async () => {
-  for (const role of ['ADMIN', 'LECTURER', 'GROUP_LEADER', 'unsupported-role']) {
+test('denies unsupported account roles before credentials are stored', async () => {
+  for (const role of ['GROUP_LEADER', 'MODERATOR', 'SYSTEM_ADMIN', 'unsupported-role']) {
     const h = createHarness();
-    await assert.rejects(signIn(h, { ...student, role }), { code: 'WEB_ONLY', message: 'Vui lòng dùng phiên bản Web' });
+    await assert.rejects(signIn(h, { ...student, role }), { code: 'UNSUPPORTED_ROLE' });
     assert.equal(h.store.getSnapshot().user, null);
     assert.equal(h.disk.token, null);
   }
@@ -58,8 +58,8 @@ test('does not grant access from a saved token or cached user before server veri
     assert.equal(config.headers.get('Authorization'), 'Bearer saved-token');
     return response(config, { ...student, role: 'ADMIN' });
   };
-  await assert.rejects(h.store.accept(revision, { accessToken: 'saved-token', user: await h.authService.getCurrentUser() }), { code: 'WEB_ONLY' });
-  assert.equal(h.store.getSnapshot().user, null);
+  await h.store.accept(revision, { accessToken: 'saved-token', user: await h.authService.getCurrentUser() });
+  assert.equal(h.store.getSnapshot().user.role, 'ADMIN');
 });
 
 test('network failure while verifying a saved session keeps it unverified and retryable', async () => {
@@ -106,17 +106,59 @@ test('public auth requests omit Bearer credentials and their 401 cannot expire a
     throw httpError(config, 401, 'INVALID_CREDENTIALS');
   };
   await assert.rejects(h.authService.loginWithGoogle({ idToken: 'invalid' }));
-  assert.deepEqual(requests, ['/auth/google']);
+  await assert.rejects(h.authService.loginWithPassword({ email: 'admin@example.test', password: 'invalid-test-password' }));
+  assert.deepEqual(requests, ['/auth/google', '/auth/login']);
   assert.equal(h.store.getSnapshot().token, 'token-1');
 });
 
-test('Google login service never persists an unapproved response itself', async () => {
+test('Google login service never persists credentials and unexpected staff responses fail the method guard', async () => {
   const h = createHarness();
   h.api.defaults.adapter = async (config) => response(config, { accessToken: 'staff-token', user: { ...student, role: 'ADMIN' } });
   const google = await h.authService.loginWithGoogle({ idToken: 'google-token' });
-  await assert.rejects(h.store.accept(h.store.begin(), google), { code: 'WEB_ONLY' });
+  const { requireLoginMethod } = h.load('src/core/auth/access.ts');
+  assert.throws(() => requireLoginMethod(google.user, 'google'), { code: 'PASSWORD_LOGIN_REQUIRED' });
   assert.equal(h.disk.token, null);
   assert.equal(h.disk.user, null);
+});
+
+test('password login sends the deployed public request without trimming or persisting the password', async () => {
+  const h = createHarness();
+  await signIn(h);
+  h.api.defaults.adapter = async config => {
+    assert.equal(config.url, '/auth/login');
+    assert.equal(config.method, 'post');
+    assert.equal(config.headers.has('Authorization'), false);
+    assert.deepEqual(JSON.parse(config.data), { email: 'admin@example.test', password: ' exact test password ' });
+    return response(config, { accessToken: 'staff-token', user: { ...student, role: 'ADMIN' } });
+  };
+  const result = await h.authService.loginWithPassword({ email: ' admin@example.test ', password: ' exact test password ' });
+  assert.equal(result.user.role, 'ADMIN');
+  assert.equal(h.disk.token, 'token-1');
+  assert.equal(h.disk.user, null);
+});
+
+test('staff sessions cannot access student features and students cannot use password sessions', () => {
+  const { canUseStudentFeatures, canUseStaffSession, getSessionDestination, requireLoginMethod } = createHarness().load('src/core/auth/access.ts');
+  for (const role of ['ADMIN', 'LECTURER']) {
+    const user = { ...student, role };
+    assert.equal(canUseStudentFeatures(user), false);
+    assert.equal(canUseStaffSession(user), true);
+    assert.equal(getSessionDestination(user), '/staff');
+    assert.doesNotThrow(() => requireLoginMethod(user, 'password'));
+  }
+  assert.equal(canUseStudentFeatures(student), true);
+  assert.equal(canUseStaffSession(student), false);
+  assert.equal(getSessionDestination(student), '/(tabs)');
+  assert.equal(getSessionDestination(null), '/(auth)/login');
+  assert.throws(() => requireLoginMethod(student, 'password'), { code: 'GOOGLE_LOGIN_REQUIRED' });
+  assert.equal(canUseStaffSession({ ...student, role: 'ADMIN', status: 'SUSPENDED' }), false);
+});
+
+test('password validation rejects empty credentials without issuing a request', async () => {
+  const h = createHarness();
+  h.api.defaults.adapter = async () => { assert.fail('invalid credentials reached the backend'); };
+  await assert.rejects(h.authService.loginWithPassword({ email: 'not-an-email', password: 'value' }));
+  await assert.rejects(h.authService.loginWithPassword({ email: 'admin@example.test', password: '   ' }));
 });
 
 test('a delayed 401 from an old request cannot log out the next account', async () => {

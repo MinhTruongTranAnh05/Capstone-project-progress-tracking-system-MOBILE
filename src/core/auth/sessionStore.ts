@@ -20,8 +20,8 @@ export function requireMobileUser(user: User): asserts user is MobileUser {
     || typeof user.fullName !== 'string') {
     throw new SessionError('INVALID_SESSION', 'Thông tin phiên đăng nhập không hợp lệ. Vui lòng đăng nhập lại.');
   }
-  if (user.role !== 'STUDENT') {
-    throw new SessionError('WEB_ONLY', 'Vui lòng dùng phiên bản Web');
+  if (!['STUDENT', 'ADMIN', 'LECTURER'].includes(user.role)) {
+    throw new SessionError('UNSUPPORTED_ROLE', 'Vai trò tài khoản không được hệ thống hỗ trợ.');
   }
   if (user.status !== 'ACTIVE') {
     throw new SessionError('ACCOUNT_INACTIVE', 'Tài khoản chưa hoạt động. Vui lòng liên hệ quản trị viên.');

@@ -10,6 +10,7 @@ import { SessionError } from '@/services/apiError';
 import { colors } from '@/constants/colors';
 import { requireOptionalNativeModule } from 'expo';
 import { FormationProvider } from '@/contexts/FormationContext';
+import { canUseStaffSession, canUseStudentFeatures } from '@/core/auth/access';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -22,7 +23,7 @@ const queryClient = new QueryClient({
 });
 
 function RootNavigator() {
-  const { isAuthenticated, isLoading, startupError } = useAuth();
+  const { user, isAuthenticated, isLoading, startupError } = useAuth();
   if (isLoading || startupError) return <SessionStatus />;
 
   return (
@@ -31,9 +32,12 @@ function RootNavigator() {
       <Stack.Protected guard={!isAuthenticated}>
         <Stack.Screen name="(auth)" />
       </Stack.Protected>
-      <Stack.Protected guard={isAuthenticated}>
+      <Stack.Protected guard={isAuthenticated && canUseStudentFeatures(user)}>
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="(groups)" />
+      </Stack.Protected>
+      <Stack.Protected guard={isAuthenticated && canUseStaffSession(user)}>
+        <Stack.Screen name="staff" />
       </Stack.Protected>
     </Stack>
   );

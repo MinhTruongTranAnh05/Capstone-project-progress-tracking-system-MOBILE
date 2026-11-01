@@ -3,8 +3,9 @@ import { AppState } from 'react-native';
 import { useQueryClient } from '@tanstack/react-query';
 import { authService } from '@/services/authService';
 import { getErrorMessage, SessionError } from '@/services/apiError';
-import { sessionStore } from '@/services/sessionStore';
-import { GoogleLoginRequest, LoginResponse, MobileUser } from '@/types/auth';
+import { requireMobileUser, sessionStore } from '@/services/sessionStore';
+import { requireLoginMethod } from '@/core/auth/access';
+import { GoogleLoginRequest, PasswordLoginRequest, LoginResponse, MobileUser } from '@/types/auth';
 
 interface AuthContextType {
   user: MobileUser | null;
@@ -15,6 +16,7 @@ interface AuthContextType {
   startupError: string | null;
   restoreSession: () => Promise<void>;
   loginWithGoogle: (data: GoogleLoginRequest) => Promise<void>;
+  loginWithPassword: (data: PasswordLoginRequest) => Promise<void>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
 }
@@ -68,11 +70,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => { active = false; unsubscribe(); };
   }, [queryClient, restoreSession]);
 
-  const authenticate = useCallback(async (request: () => Promise<LoginResponse>) => {
+  const authenticate = useCallback(async (request: () => Promise<LoginResponse>, method: 'google' | 'password') => {
     const revision = sessionStore.begin();
     setStartupError(null);
     try {
       const response = await request();
+      requireMobileUser(response.user);
+      requireLoginMethod(response.user, method);
       await sessionStore.accept(revision, response);
     } catch (error) {
       if (sessionStore.isCurrent(revision)) {
@@ -83,7 +87,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const loginWithGoogle = useCallback((data: GoogleLoginRequest) =>
-    authenticate(() => authService.loginWithGoogle(data)), [authenticate]);
+    authenticate(() => authService.loginWithGoogle(data), 'google'), [authenticate]);
+  const loginWithPassword = useCallback((data: PasswordLoginRequest) =>
+    authenticate(() => authService.loginWithPassword(data), 'password'), [authenticate]);
 
   const logout = useCallback(async () => {
     restoreAttempt.current += 1;
@@ -127,6 +133,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         startupError,
         restoreSession,
         loginWithGoogle,
+        loginWithPassword,
         logout,
         refreshUser,
       }}

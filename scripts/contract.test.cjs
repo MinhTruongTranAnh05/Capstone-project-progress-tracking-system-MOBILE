@@ -4,7 +4,7 @@ const axios = require('axios');
 const contract = require('../docs/contracts/deployed-v29.json');
 const { createHarness } = require('./testHarness.cjs');
 
-test('student API operations exist in the independently captured deployed contract', async () => {
+test('mobile API operations exist in the independently captured deployed contract', async () => {
   const h = createHarness();
   h.api.defaults.adapter = async config => {
     const path = '/api/v1' + config.url;
@@ -14,6 +14,7 @@ test('student API operations exist in the independently captured deployed contra
     return { config, status: 200, statusText: 'OK', headers: {}, data: [] };
   };
   const { groupApi } = h.load('src/features/groups/data/groupApi.ts');
+  await h.authService.loginWithPassword({ email: 'admin@example.test', password: 'test-password' });
   await groupApi.getMySemesters(); await groupApi.createGroup('subject', { name: 'TEST-Team', wantedSkills: '' });
   await groupApi.requests('group'); await groupApi.apply('group', 'TEST-apply'); await groupApi.invite('group', 'SE192636', 'TEST-invite');
   await groupApi.answer('request', 'accept'); await groupApi.like('request', true); await groupApi.like('request', false);

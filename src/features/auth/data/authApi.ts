@@ -1,7 +1,13 @@
 import api from '@/services/api';
-import { GoogleLoginConfig, GoogleLoginRequest, LoginResponse, User, ProfileRequest } from '@/types/auth';
+import { GoogleLoginConfig, GoogleLoginRequest, PasswordLoginRequest, LoginResponse, User, ProfileRequest } from '@/types/auth';
+import { passwordLoginSchema } from '@/core/validation/auth';
 
 export const authService = {
+  async loginWithPassword(data: PasswordLoginRequest): Promise<LoginResponse> {
+    const response = await api.post<LoginResponse>('/auth/login', passwordLoginSchema.parse(data), { authMode: 'public' });
+    return response.data;
+  },
+
   async getGoogleConfig(): Promise<GoogleLoginConfig> {
     const response = await api.get<GoogleLoginConfig>('/auth/google/config', { authMode: 'public' });
     return response.data;

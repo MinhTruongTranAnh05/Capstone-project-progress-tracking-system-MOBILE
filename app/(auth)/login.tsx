@@ -1,18 +1,23 @@
 import { Link } from 'expo-router';
+import { useState } from 'react';
 import { Text, View } from 'react-native';
 import { useAuth } from '@/contexts/AuthContext';
 import { GoogleAuthSection } from '@/components/GoogleAuthSection';
 import { AuthFrame } from '@/core/ui/AuthFrame';
 import { ui } from '@/components/FormationUI';
+import { authStyles } from '@/features/auth/presentation/authStyles';
+import { PasswordLoginForm } from '@/features/auth/presentation/PasswordLoginForm';
 
 export default function LoginScreen() {
   const { sessionNotice } = useAuth();
-  return <AuthFrame><View style={{ gap: 16 }}>
-    <Text style={ui.title}>Đăng nhập hệ thống</Text>
-    <Text style={ui.text}>Sinh viên xác thực bằng Google để tìm nhóm và quản lý nhóm trong học kỳ.</Text>
+  const [busy, setBusy] = useState(false);
+  return <AuthFrame><View style={{ gap: 14 }}>
+    <View style={{ gap: 3 }}><Text accessibilityRole="header" style={authStyles.heading}>Đăng nhập hệ thống</Text>
+    <Text style={authStyles.body}>Sinh viên xác thực bằng Google; Quản trị viên và Điều phối viên dùng mật khẩu hệ thống.</Text></View>
     {!!sessionNotice && <Text accessibilityRole="alert" style={ui.error}>{sessionNotice}</Text>}
-    <GoogleAuthSection />
-    <Link href="/(auth)/register" style={ui.tag}>Thông tin tạo tài khoản</Link>
-    <Text style={ui.text}>Quản trị viên và Người điều phối sử dụng phiên bản Web.</Text>
+    <PasswordLoginForm disabled={busy} onBusyChange={setBusy} />
+    <View style={[authStyles.separator, { marginTop: 2 }]}><View style={authStyles.separatorLine} /><Text style={authStyles.separatorText}>Hoặc đăng nhập bằng Google</Text><View style={authStyles.separatorLine} /></View>
+    <GoogleAuthSection compact disabled={busy} onBusyChange={setBusy} />
+    <Link href="/(auth)/register" style={[authStyles.footnote, { alignSelf: 'flex-start' }]} disabled={busy}>Thông tin tạo tài khoản sinh viên</Link>
   </View></AuthFrame>;
 }

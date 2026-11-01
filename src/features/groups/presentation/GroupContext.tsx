@@ -9,6 +9,7 @@ import { canParticipate, canRecruit } from '../domain/rules';
 import { sessionStore } from '@/services/sessionStore';
 import { storage } from '@/services/storage';
 import { SessionError } from '@/services/apiError';
+import { canUseStudentFeatures } from '@/core/auth/access';
 import type { MySemester, MySubject, StudentGroup } from '../domain/models';
 
 interface FormationState {
@@ -20,7 +21,7 @@ interface FormationState {
 const Context = createContext<FormationState | null>(null);
 export function FormationProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
-  const userId = user?.id;
+  const userId = canUseStudentFeatures(user) ? user?.id : undefined;
   const queryClient = useQueryClient();
   const [selection, setSelection] = useState<{ userId: string; scopeId: string } | null>(null);
   const [now, setNow] = useState(() => Date.now());
