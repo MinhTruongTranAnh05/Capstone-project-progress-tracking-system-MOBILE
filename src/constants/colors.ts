@@ -12,6 +12,7 @@ export const colors = {
   surfaceMuted: '#F8F6F0',
   cardGlass: 'rgba(255, 255, 255, 0.95)',
   overlayDark: 'rgba(44, 40, 37, 0.45)',
+  authOverlay: 'rgba(255, 255, 255, 0.2)',
 
   // Text Hierarchy
   text: '#2C2825',
