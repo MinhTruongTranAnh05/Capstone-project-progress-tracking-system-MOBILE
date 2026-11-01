@@ -1,25 +1,11 @@
 import api from './api';
-import { GoogleLoginConfig, GoogleLoginRequest, LoginResponse, User, ProfileRequest } from '@/types/auth';
-
+import type { Campus, GoogleLoginConfig, GoogleLoginRequest, LoginRequest, LoginResponse, ProfileRequest, RegisterRequest, RegisterResponse, User } from '@/types/auth';
 export const authService = {
-  async getGoogleConfig(): Promise<GoogleLoginConfig> {
-    const response = await api.get<GoogleLoginConfig>('/auth/google/config', { authMode: 'public' });
-    return response.data;
-  },
-
-  async loginWithGoogle(data: GoogleLoginRequest): Promise<LoginResponse> {
-    const response = await api.post<LoginResponse>('/auth/google', data, { authMode: 'public' });
-    return response.data;
-  },
-
-  async getCurrentUser(): Promise<User> {
-    const response = await api.get<User>('/auth/me');
-    return response.data;
-  },
-
-  async updateProfile(data: ProfileRequest): Promise<User> {
-    const response = await api.put<User>('/me/profile', data);
-    return response.data;
-  },
-
+  getCampuses: () => api.get<Campus[]>('/auth/campuses', { authMode: 'public' }).then(r => r.data),
+  getGoogleConfig: () => api.get<GoogleLoginConfig>('/auth/google/config', { authMode: 'public' }).then(r => r.data),
+  loginWithGoogle: (data: GoogleLoginRequest) => api.post<LoginResponse>('/auth/google', data, { authMode: 'public' }).then(r => r.data),
+  login: (data: LoginRequest) => api.post<LoginResponse>('/auth/login', data, { authMode: 'public' }).then(r => r.data),
+  register: (data: RegisterRequest) => api.post<RegisterResponse>('/auth/register', data, { authMode: 'public' }).then(r => r.data),
+  getCurrentUser: () => api.get<User>('/auth/me').then(r => r.data),
+  updateProfile: (data: ProfileRequest) => api.put<User>('/me/profile', data).then(r => r.data),
 };

@@ -20,7 +20,7 @@ export function requireMobileUser(user: User): asserts user is MobileUser {
     || typeof user.fullName !== 'string') {
     throw new SessionError('INVALID_SESSION', 'Thông tin phiên đăng nhập không hợp lệ. Vui lòng đăng nhập lại.');
   }
-  if (user.role !== 'STUDENT') {
+  if (user.role !== 'STUDENT' && user.role !== 'GROUP_LEADER') {
     throw new SessionError('WEB_ONLY', 'Vui lòng dùng phiên bản Web');
   }
   if (user.status !== 'ACTIVE') {

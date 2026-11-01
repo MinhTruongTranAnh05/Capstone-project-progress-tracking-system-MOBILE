@@ -5,11 +5,11 @@ import { Button, ui } from './FormationUI';
 import { useAuth } from '@/contexts/AuthContext';
 import { authService } from '@/services/authService';
 import { getErrorMessage, SessionError } from '@/services/apiError';
-import type { GoogleLoginConfig } from '@/types/auth';
+import type { Campus, GoogleLoginConfig } from '@/types/auth';
 import { colors } from '@/constants/colors';
 import axios from 'axios';
 
-export function GoogleAuthSection() {
+export function GoogleAuthSection({ campus }: { campus?: Campus }) {
   const { loginWithGoogle } = useAuth();
   const [settings, setSettings] = useState<GoogleLoginConfig | null>(null);
   const [loading, setLoading] = useState(true);
@@ -28,8 +28,8 @@ export function GoogleAuthSection() {
     {loading ? <><ActivityIndicator color={colors.primary} /><Text style={ui.text}>Đang kiểm tra đăng nhập Google...</Text></>
       : configError ? <><Text accessibilityRole="alert" style={ui.error}>{configError}</Text><Button title="Thử lại" secondary onPress={() => void load()} /></>
       : settings?.enabled && settings.clientId ? <GoogleSignInButton clientId={process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID || settings.clientId}
-          disabled={busy} onBusyChange={value => { if (mounted.current) { setBusy(value); if (value) setError(''); } }}
-          onCredential={async idToken => { await loginWithGoogle({ idToken }); }}
+          disabled={busy || !campus} onBusyChange={value => { if (mounted.current) { setBusy(value); if (value) setError(''); } }}
+          onCredential={async idToken => { if (!campus) throw new Error('Vui lòng chọn cơ sở.'); await loginWithGoogle({ idToken, campus }); }}
           onError={error => {
             if (!mounted.current) return;
             setError(axios.isAxiosError(error) || error instanceof SessionError ? getErrorMessage(error) : error instanceof Error ? error.message : 'Đăng nhập Google thất bại. Vui lòng thử lại.');
@@ -37,6 +37,6 @@ export function GoogleAuthSection() {
       : <Text style={ui.notice}>Đăng nhập Google chưa được bật trên hệ thống. Vui lòng liên hệ quản trị viên.</Text>}
     {busy && <ActivityIndicator color={colors.primary} />}
     {!!error && <Text accessibilityRole="alert" style={ui.error}>{error}</Text>}
-    <Text style={ui.text}>Dùng email Google cá nhân đã có trong danh sách import của phòng đào tạo. Không dùng tài khoản @fpt.edu.vn. Không có chức năng tự đăng ký tài khoản.</Text>
+    <Text style={ui.text}>Chọn cơ sở và dùng tài khoản Google Workspace của trường đã được cấp. Tài khoản email cá nhân cần đăng ký và được quản trị viên phê duyệt trước.</Text>
   </View>;
 }

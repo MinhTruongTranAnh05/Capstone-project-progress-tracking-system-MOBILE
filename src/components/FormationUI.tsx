@@ -39,9 +39,9 @@ export function Button({ title, onPress, disabled = false, busy = false, seconda
     {busy ? <ActivityIndicator color={secondary ? colors.primary : colors.textLight} /> : <Text style={[ui.buttonText, secondary && { color: tint ?? colors.text }]}>{title}</Text>}
   </TouchableOpacity>;
 }
-export function Field({ label, ...props }: TextInputProps & { label: string }) {
+export function Field({ label, error, ...props }: TextInputProps & { label: string; error?: string }) {
   return <View style={{ gap: 6 }}><Text style={ui.label}>{label}</Text><TextInput accessibilityLabel={label} placeholderTextColor={colors.textMuted}
-    {...props} style={[ui.input, props.multiline && { minHeight: 90, textAlignVertical: 'top' }, props.style]} /></View>;
+    {...props} style={[ui.input, props.multiline && { minHeight: 90, textAlignVertical: 'top' }, props.style]} />{error && <Text accessibilityRole="alert" style={ui.error}>{error}</Text>}</View>;
 }
 export function ConfirmButton({ title, message, onConfirm, disabled = false, busy = false, tone, secondary = true }: { title: string; message: string; onConfirm: () => void; disabled?: boolean; busy?: boolean; tone?: 'success' | 'danger'; secondary?: boolean }) {
   const [open, setOpen] = useState(false);

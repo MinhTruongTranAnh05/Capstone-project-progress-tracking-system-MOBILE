@@ -21,7 +21,7 @@ function deferred() {
   return { promise, resolve };
 }
 
-for (const role of ['STUDENT']) {
+for (const role of ['STUDENT', 'GROUP_LEADER']) {
   test(`accepts an active ${role} and persists a verified session`, async () => {
     const h = createHarness();
     await signIn(h, { ...student, role });
@@ -31,7 +31,7 @@ for (const role of ['STUDENT']) {
 }
 
 test('denies Admin/Coordinator and any unknown role before credentials are stored', async () => {
-  for (const role of ['ADMIN', 'LECTURER', 'GROUP_LEADER', 'unsupported-role']) {
+  for (const role of ['ADMIN', 'INSTRUCTOR', 'COUNCIL', 'LECTURER', 'unsupported-role']) {
     const h = createHarness();
     await assert.rejects(signIn(h, { ...student, role }), { code: 'WEB_ONLY', message: 'Vui lòng dùng phiên bản Web' });
     assert.equal(h.store.getSnapshot().user, null);
@@ -185,4 +185,28 @@ test('malformed login responses cannot create a usable session', async () => {
   await assert.rejects(signIn(h, null), { code: 'INVALID_SESSION' });
   await assert.rejects(signIn(h, student, ''), { code: 'INVALID_SESSION' });
   assert.equal(h.disk.token, null);
+});
+
+test('Google sends campus; registration sends student fields and cannot authenticate a pending account', async () => {
+  const h = createHarness();
+  const calls = [];
+  h.api.defaults.adapter = async config => {
+    assert.equal(config.headers.has('Authorization'), false);
+    calls.push([config.url, JSON.parse(config.data)]);
+    return response(config, { status: 'PENDING_APPROVAL' });
+  };
+  await h.authService.loginWithGoogle({ idToken: 'credential', campus: 'HO_CHI_MINH' });
+  await h.authService.register({ email: student.email, password: 'password-123', fullName: 'Student', studentCode: 'SE160368', campus: 'HA_NOI' });
+  assert.deepEqual(calls[0], ['/auth/google', { idToken: 'credential', campus: 'HO_CHI_MINH' }]);
+  assert.equal(calls[1][0], '/auth/register');
+  assert.equal(h.store.getSnapshot().token, null);
+});
+
+test('registration validates campus, MSSV, password confirmation and consent', () => {
+  const { registrationSchema } = createHarness().load('src/core/validation/auth.ts');
+  const data = { email: student.email, fullName: 'Student', studentCode: 'se160368', password: 'password-123', confirmPassword: 'password-123', campus: 'HA_NOI', agreeTerms: true };
+  assert.equal(registrationSchema.parse(data).studentCode, 'SE160368');
+  for (const patch of [{ campus: undefined }, { studentCode: 'abc' }, { agreeTerms: false }, { confirmPassword: 'different' }, { password: 'short' }]) {
+    assert.equal(registrationSchema.safeParse({ ...data, ...patch }).success, false);
+  }
 });
