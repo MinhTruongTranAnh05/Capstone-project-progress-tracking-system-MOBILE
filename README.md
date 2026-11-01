@@ -1,66 +1,70 @@
-# MatchPoint FPT Mobile — Team Formation v2.9
+# MatchPoint FPT Mobile
 
-Ứng dụng Expo / React Native / TypeScript dành cho sinh viên và trưởng nhóm. Giao diện, nhãn và điều hướng tham chiếu FE v2.9; API lấy từ BE `feat/team-formation-v2.8` (commit `e0d89ec`). **BE main cũ không tương thích.**
+Ứng dụng sinh viên ghép nhóm đồ án, đã có sẵn và được chỉnh sửa tiếp trên nhánh `align-with-web-be`. Backend và Frontend chỉ được đọc để đối chiếu.
 
-## Chức năng
+## Contract đang sử dụng
 
-- Google login theo danh sách sinh viên đã import; không tự đăng ký hoặc chọn campus.
-- Học kỳ/môn học, điều kiện, deadline và nhóm hiện tại từ `/me/semesters`, kể cả nhóm đầy/khóa.
-- Tạo/tìm nhóm, tìm sinh viên theo tên/kỹ năng; xem hồ sơ theo quyền riêng tư.
-- Apply/Invite/Accept/Reject/Withdraw và Like; tối đa 3 Apply đang chờ.
-- Giới hạn 5 thành viên gồm trưởng nhóm; khóa/mở khóa, sửa tên/kỹ năng và quản lý thành viên.
-- Rời nhóm, duyệt/thu hồi/khiếu nại; đề nghị/nhận/từ chối chuyển trưởng nhóm, có chuyển kèm rời nhóm.
-- Cập nhật hồ sơ và private mode; thông báo phân trang, đánh dấu đã đọc.
-- Chặn staff và role lạ; xác minh phiên qua BE, xử lý 401, xóa query cache khi đổi tài khoản và bỏ phản hồi phiên cũ.
+- Theo quyết định mới nhất của người dùng: **BE triển khai v2.9**, không phải BE `main` cũ trong workspace.
+- API: `https://quick-collecting-studies-apparently.trycloudflare.com/api/v1`.
+- Swagger: `https://quick-collecting-studies-apparently.trycloudflare.com/swagger-ui/index.html`.
+- Bằng chứng contract đã đọc: [deployed-v29.json](docs/contracts/deployed-v29.json). Tunnel có thể thay đổi; cần xác nhận lại trước khi kiểm thử thật.
+- Web tham chiếu: FE `origin/main` đang lưu cục bộ, commit `7078a14`, đọc bằng `git show`, không checkout hay chỉnh sửa FE.
 
-Leader là cờ membership, không phải role tài khoản. Admin/Moderator sử dụng Web. Các module đăng ký, đề tài, tiến độ, tài liệu và lịch của bản cũ đã được gỡ theo phạm vi v2.9.
+## Vai trò và giới hạn
 
-## Chạy ứng dụng
+- Mobile chỉ dành cho Sinh viên và Trưởng nhóm. Cả hai có account role `STUDENT`; Trưởng nhóm xác định từ `leaderId` **và** membership `leader` của nhóm đã xác minh.
+- Người điều phối trong BE là account `LECTURER` được gán cho học kỳ qua `moderatorId`. `ADMIN` có quyền thực hiện các tác vụ điều phối tương ứng. Không ánh xạ Người điều phối thành `COUNCIL`.
+- Không có portal quản trị/điều phối trên mobile. Không có luồng đặt/hủy lịch hẹn, vai trò hoặc giao diện Instructor.
+- Nhóm hợp lệ **3–5 người**, tối đa 5 bao gồm Trưởng nhóm. Quy tắc dùng constants chung và kiểm tra lại từ server.
+
+## Chức năng hiện có
+
+- Google sign-in cho tài khoản có trong danh sách nhà trường; kiểm tra lại `/auth/me`, trạng thái và vai trò trước khi mở màn hình đăng nhập thành công.
+- Chọn học kỳ/môn học từ `/me/semesters`; xác minh membership/scope khi lấy nhóm. Known group ID lưu theo user chỉ là gợi ý chọn scope, không cấp quyền từ cache và không đoán nhóm từ danh sách tuyển.
+- Tạo nhóm, tìm nhóm/sinh viên, Apply/Invite, chấp nhận/từ chối/thu hồi, Like tư vấn. Theo v2.9, chấp nhận Apply hoặc Invite qua `/requests/{id}/accept` làm sinh viên gia nhập ngay; không dùng quy trình approve → invite của BE cũ.
+- Khóa/mở khóa, mời/xóa thành viên, rời nhóm/yêu cầu/thu hồi/khiếu nại, chuyển Trưởng nhóm theo quyền và phase thực tế.
+- Hồ sơ phone/skills/strengths/weaknesses/profilePrivate theo BE; dữ liệu riêng tư hiển thị theo `full` từ server. Không gửi field `bio` của BE cũ.
+- Thông báo phân trang, chưa đọc, đánh dấu đọc, retry và refresh. Hồ sơ/thông báo không bị chặn hiển thị chỉ vì nhóm tải lỗi.
+- Bảng màu, ảnh nền và shell responsive hiện có được giữ lại; menu dùng một định nghĩa chung.
+
+## Chức năng bị BE chặn
+
+BE triển khai không công bố endpoint cho tự đăng ký, danh mục đề tài, chọn/đề xuất đề tài, báo cáo tiến độ tuần hoặc lịch tư vấn/hướng dẫn đồ án. Các màn tương ứng thông báo rõ chưa khả dụng, không tạo dữ liệu demo và không giả thành công.
+
+Màn thông tin tạo tài khoản dùng cùng ảnh nền/card trắng/banner cam với Web; giải thích việc nhà trường cấp tài khoản. Không có form thu thập mật khẩu hoặc nút gửi tới endpoint không tồn tại. Register.jsx của FE tham chiếu hiện bị comment và không được route.
+
+Chi tiết endpoint, quyền và trạng thái: [gap-report.md](docs/gap-report.md), [feature-parity-matrix.md](docs/feature-parity-matrix.md), [verification.md](docs/verification.md). Hạn lập nhóm không được dùng thay cho lịch hướng dẫn. Mọi lỗi/denial từ BE được giữ nguyên thông điệp; trạng thái chưa thử không được ghi thành 403/404 giả.
+
+## Chạy và kiểm tra
 
 ```sh
 npm install
-# Copy .env.example thành .env, đặt EXPO_PUBLIC_API_URL trỏ tới BE v2.9.
 npm start
-npm run android
 npm run web
-```
-
-Base URL cần có `/api/v1`:
-
-- Android emulator: `http://10.0.2.2:8081/api/v1`
-- iOS simulator: `http://localhost:8081/api/v1`
-- Thiết bị thật: `http://<IP-LAN-máy-chạy-BE>:8081/api/v1`
-
-Thay port theo BE thực tế. Không commit `.env` hoặc credential.
-
-Google native cần development build chứa `@react-native-google-signin/google-signin`; Expo Go không có module này. Android OAuth client phải khớp package `com.fpt.capstone.mobile` và SHA-1 của bản cài. iOS cần `EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID` và rebuild. Web dùng clientId từ `/auth/google/config`, hoặc override `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID`; origin của Web cần nằm trong cấu hình Google OAuth. Sinh viên phải đăng nhập đúng email Google trong roster, không dùng `@fpt.edu.vn`.
-
-## Kiểm tra
-
-```sh
-npm test
+npm run android
+npm run lint
 npm run typecheck
-npx expo export --platform web --output-dir .expo/v29-web
-npx expo export --platform android --output-dir .expo/v29-android
+npm test
+npm run build
 ```
 
-Tests dùng HTTP/storage adapter trong Node, không gửi request tới BE và không thêm mock vào app. Chưa thay thế test Google thật, quyền trên BE thật hoặc thao tác thiết bị. Hiện chưa cấu hình ESLint riêng; typecheck bật kiểm tra import/biến không dùng.
+Copy `.env.example` thành `.env` nếu chưa có. `EXPO_PUBLIC_API_URL` phải chứa `/api/v1`. API base URL không hard-code trong code runtime. Bản làm việc này đã đổi riêng giá trị đó sang test tunnel đã được cung cấp; URL cũ lưu trong `.expo/api-url-before-alignment.txt` (không commit).
 
-## Cấu trúc
+Google native cần development build có module Google Sign-In, không hoạt động trong Expo Go. BE trả Google Web client ID qua `/auth/google/config`; có thể cấu hình `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID` và `EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID` theo OAuth app đã được cấp. Origin Web/native client phải được cấu hình hợp lệ; không bỏ qua lỗi OAuth hoặc đưa token vào chat/log.
 
-```text
-app/(auth)/             Đăng nhập Google
-app/(tabs)/             Tổng quan, thành viên, đơn Apply, quản lý, hồ sơ, thông báo
-app/(groups)/           Tạo nhóm và đường dẫn nhóm
-src/components/         UI dùng chung, trạng thái và Google Sign-In
-src/contexts/           Auth và học kỳ/môn/nhóm đang chọn
-src/screens/            Màn hình chia sẻ giữa các route
-src/services/           API, session, storage và xử lý lỗi
-src/types/              Contract BE v2.9
-src/constants/          Theme, nhãn và quy tắc nhóm
-scripts/                Tests xác thực và contract/permission
-```
+`npm run build` export Web/Android/iOS vào `.expo/alignment-build`; đây là bundle JS/Hermes, **không phải APK/IPA**. Kiểm tra thiết bị/native build và đăng nhập thật là bước riêng. `npm test` dùng adapter HTTP/storage trong Node và contract đã chụp, không ghi vào DB thật.
 
-Chi tiết phiên bản, API, quy tắc và phần chưa kiểm chứng: [V29_MIGRATION.md](docs/V29_MIGRATION.md). Các tài liệu đợt A/B chỉ được giữ làm lịch sử.
+## Cấu trúc và rollback
 
-Đối chiếu từng màn với source FE, cách chuyển sidebar/cột nội dung sang điện thoại và giới hạn kiểm chứng giao diện: [WEB_UI_PARITY.md](docs/WEB_UI_PARITY.md).
+- `app/`: Expo route wrappers.
+- `src/features/<feature>/presentation`: màn hình/context; `domain`: models/quy tắc; `data`: API/recovery.
+- `src/core/http`, `src/core/auth`, `src/core/ui`, `src/core/validation`: API client, session store, UI primitives, schemas chung.
+- Các path cũ trong `src/services`, `src/types`, `src/contexts`, `src/screens` và `FormationUI` là re-export mỏng giữ import tương thích; không có bản sao logic/API.
+- Palette/tokens tại `src/constants/colors.ts`, quy mô nhóm tại `src/constants/group.ts`.
+- Snapshot trước khi sửa: commit **`90eed1b`**. Các thay đổi từng vùng được commit riêng. Không reset hoặc ghi đè thay đổi có sẵn trong BE/FE.
+
+## Tình trạng kiểm thử thật
+
+Chưa có đăng nhập OAuth hoặc ghi dữ liệu BE trong đợt này. Computer Use bị dừng vì không xác định chắc chắn URL hiện tại của Chrome; không tiếp tục tự động hóa trình duyệt trong turn đó. Kiểm tra ảnh render và hành vi thực tế chưa được ký duyệt.
+
+Chỉ dùng dữ liệu `TEST-` trên test DB được cho phép; không sửa bản ghi khác. Hai tài khoản được cung cấp cần người dùng đăng nhập Google trực tiếp. Luồng cần 3+ thành viên ghi **not tested**. Tài khoản staff không có và cũng không thuộc phạm vi mobile.

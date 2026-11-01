@@ -1,5 +1,24 @@
 # Phase 2 progress — 2026-11-01
 
+## Current status after lecturer review and explicit retarget
+
+The user selected **the deployed v2.9 BE**. The earlier deployment-mismatch pause below is historical and resolved by that decision. The checked-out BE remains untouched and is no longer the implementation contract.
+
+- `208e025`: revised gap report/parity matrix before code changes, including exact Coordinator mapping and absent required features.
+- `52b84fc`: deployed Google/profile contract, Web-styled account-access UI, exact server errors; unsupported campus/password/register writes removed from mobile runtime. Earlier work remains in rollback history.
+- `7c8c19f`: canonical v2.9 API/models/rules, fresh membership/scope verification and user-scoped known-group hints; existing compatible workflows preserved.
+- `af9e06f`: common menu/route definitions, independent profile/notification rendering, truthful unavailable states for lecturer-requested features.
+- `aafd31f`: separates core UI/HTTP/session code from feature presentation/domain/data, retains thin old import paths and centralizes validation. State-reset and compiler-lint errors are fixed without disabling the compiler rules.
+- `52f1f52`: adds Expo-compatible lint/export scripts and removes unused dependencies.
+
+**Before Phase 3 live checks:** self-registration, topic catalog, topic selection/proposals, weekly progress and advisory/guidance schedule are **blocked by BE** (no advertised endpoint/matching controller). Booking and staff portals are excluded. Four unavailable-state screens do not represent fake feature completion. Coordinator is LECTURER assigned to a semester, with ADMIN fallback; COUNCIL is absent in deployment. Max group size stays 5.
+
+Latest checks: 28 tests and typecheck pass; ESLint permits zero warnings; Web/Android/iOS exports pass. Exports are not APK/IPA builds. Real OAuth/read/write and visual/device QA remain not tested. Computer Use stopped because Chrome's current URL could not be determined confidently enough to enforce policy. No further browser control or live writes were attempted. See [verification.md](verification.md), [feature-parity-matrix.md](feature-parity-matrix.md) and the current section of [gap-report.md](gap-report.md).
+
+---
+
+## Historical checkpoints before retarget
+
 Scope: STUDENT/GROUP_LEADER only. Backend and Frontend remain read-only. Instructor booking/appointments are excluded following the user's latest instruction. No Instructor/Admin portals or BE-only backlog will be built.
 
 ## Completed checkpoints
