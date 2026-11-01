@@ -1,4 +1,38 @@
-# Mobile parity gap report — Phase 1
+# Mobile parity gap report — current target: deployed v2.9
+
+## Lecturer review and retarget decision — 2026-11-01
+
+**This section supersedes the historical Phase 1 target and removal list below.** The user explicitly chose the deployed v2.9 BE after the deployment mismatch was identified. Existing commits/snapshot are retained; incompatible checked-out-BE adapters will not remain in active mobile flows. BE and FE repositories stay read-only.
+
+Current API target: `https://quick-collecting-studies-apparently.trycloudflare.com/api/v1`. Public `/v3/api-docs` rechecked successfully with HTTP 200 on 2026-11-01: **Team Formation API**, 76 paths. Matching source reference is locally cached BE `origin/feat/team-formation-v2.8` (`e0d89ec`), read via `git show`; web design reference is locally cached FE `origin/main` (`7078a14`), also read without checkout. The old checked-out BE/FE are historical comparison sources, not the implementation contract now.
+
+Mobile serves Student and Leader only. The deployed account role is **STUDENT** for both; Leader is verified using group membership and leaderId. Staff accounts are refused. **Người điều phối = LECTURER assigned through semester.moderatorId**, with ADMIN as an authorized fallback. COUNCIL is not a deployed role. Evidence: deployed UserResponse.role enum (ADMIN/LECTURER/STUDENT), cached `semester/Access.java:isModerator`, `user/Role.java`, `team/ModerationController.java`. No Instructor UI, role aliases, booking logic or staff portals will be added. LECTURER is retained only as a wire value for the coordinator account, not relabeled Instructor.
+
+### Required-feature permission re-audit
+
+All paths are relative to `/api/v1`. “Absent” means not advertised by the deployed OpenAPI and no controller in its matching cached source; **it is not an observed authenticated 403/404**. No signed-in account or test write has been used for this re-audit.
+
+| Area | Web behavior | Mobile current / required change | Difference / exact permission evidence | Severity (High/Med/Low) | Fix / status |
+|---|---|---|---|---|---|
+| Topic catalog | Latest active web has no catalog page/API; older checkout used GET `/topics` | Lecturer requires catalog | Deployed GET `/topics`, `/topics/{id}` absent for Student and Leader | High | **blocked by BE**: no catalog endpoint. Keep honest availability messaging; no demo topics |
+| Topic selection / proposal | Latest web has no topic write; older checkout attempted PUT group topicId | Lecturer requires selection | Deployed PUT `/groups/{groupId}` accepts name/wantedSkills only; POST `/groups/{groupId}/topic-proposals` and topic selection endpoints absent | High | **blocked by BE** for both roles. Do not smuggle topicId into group update or use old approval APIs |
+| Weekly progress | Latest web has no progress page/API; older checkout used wrong field names | Lecturer requires report/history | Deployed GET/POST `/groups/{groupId}/progress`, PUT `/progress/{id}` absent for both roles | High | **blocked by BE**: no report/task storage endpoints. No fabricated report or local-only success |
+| Advisory/guidance schedule | Latest web has no such schedule; older checkout had appointment slots | Lecturer requires advisory view, explicitly excludes bookings | No guidance/advisory timetable endpoint in deployment or matching source. Subjects/scopes expose formation deadlines, not guidance appointments | High | **blocked by BE** for both roles. Do not reinterpret deadlines as timetable or call slot/booking routes |
+| Appointments with Instructor | Present only in older web checkout | Excluded by lecturer | Slots/bookings are absent from deployment and out of approved scope | High | Remove all mobile appointment/Instructor UI and logic; no create/cancel/book controls |
+| Registration | Latest FE Register.jsx is commented out and `/register` is not routed | Existing newly added working form targets old BE | Deployed POST `/auth/register` and GET `/auth/campuses` absent; students are provisioned by roster import | High | Redesign account-access page with existing web background/white card/orange banner; clearly explain school provisioning. **Account creation blocked by BE**; no collection/submission of credentials |
+| Auth | Latest web uses Google for students | Previous commit added campus/password | Deployed POST `/auth/google` requires only idToken. `/auth/login` is a staff path; Leader is not global role | High | Retain Google/native/session improvements, remove campus/registration/password calls from student runtime and reject staff |
+| Formation and group recovery | Latest web uses `/me/semesters` then group detail | Existing v2.9 screens largely match | Keep subject/scope APIs; remove old-BE two-stage approve/vote/member-ID assumptions. Verify membership on every restored group and persist user-scoped known ID only as a hint | High | Continue v2.9 implementation; fail closed on mismatched membership, never select a recruiting group as own |
+| Apply/invite/vote | Latest web approves or accepts via requests | Previous old-BE adapters require approve→invite→accept and SUPPORT/OPPOSE | Deployed POST `/requests/{id}/accept` immediately joins on accepted Apply or Invite; advisory voting uses PUT/DELETE Like | High | Follow deployed behavior; preserve confirmations, capacity/expiry and privacy guards. The old two-stage requirement is superseded by actual target |
+| Profile | Latest web uses strengths/weaknesses/skills/phone/private | Previous commit uses bio/skills | Deployed ProfileRequest has phone≤20, skills/strengths/weaknesses≤1000, profilePrivate; **bio not exposed** | High | Restore compatible profile editor and validation; preserve field errors/privacy rules and independent skills fields |
+| Size/navigation | Latest web has formation menus and 3–5 members | Keep existing responsive shell/palette | Never use 6; centralize size/labels. Required unavailable features must remain visibly unavailable rather than pretending parity | Med | Align menu order/labels, allow profile/notifications despite group load failure, preserve mobile touch targets |
+
+The older checked-out BE's topic/proposal/progress endpoints **cannot be used against this deployment**. For historical reference only: its SecurityConfig blocks STUDENT reads outside its formation paths; GROUP_LEADER can browse topics and own-group reports and submit proposals, but proposals require a supervisor (`The group needs a supervisor before it can submit topics for pre-review`). Its PUT group assignment is ADMIN-only. These are source-derived restrictions, not live denial responses. This contract also contains the obsolete Instructor workflow, so it is not a safe replacement for the selected deployment.
+
+Current scope excludes staff portals, Instructor/booking, reviews, defense and reports. Four required capstone features plus account creation are recorded as **blocked by BE** until the BE team exposes them. The parity matrix records implementation and runtime verification separately. No unsupported flow will be labeled complete.
+
+---
+
+# Historical Phase 1 audit — checked-out BE target (superseded)
 
 Audit date: 2026-11-01 (Asia/Saigon). **Application code unchanged. Phase 2 has not started.**
 
