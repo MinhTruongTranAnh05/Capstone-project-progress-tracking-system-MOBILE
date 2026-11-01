@@ -5,7 +5,6 @@ import { storage } from './storage';
 export interface SessionStorage {
   getToken(): Promise<string | null>;
   setToken(token: string): Promise<void>;
-  setUser(user: User): Promise<void>;
   clear(): Promise<void>;
 }
 
@@ -21,13 +20,11 @@ export function requireMobileUser(user: User): asserts user is MobileUser {
     || typeof user.fullName !== 'string') {
     throw new SessionError('INVALID_SESSION', 'Thông tin phiên đăng nhập không hợp lệ. Vui lòng đăng nhập lại.');
   }
-  if (user.role !== 'STUDENT' && user.role !== 'GROUP_LEADER') {
+  if (user.role !== 'STUDENT') {
     throw new SessionError('WEB_ONLY', 'Vui lòng dùng phiên bản Web');
   }
   if (user.status !== 'ACTIVE') {
-    throw new SessionError('ACCOUNT_INACTIVE', user.status === 'PENDING_APPROVAL'
-      ? 'Tài khoản đang chờ quản trị viên phê duyệt.'
-      : 'Tài khoản chưa hoạt động. Vui lòng liên hệ quản trị viên.');
+    throw new SessionError('ACCOUNT_INACTIVE', 'Tài khoản chưa hoạt động. Vui lòng liên hệ quản trị viên.');
   }
 }
 
@@ -82,7 +79,6 @@ export class SessionStore {
       await this.enqueue(async () => {
         if (!this.isCurrent(revision)) return;
         await this.disk.setToken(session.accessToken);
-        await this.disk.setUser(session.user);
       });
     } catch {
       await this.invalidate(revision, 'Không thể lưu phiên đăng nhập. Vui lòng thử lại.');

@@ -9,6 +9,7 @@ import { SessionStatus } from '@/components/SessionStatus';
 import { SessionError } from '@/services/apiError';
 import { colors } from '@/constants/colors';
 import { requireOptionalNativeModule } from 'expo';
+import { FormationProvider } from '@/contexts/FormationContext';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -61,8 +62,10 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
+          <FormationProvider>
           <StatusBar style="dark" />
           <RootNavigator />
+          </FormationProvider>
         </AuthProvider>
       </QueryClientProvider>
     </SafeAreaProvider>

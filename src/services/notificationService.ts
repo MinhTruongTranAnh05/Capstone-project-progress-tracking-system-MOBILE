@@ -1,15 +1,13 @@
 import api from './api';
-import { sessionStore } from './sessionStore';
-import { SessionError } from './apiError';
-import { config } from '@/constants/config';
+import type { Notification, Page } from '@/types/models';
 
 export const notificationService = {
   async getNotifications(params?: {
     unreadOnly?: boolean;
     page?: number;
     size?: number;
-  }): Promise<any> {
-    const response = await api.get('/notifications', { params });
+  }, signal?: AbortSignal): Promise<Page<Notification>> {
+    const response = await api.get<Page<Notification>>('/notifications', { params, signal });
     return response.data;
   },
 
@@ -18,21 +16,15 @@ export const notificationService = {
     return response.data;
   },
 
-  async markAsRead(id: string): Promise<any> {
-    const response = await api.put(`/notifications/${id}/read`);
+  async markAsRead(id: string): Promise<Notification> {
+    const response = await api.put<Notification>(`/notifications/${encodeURIComponent(id)}/read`);
     return response.data;
   },
 
-  async markAllAsRead(): Promise<any> {
-    const response = await api.put('/notifications/read-all');
+  async markAllAsRead(): Promise<{ updated: number }> {
+    const response = await api.put<{ updated: number }>('/notifications/read-all');
     return response.data;
   },
 
-  async getSseUrl(): Promise<string> {
-    const { token, user } = sessionStore.getSnapshot();
-    if (!token || !user) throw new SessionError('UNAUTHORIZED', 'Vui lòng đăng nhập lại.');
-    const apiUrl = config.API_URL;
-    return `${apiUrl}/notifications/stream?access_token=${encodeURIComponent(token)}`;
-  },
 };
 

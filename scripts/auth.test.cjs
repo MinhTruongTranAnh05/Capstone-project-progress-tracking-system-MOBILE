@@ -1,47 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const fs = require('node:fs');
-const path = require('node:path');
-const ts = require('typescript');
 const axios = require('axios');
-
-const root = path.resolve(__dirname, '..');
-
-// Execute the real TS services with an in-memory storage boundary, without loading native Expo modules.
-function createHarness(initialToken = null) {
-  const disk = {
-    token: initialToken, user: null, clears: 0,
-    async getToken() { return this.token; },
-    async setToken(token) { this.token = token; },
-    async setUser(user) { this.user = user; },
-    async clear() { this.token = null; this.user = null; this.clears++; },
-  };
-  const modules = new Map();
-  function load(filename) {
-    filename = path.resolve(root, filename);
-    if (modules.has(filename)) return modules.get(filename).exports;
-    if (filename === path.join(root, 'src/services/storage.ts')) return { storage: disk };
-    if (filename === path.join(root, 'src/constants/config.ts')) {
-      return { config: { API_URL: 'https://api.example.test/api/v1', API_TIMEOUT: 15000 } };
-    }
-    const module = { exports: {} };
-    modules.set(filename, module);
-    const source = ts.transpileModule(fs.readFileSync(filename, 'utf8'), {
-      compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, esModuleInterop: true },
-    }).outputText;
-    const localRequire = (name) => {
-      if (name.startsWith('@/')) return load(path.join(root, 'src', name.slice(2)) + '.ts');
-      if (name.startsWith('.')) return load(path.resolve(path.dirname(filename), name) + '.ts');
-      return require(name);
-    };
-    new Function('require', 'module', 'exports', source)(localRequire, module, module.exports);
-    return module.exports;
-  }
-  const { sessionStore: store } = load('src/services/sessionStore.ts');
-  const api = load('src/services/api.ts').default;
-  const { authService } = load('src/services/authService.ts');
-  return { store, api, disk, authService, load };
-}
+const { createHarness } = require('./testHarness.cjs');
 
 const student = { id: 'student-1', email: 'student@example.test', fullName: 'Sinh viên', role: 'STUDENT', status: 'ACTIVE', campus: 'HO_CHI_MINH' };
 function response(config, data) { return { config, data, status: 200, statusText: 'OK', headers: {} }; }
@@ -61,7 +21,7 @@ function deferred() {
   return { promise, resolve };
 }
 
-for (const role of ['STUDENT', 'GROUP_LEADER']) {
+for (const role of ['STUDENT']) {
   test(`accepts an active ${role} and persists a verified session`, async () => {
     const h = createHarness();
     await signIn(h, { ...student, role });
@@ -71,7 +31,7 @@ for (const role of ['STUDENT', 'GROUP_LEADER']) {
 }
 
 test('denies Admin/Coordinator and any unknown role before credentials are stored', async () => {
-  for (const role of ['ADMIN', 'COORDINATOR', 'unsupported-role']) {
+  for (const role of ['ADMIN', 'LECTURER', 'GROUP_LEADER', 'unsupported-role']) {
     const h = createHarness();
     await assert.rejects(signIn(h, { ...student, role }), { code: 'WEB_ONLY', message: 'Vui lòng dùng phiên bản Web' });
     assert.equal(h.store.getSnapshot().user, null);
@@ -145,18 +105,15 @@ test('public auth requests omit Bearer credentials and their 401 cannot expire a
     assert.equal(config.headers.has('Authorization'), false);
     throw httpError(config, 401, 'INVALID_CREDENTIALS');
   };
-  await assert.rejects(h.authService.login({ email: student.email, password: 'incorrect' }));
-  await assert.rejects(h.authService.loginWithGoogle({ idToken: 'invalid', campus: student.campus }));
-  assert.deepEqual(requests, ['/auth/login', '/auth/google']);
+  await assert.rejects(h.authService.loginWithGoogle({ idToken: 'invalid' }));
+  assert.deepEqual(requests, ['/auth/google']);
   assert.equal(h.store.getSnapshot().token, 'token-1');
 });
 
-test('email and Google login services never persist an unapproved response themselves', async () => {
+test('Google login service never persists an unapproved response itself', async () => {
   const h = createHarness();
   h.api.defaults.adapter = async (config) => response(config, { accessToken: 'staff-token', user: { ...student, role: 'ADMIN' } });
-  const login = await h.authService.login({ email: student.email, password: 'password' });
-  await assert.rejects(h.store.accept(h.store.begin(), login), { code: 'WEB_ONLY' });
-  const google = await h.authService.loginWithGoogle({ idToken: 'google-token', campus: student.campus });
+  const google = await h.authService.loginWithGoogle({ idToken: 'google-token' });
   await assert.rejects(h.store.accept(h.store.begin(), google), { code: 'WEB_ONLY' });
   assert.equal(h.disk.token, null);
   assert.equal(h.disk.user, null);
@@ -215,9 +172,9 @@ test('logout during a delayed disk save cannot resurrect credentials', async () 
   assert.equal(h.disk.user, null);
 });
 
-test('partial storage failure does not authenticate the user or leave a token behind', async () => {
+test('token storage failure does not authenticate the user or leave a token behind', async () => {
   const h = createHarness();
-  h.disk.setUser = async () => { throw new Error('Disk unavailable'); };
+  h.disk.setToken = async token => { h.disk.token = token; throw new Error('Disk unavailable'); };
   await assert.rejects(signIn(h), { code: 'SESSION_STORAGE' });
   assert.equal(h.disk.token, null);
   assert.equal(h.store.getSnapshot().user, null);

@@ -14,7 +14,6 @@ interface AuthContextType {
   sessionNotice: string | null;
   startupError: string | null;
   restoreSession: () => Promise<void>;
-  login: (email: string, password: string) => Promise<void>;
   loginWithGoogle: (data: GoogleLoginRequest) => Promise<void>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
@@ -82,9 +81,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const login = useCallback((email: string, password: string) =>
-    authenticate(() => authService.login({ email, password })), [authenticate]);
-
   const loginWithGoogle = useCallback((data: GoogleLoginRequest) =>
     authenticate(() => authService.loginWithGoogle(data)), [authenticate]);
 
@@ -129,7 +125,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         sessionNotice: session.notice,
         startupError,
         restoreSession,
-        login,
         loginWithGoogle,
         logout,
         refreshUser,

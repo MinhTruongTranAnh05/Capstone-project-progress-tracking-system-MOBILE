@@ -1,5 +1,7 @@
 # Đợt B — Xác thực và phân quyền Mobile
 
+> Ghi nhận lịch sử đợt B. Bản v2.9 đã thay đổi xác thực: sinh viên dùng Google `{idToken}`, Leader là cờ membership; không còn đăng ký/campus/mật khẩu sinh viên. Xem [V29_MIGRATION.md](V29_MIGRATION.md).
+
 ## Hành vi đã triển khai
 
 - Chỉ tài khoản `ACTIVE` có role `STUDENT` hoặc `GROUP_LEADER` được vào các route `(tabs)` và `(groups)`.
