@@ -36,6 +36,8 @@ BE triển khai không công bố endpoint cho tự đăng ký, danh mục đề
 
 Màn thông tin tạo tài khoản dùng cùng ảnh nền/card trắng/banner cam với Web; giải thích việc nhà trường cấp tài khoản. Không có form thu thập mật khẩu hoặc nút gửi tới endpoint không tồn tại. Register.jsx của FE tham chiếu hiện bị comment và không được route.
 
+Theo yêu cầu giao diện mobile, khối giới thiệu màu cam được ẩn trên Android/iOS và Web màn hình nhỏ; chỉ giữ ở Web màn hình rộng. Form đăng nhập/thông tin tài khoản dùng một cột gọn trên mobile.
+
 Chi tiết endpoint, quyền và trạng thái: [gap-report.md](docs/gap-report.md), [feature-parity-matrix.md](docs/feature-parity-matrix.md), [verification.md](docs/verification.md). Hạn lập nhóm không được dùng thay cho lịch hướng dẫn. Mọi lỗi/denial từ BE được giữ nguyên thông điệp; trạng thái chưa thử không được ghi thành 403/404 giả.
 
 ## Chạy và kiểm tra
