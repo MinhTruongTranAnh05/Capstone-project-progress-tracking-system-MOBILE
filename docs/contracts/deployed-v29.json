@@ -1,0 +1,629 @@
+{
+  "auditedOn": "2026-11-01",
+  "source": "https://quick-collecting-studies-apparently.trycloudflare.com/v3/api-docs",
+  "sha256": "ff82bc3034a924816a9cc6bc8d01c5ba17a26d1776f4a62919bab17906bf2159",
+  "pathCount": 76,
+  "paths": {
+    "/api/v1/users/{id}": [
+      "get",
+      "put"
+    ],
+    "/api/v1/users/{id}/password": [
+      "put"
+    ],
+    "/api/v1/subjects/{subjectId}": [
+      "get",
+      "put"
+    ],
+    "/api/v1/semesters/{semester}": [
+      "get",
+      "put",
+      "delete"
+    ],
+    "/api/v1/semesters/{semester}/moderator": [
+      "put"
+    ],
+    "/api/v1/semester-students/{semesterStudentId}": [
+      "put"
+    ],
+    "/api/v1/scopes/{scopeId}/deadline": [
+      "put"
+    ],
+    "/api/v1/requests/{requestId}/like": [
+      "put",
+      "delete"
+    ],
+    "/api/v1/notifications/{id}/read": [
+      "put"
+    ],
+    "/api/v1/notifications/read-all": [
+      "put"
+    ],
+    "/api/v1/me/profile": [
+      "get",
+      "put"
+    ],
+    "/api/v1/majors/{id}": [
+      "put"
+    ],
+    "/api/v1/groups/{groupId}": [
+      "get",
+      "put"
+    ],
+    "/api/v1/enrollments/{enrollmentId}/eligibility": [
+      "put"
+    ],
+    "/api/v1/users/moderators": [
+      "post"
+    ],
+    "/api/v1/subjects/{subjectId}/groups": [
+      "post"
+    ],
+    "/api/v1/semesters": [
+      "get",
+      "post"
+    ],
+    "/api/v1/semesters/{semester}/imports/students": [
+      "post"
+    ],
+    "/api/v1/semesters/{semester}/imports/students/preview": [
+      "post"
+    ],
+    "/api/v1/semesters/{semester}/imports/eligibility": [
+      "post"
+    ],
+    "/api/v1/semesters/{semester}/imports/eligibility/preview": [
+      "post"
+    ],
+    "/api/v1/scopes/{scopeId}/reopen": [
+      "post"
+    ],
+    "/api/v1/scopes/{scopeId}/groups": [
+      "post"
+    ],
+    "/api/v1/scopes/{scopeId}/finalize": [
+      "post"
+    ],
+    "/api/v1/scopes/{scopeId}/extend": [
+      "post"
+    ],
+    "/api/v1/requests/{requestId}/withdraw": [
+      "post"
+    ],
+    "/api/v1/requests/{requestId}/reject": [
+      "post"
+    ],
+    "/api/v1/requests/{requestId}/accept": [
+      "post"
+    ],
+    "/api/v1/moderation/dissolve": [
+      "post"
+    ],
+    "/api/v1/majors": [
+      "get",
+      "post"
+    ],
+    "/api/v1/leave-requests/{requestId}/withdraw": [
+      "post"
+    ],
+    "/api/v1/leave-requests/{requestId}/moderator-decision": [
+      "post"
+    ],
+    "/api/v1/leave-requests/{requestId}/leader-decision": [
+      "post"
+    ],
+    "/api/v1/leave-requests/{requestId}/complaint": [
+      "post"
+    ],
+    "/api/v1/leader-transfers/{transferId}/decline": [
+      "post"
+    ],
+    "/api/v1/leader-transfers/{transferId}/cancel": [
+      "post"
+    ],
+    "/api/v1/leader-transfers/{transferId}/accept": [
+      "post"
+    ],
+    "/api/v1/groups/{groupId}/unlock": [
+      "post"
+    ],
+    "/api/v1/groups/{groupId}/moderation/remove": [
+      "post"
+    ],
+    "/api/v1/groups/{groupId}/moderation/move": [
+      "post"
+    ],
+    "/api/v1/groups/{groupId}/moderation/merge": [
+      "post"
+    ],
+    "/api/v1/groups/{groupId}/moderation/leader": [
+      "post"
+    ],
+    "/api/v1/groups/{groupId}/moderation/add": [
+      "post"
+    ],
+    "/api/v1/groups/{groupId}/lock": [
+      "post"
+    ],
+    "/api/v1/groups/{groupId}/leave": [
+      "post"
+    ],
+    "/api/v1/groups/{groupId}/leader-transfers": [
+      "post"
+    ],
+    "/api/v1/groups/{groupId}/invitations": [
+      "post"
+    ],
+    "/api/v1/groups/{groupId}/applications": [
+      "post"
+    ],
+    "/api/v1/auth/login": [
+      "post"
+    ],
+    "/api/v1/auth/google": [
+      "post"
+    ],
+    "/api/v1/users": [
+      "get"
+    ],
+    "/api/v1/subjects/{subjectId}/open-groups": [
+      "get"
+    ],
+    "/api/v1/subjects/{subjectId}/my-requests": [
+      "get"
+    ],
+    "/api/v1/subjects/{subjectId}/complaints": [
+      "get"
+    ],
+    "/api/v1/subjects/{subjectId}/candidates": [
+      "get"
+    ],
+    "/api/v1/semesters/{semester}/subjects": [
+      "get"
+    ],
+    "/api/v1/semesters/{semester}/students": [
+      "get"
+    ],
+    "/api/v1/semesters/{semester}/statistics": [
+      "get"
+    ],
+    "/api/v1/semesters/{semester}/scopes": [
+      "get"
+    ],
+    "/api/v1/semesters/{semester}/groups": [
+      "get"
+    ],
+    "/api/v1/semesters/{semester}/export": [
+      "get"
+    ],
+    "/api/v1/semesters/{semester}/export-check": [
+      "get"
+    ],
+    "/api/v1/scopes/{scopeId}": [
+      "get"
+    ],
+    "/api/v1/scopes/{scopeId}/finalize-check": [
+      "get"
+    ],
+    "/api/v1/requests/{requestId}": [
+      "get"
+    ],
+    "/api/v1/notifications": [
+      "get"
+    ],
+    "/api/v1/notifications/unread-count": [
+      "get"
+    ],
+    "/api/v1/notifications/stream": [
+      "get"
+    ],
+    "/api/v1/me/semesters": [
+      "get"
+    ],
+    "/api/v1/me/leave-requests": [
+      "get"
+    ],
+    "/api/v1/me/leader-transfers": [
+      "get"
+    ],
+    "/api/v1/groups/{groupId}/requests": [
+      "get"
+    ],
+    "/api/v1/groups/{groupId}/leave-requests": [
+      "get"
+    ],
+    "/api/v1/auth/me": [
+      "get"
+    ],
+    "/api/v1/auth/google/config": [
+      "get"
+    ],
+    "/api/v1/groups/{groupId}/members/{userId}": [
+      "delete"
+    ]
+  },
+  "schemas": {
+    "UserResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "email": {
+          "type": "string"
+        },
+        "fullName": {
+          "type": "string"
+        },
+        "role": {
+          "type": "string",
+          "enum": [
+            "ADMIN",
+            "LECTURER",
+            "STUDENT"
+          ]
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "ACTIVE",
+            "SUSPENDED",
+            "INACTIVE"
+          ]
+        },
+        "avatarUrl": {
+          "type": "string"
+        },
+        "studentCode": {
+          "type": "string"
+        },
+        "phone": {
+          "type": "string"
+        },
+        "skills": {
+          "type": "string"
+        },
+        "strengths": {
+          "type": "string"
+        },
+        "weaknesses": {
+          "type": "string"
+        },
+        "profilePrivate": {
+          "type": "boolean"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "GoogleLoginRequest": {
+      "required": [
+        "idToken"
+      ],
+      "type": "object",
+      "properties": {
+        "idToken": {
+          "type": "string"
+        }
+      }
+    },
+    "ProfileRequest": {
+      "type": "object",
+      "properties": {
+        "phone": {
+          "maxLength": 20,
+          "minLength": 0,
+          "type": "string"
+        },
+        "skills": {
+          "maxLength": 1000,
+          "minLength": 0,
+          "type": "string"
+        },
+        "strengths": {
+          "maxLength": 1000,
+          "minLength": 0,
+          "type": "string"
+        },
+        "weaknesses": {
+          "maxLength": 1000,
+          "minLength": 0,
+          "type": "string"
+        },
+        "profilePrivate": {
+          "type": "boolean"
+        }
+      }
+    },
+    "GroupRequest": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "wantedSkills": {
+          "type": "string"
+        }
+      }
+    },
+    "GroupResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "code": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "wantedSkills": {
+          "type": "string"
+        },
+        "scopeId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "subjectId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "subjectCode": {
+          "type": "string"
+        },
+        "semesterCode": {
+          "type": "string"
+        },
+        "majorCode": {
+          "type": "string"
+        },
+        "majorName": {
+          "type": "string"
+        },
+        "scopePhase": {
+          "type": "string",
+          "enum": [
+            "PREPARING",
+            "OPEN",
+            "LOCKED",
+            "FINALIZED"
+          ]
+        },
+        "size": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "minSize": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "maxSize": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "state": {
+          "type": "string",
+          "enum": [
+            "OPEN",
+            "FULL",
+            "LOCKED",
+            "DISSOLVED"
+          ]
+        },
+        "full": {
+          "type": "boolean"
+        },
+        "locked": {
+          "type": "boolean"
+        },
+        "finalized": {
+          "type": "boolean"
+        },
+        "finalizedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "dissolvedReason": {
+          "type": "string",
+          "enum": [
+            "TOO_SMALL_AT_DEADLINE",
+            "EMPTY",
+            "MODERATOR"
+          ]
+        },
+        "dissolvedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "leaderId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "leaderName": {
+          "type": "string"
+        },
+        "members": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/Member"
+          }
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "JoinRequestResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "APPLY",
+            "INVITE"
+          ]
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "PENDING",
+            "ACCEPTED",
+            "REJECTED",
+            "WITHDRAWN",
+            "EXPIRED",
+            "CANCELLED"
+          ]
+        },
+        "groupId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "groupCode": {
+          "type": "string"
+        },
+        "groupName": {
+          "type": "string"
+        },
+        "student": {
+          "$ref": "#/components/schemas/ProfileView"
+        },
+        "message": {
+          "type": "string"
+        },
+        "rejectReason": {
+          "type": "string"
+        },
+        "cancelReason": {
+          "type": "string",
+          "enum": [
+            "JOINED_ANOTHER_GROUP",
+            "DEADLINE",
+            "INELIGIBLE",
+            "GROUP_DISSOLVED"
+          ]
+        },
+        "createdBy": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "expiresAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "respondedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "likes": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "likedByMe": {
+          "type": "boolean"
+        }
+      }
+    },
+    "MySemester": {
+      "type": "object",
+      "properties": {
+        "semesterCode": {
+          "type": "string"
+        },
+        "semesterName": {
+          "type": "string"
+        },
+        "majorCode": {
+          "type": "string"
+        },
+        "majorName": {
+          "type": "string"
+        },
+        "currentTerm": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "readOnly": {
+          "type": "boolean"
+        },
+        "subjects": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/MySubject"
+          }
+        }
+      }
+    },
+    "MySubject": {
+      "type": "object",
+      "properties": {
+        "subjectId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "code": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "scopeId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "phase": {
+          "type": "string",
+          "enum": [
+            "PREPARING",
+            "OPEN",
+            "LOCKED",
+            "FINALIZED"
+          ]
+        },
+        "deadline": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "canAct": {
+          "type": "boolean"
+        },
+        "eligibility": {
+          "type": "string",
+          "enum": [
+            "UNDECIDED",
+            "ELIGIBLE",
+            "INELIGIBLE"
+          ]
+        },
+        "eligibilityReason": {
+          "type": "string"
+        },
+        "noGroupReason": {
+          "type": "string",
+          "enum": [
+            "GROUP_DISSOLVED",
+            "INELIGIBLE",
+            "REMOVED_BY_MODERATOR",
+            "LEFT_GROUP"
+          ]
+        },
+        "group": {
+          "$ref": "#/components/schemas/MyGroup"
+        }
+      }
+    }
+  }
+}

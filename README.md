@@ -1,176 +1,81 @@
-# Capstone Project Progress Tracking System - Mobile
+# MatchPoint FPT Mobile
 
-Native mobile application for the Capstone Project Progress Tracking System, built with React Native, Expo, and TypeScript.
+Ứng dụng sinh viên ghép nhóm đồ án, đã có sẵn và được chỉnh sửa tiếp trên nhánh `align-with-web-be`. Backend và Frontend chỉ được đọc để đối chiếu.
 
-## Features
+## Contract đang sử dụng
 
-Authentication/session behavior and verification: [Phase B](docs/PHASE_B_AUTH.md).
+- Theo quyết định mới nhất của người dùng: **BE triển khai v2.9**, không phải BE `main` cũ trong workspace.
+- API: `https://quick-collecting-studies-apparently.trycloudflare.com/api/v1`.
+- Swagger: `https://quick-collecting-studies-apparently.trycloudflare.com/swagger-ui/index.html`.
+- Bằng chứng contract đã đọc: [deployed-v29.json](docs/contracts/deployed-v29.json). Tunnel có thể thay đổi; cần xác nhận lại trước khi kiểm thử thật.
+- Web tham chiếu: FE `origin/main` đang lưu cục bộ, commit `7078a14`, đọc bằng `git show`, không checkout hay chỉnh sửa FE.
+- Đã đối chiếu lại bản FE vừa clone: `main`, `7078a14`; chi tiết chênh lệch và các lỗi Web không sao chép nằm trong [frontend-recheck.md](docs/frontend-recheck.md).
 
-- **Authentication**: Login, Register with email/password
-- **Role-based access**: STUDENT, GROUP_LEADER (mobile scope)
-- **Group Management**: Create group, join group, manage members
-- **Topics**: Browse capstone topics; direct selection is awaiting a Backend update
-- **Consultation schedule**: Awaiting the new Backend contract
-- **Progress Tracking**: Submit and view weekly progress reports
-- **Document Management**: Upload and manage project documents
-- **Real-time Notifications**: In-app notifications with SSE
+## Vai trò và giới hạn
 
-## Tech Stack
+- Cập nhật theo xác nhận mới nhất của người dùng: màn login có thêm Email/Mật khẩu cho `ADMIN` và `LECTURER`, gọi POST `/auth/login`. Sau đăng nhập, staff chỉ có màn xác nhận tài khoản/làm mới/đăng xuất; không mở portal quản trị hoặc các màn/API nhóm sinh viên. Quyết định này thay thế việc từ chối toàn bộ staff ở các checkpoint cũ.
+- Các luồng nghiệp vụ nhóm chỉ dành cho Sinh viên và Trưởng nhóm. Cả hai có account role `STUDENT`; Trưởng nhóm xác định từ `leaderId` **và** membership `leader` của nhóm đã xác minh. Staff có phiên đăng nhập/xác nhận tài khoản riêng theo phê duyệt mới.
+- Người điều phối trong BE là account `LECTURER` được gán cho học kỳ qua `moderatorId`. `ADMIN` có quyền thực hiện các tác vụ điều phối tương ứng. Không ánh xạ Người điều phối thành `COUNCIL`.
+- Không có portal quản trị/điều phối trên mobile. Không có luồng đặt/hủy lịch hẹn, vai trò hoặc giao diện Instructor.
+- Nhóm hợp lệ **3–5 người**, tối đa 5 bao gồm Trưởng nhóm. Quy tắc dùng constants chung và kiểm tra lại từ server.
 
-- **Framework**: React Native with Expo SDK 57
-- **Routing**: Expo Router (file-based routing)
-- **State Management**: TanStack Query (React Query)
-- **HTTP Client**: Axios
-- **Secure Storage**: expo-secure-store
-- **Styling**: React Native StyleSheet
+## Chức năng hiện có
 
-## Project Structure
+- Google sign-in cho tài khoản có trong danh sách nhà trường; xác minh trạng thái/vai trò từ phản hồi BE và kiểm tra lại `/auth/me` khi khôi phục phiên.
+- Login theo mẫu ảnh: card trong mờ, logo nhỏ, tiêu đề đậm, Email/Mật khẩu có Hiện/Ẩn, nút cam và phần Google riêng. Không lưu mật khẩu. Form staff và Google cùng khóa khi một luồng đang xử lý; lỗi BE được giữ nguyên.
+- Chọn học kỳ/môn học từ `/me/semesters`; xác minh membership/scope khi lấy nhóm. Known group ID lưu theo user chỉ là gợi ý chọn scope, không cấp quyền từ cache và không đoán nhóm từ danh sách tuyển.
+- Tạo nhóm, tìm nhóm/sinh viên, Apply/Invite, chấp nhận/từ chối/thu hồi, Like tư vấn. Theo v2.9, chấp nhận Apply hoặc Invite qua `/requests/{id}/accept` làm sinh viên gia nhập ngay; không dùng quy trình approve → invite của BE cũ.
+- Khóa/mở khóa, mời/xóa thành viên, rời nhóm/yêu cầu/thu hồi/khiếu nại, chuyển Trưởng nhóm theo quyền và phase thực tế.
+- Hồ sơ phone/skills/strengths/weaknesses/profilePrivate theo BE; dữ liệu riêng tư hiển thị theo `full` từ server. Không gửi field `bio` của BE cũ.
+- Thông báo phân trang, chưa đọc, đánh dấu đọc, retry và refresh. Hồ sơ/thông báo không bị chặn hiển thị chỉ vì nhóm tải lỗi.
+- Bảng màu, ảnh nền và shell responsive hiện có được giữ lại; menu dùng một định nghĩa chung.
+- Menu chưa có nhóm theo workspace Tạo nhóm mới/Tìm nhóm đang tuyển của Web; menu có nhóm gồm Tổng quan, Thành viên, Đơn ứng tuyển & Lời mời, Quản lý trạng thái và Hồ sơ. Lịch sử đơn vẫn truy cập được từ màn tìm nhóm.
+- Tổng quan hiển thị thành viên/vị trí trống, cảnh báo khóa và bộ đếm yêu cầu thật; không gán 0 khi API lỗi. Trước khi Apply cần lưu kỹ năng; lời giới thiệu mặc định dùng kỹ năng đã lưu.
 
-```
-src/
-├── app/                    # Expo Router pages
-│   ├── (auth)/            # Authentication screens
-│   ├── (tabs)/            # Tab navigation screens
-│   └── (groups)/          # Group-related screens
-├── constants/             # App constants (colors, config)
-├── contexts/              # React contexts (Auth)
-├── hooks/                 # Custom hooks (TanStack Query)
-├── services/              # API services
-└── types/                 # TypeScript types
+## Chức năng bị BE chặn
 
-assets/                    # App icons and images
-```
+BE triển khai không công bố endpoint cho tự đăng ký, danh mục đề tài, chọn/đề xuất đề tài, báo cáo tiến độ tuần hoặc lịch tư vấn/hướng dẫn đồ án. Các màn tương ứng thông báo rõ chưa khả dụng, không tạo dữ liệu demo và không giả thành công.
 
-## Setup
+Màn thông tin tạo tài khoản dùng cùng ảnh nền/card trắng/banner cam với Web; giải thích việc nhà trường cấp tài khoản. Không có form thu thập mật khẩu hoặc nút gửi tới endpoint không tồn tại. Register.jsx của FE tham chiếu hiện bị comment và không được route.
 
-### Prerequisites
+Theo yêu cầu giao diện mobile, khối giới thiệu màu cam được ẩn trên Android/iOS và Web màn hình nhỏ; chỉ giữ ở Web màn hình rộng. Form đăng nhập/thông tin tài khoản dùng một cột gọn trên mobile.
 
-- Node.js 18+
-- npm or yarn
-- Expo CLI
-- Android Studio (for Android development)
-- Xcode (for iOS development, macOS only)
+Chi tiết endpoint, quyền và trạng thái: [gap-report.md](docs/gap-report.md), [feature-parity-matrix.md](docs/feature-parity-matrix.md), [verification.md](docs/verification.md). Hạn lập nhóm không được dùng thay cho lịch hướng dẫn. Mọi lỗi/denial từ BE được giữ nguyên thông điệp; trạng thái chưa thử không được ghi thành 403/404 giả.
 
-### Installation
+## Chạy và kiểm tra
 
-```bash
-# Install dependencies
-npm install
+Project dùng **Expo SDK 58**, React Native 0.88 và React 19.3, tương thích về SDK với Expo Go 58 trên iPhone. Node cần bản được SDK 58 hỗ trợ (22.13+, 24.3+ hoặc 26+; không dùng các nhánh lẻ).
 
-# Start development server
+```sh
+npm ci
 npm start
-
-# Run on Android
+npm run web
 npm run android
-
-# Run on iOS
-npm run ios
+npm run lint
+npm run typecheck
+npm test
+npm run build
 ```
 
-### Cài đặt
+Nếu Expo Go còn báo project SDK 57, dừng Metro cũ bằng `Ctrl+C`, chạy `npm start -- --clear --go`, rồi quét QR mới. iPhone và máy chạy Metro cần truy cập được nhau qua mạng LAN. Nâng SDK chỉ xử lý lỗi phiên bản; Google Sign-In native vẫn cần development build như phần dưới.
 
-```bash
-# 1. Tạo file .env từ mẫu
-cp .env.example .env
+Copy `.env.example` thành `.env` nếu chưa có. `EXPO_PUBLIC_API_URL` phải chứa `/api/v1`. API base URL không hard-code trong code runtime. Bản làm việc này đã đổi riêng giá trị đó sang test tunnel đã được cung cấp; URL cũ lưu trong `.expo/api-url-before-alignment.txt` (không commit).
 
-# 2. Mở .env và điền EXPO_PUBLIC_API_URL (URL backend, ví dụ https://your-backend.up.railway.app/api/v1)
+Google native cần development build có module Google Sign-In, không hoạt động trong Expo Go. BE trả Google Web client ID qua `/auth/google/config`; có thể cấu hình `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID` và `EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID` theo OAuth app đã được cấp. Origin Web/native client phải được cấu hình hợp lệ; không bỏ qua lỗi OAuth hoặc đưa token vào chat/log.
 
-# 3. Cài dependencies
-npm install
+`npm run build` export Web/Android/iOS vào `.expo/alignment-build`; đây là bundle JS/Hermes, **không phải APK/IPA**. Kiểm tra thiết bị/native build và đăng nhập thật là bước riêng. `npm test` dùng adapter HTTP/storage trong Node và contract đã chụp, không ghi vào DB thật.
 
-# 4. Chạy app (xoá cache để nạp biến môi trường mới)
-npx expo start -c
-```
+## Cấu trúc và rollback
 
-> **Lưu ý:** App sẽ báo lỗi khi khởi động nếu thiếu `EXPO_PUBLIC_API_URL`.
+- `app/`: Expo route wrappers.
+- `src/features/<feature>/presentation`: màn hình/context; `domain`: models/quy tắc; `data`: API/recovery.
+- `src/core/http`, `src/core/auth`, `src/core/ui`, `src/core/validation`: API client, session store, UI primitives, schemas chung.
+- Các path cũ trong `src/services`, `src/types`, `src/contexts`, `src/screens` và `FormationUI` là re-export mỏng giữ import tương thích; không có bản sao logic/API.
+- Palette/tokens tại `src/constants/colors.ts`, quy mô nhóm tại `src/constants/group.ts`.
+- Snapshot trước khi sửa: commit **`90eed1b`**. Các thay đổi từng vùng được commit riêng. Không reset hoặc ghi đè thay đổi có sẵn trong BE/FE.
 
-### Build bằng EAS
+## Tình trạng kiểm thử thật
 
-File `.env` **không được commit** lên Git, nên khi build bằng EAS bạn phải khai báo
-`EXPO_PUBLIC_API_URL` trong **EAS Environment Variables** (trên expo.dev hoặc bằng
-`eas env:create`) cho từng môi trường (development / preview / production).
+Chưa có đăng nhập OAuth hoặc ghi dữ liệu BE trong đợt này. Computer Use bị dừng vì không xác định chắc chắn URL hiện tại của Chrome; không tiếp tục tự động hóa trình duyệt trong turn đó. Kiểm tra ảnh render và hành vi thực tế chưa được ký duyệt.
 
-### Environment Configuration
-
-The app connects to the backend at:
-- Android Emulator: `http://10.0.2.2:8080/api/v1`
-- iOS Simulator: `http://localhost:8080/api/v1`
-- Physical device: Configure your computer's IP address
-
-## API Endpoints
-
-The mobile app connects to these backend APIs:
-
-### Authentication
-- `POST /auth/login` - User login
-- `POST /auth/register` - User registration
-- `GET /auth/me` - Get current user
-- `GET /auth/google/config` - Google sign-in availability and Web OAuth client ID
-- `POST /auth/google` - Exchange `{ idToken, campus }` for the app session
-
-### Google sign-in (login and registration screens)
-
-The backend must configure `GOOGLE_CLIENT_IDS` with the Web OAuth client ID used
-by the app. The app loads it from `/auth/google/config`; optionally override it
-with `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID`. No client secret belongs in the app.
-
-- **Android:** Create an Android OAuth client in the same Google Cloud project
-  for `com.fpt.capstone.mobile` and register the SHA-1 of each signing certificate
-  (development and production). Install a native development/production build,
-  e.g. `npx expo run:android` after installing the Android SDK.
-- **iOS:** Create an iOS OAuth client for `com.fpt.capstone.mobile` and set
-  `EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID` before building. `app.config.js` registers
-  the reversed client ID URL scheme. Rebuild after changing this value.
-- **Web:** Add the app origin (including the development port) to the Web OAuth
-  client's Authorized JavaScript origins. The app uses Google's official sign-in button.
-- **Expo Go:** The Google native SDK requires a development build; tapping the
-  button in Expo Go explains this requirement. Email/password remains available.
-
-Choose the correct campus before signing in. On the registration screen, Google
-uses the selected campus and signs into an existing account. It does not submit
-the registration form or create an account: the current backend requires personal
-email accounts to register with a student code and receive admin approval first.
-Backend role, approval, account status, and campus checks apply to both screens.
-
-Setup references: [Expo Google authentication](https://docs.expo.dev/guides/google-authentication/)
-and [Google Sign-In Expo setup](https://react-native-google-signin.github.io/docs/setting-up/expo).
-
-### Groups
-- `GET /groups` - List groups
-- `POST /groups` - Create group
-- `GET /groups/{id}` - Get group details
-- `POST /groups/{id}/applications` - Apply to group
-- `POST /groups/{id}/invites` - Invite to group
-
-### Topics
-- `GET /topics` - List topics
-- `GET /topics/{id}` - Get topic details
-
-### Consultation schedule
-The previous booking flow has been removed. The replacement is awaiting the Backend contract.
-See [Backend handoff](docs/BACKEND_HANDOFF.md) for pending contracts and current limitations.
-
-### Progress
-- `GET /groups/{id}/progress` - Get progress reports
-- `POST /groups/{id}/progress` - Submit progress report
-
-### Notifications
-- `GET /notifications` - List notifications
-- `GET /notifications/stream` - SSE stream for real-time updates
-
-## Backend Repository
-
-The backend API is maintained separately:
-- **Location**: `../Capstone-project-progress-tracking-system-BE`
-- **Technology**: Spring Boot, PostgreSQL
-
-## Contributing
-
-1. Create a feature branch
-2. Make your changes
-3. Test on Android emulator and iOS simulator
-4. Submit a pull request
-
-## License
-
-MIT License - See LICENSE file for details.
+Chỉ dùng dữ liệu `TEST-` trên test DB được cho phép; không sửa bản ghi khác. Hai tài khoản được cung cấp cần người dùng đăng nhập Google trực tiếp. Luồng cần 3+ thành viên ghi **not tested**. Tài khoản staff không có và cũng không thuộc phạm vi mobile.

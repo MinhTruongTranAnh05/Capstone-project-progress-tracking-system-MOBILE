@@ -1,5 +1,7 @@
 # Các điểm cần Backend cập nhật cho Mobile
 
+> Tài liệu lịch sử của đợt A/B. Từ 30/10/2026, người dùng đã chọn chuyển Mobile sang Team Formation v2.9. Contract và trạng thái mới nằm trong [V29_MIGRATION.md](V29_MIGRATION.md); không dùng các đề xuất phục hồi API cũ bên dưới cho bản v2.9.
+
 Phạm vi Mobile: Student (`STUDENT`) và Leader (`GROUP_LEADER`). Coordinator tương ứng `ADMIN`, sử dụng Web. Chưa sửa Backend/Web.
 
 ## Contract đã xác nhận

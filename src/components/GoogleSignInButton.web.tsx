@@ -29,7 +29,7 @@ function loadGoogle(): Promise<GoogleIdentity> {
 export function GoogleSignInButton(props: GoogleSignInButtonProps) {
   const container = useRef<HTMLDivElement>(null);
   const current = useRef(props);
-  current.current = props;
+  useEffect(() => { current.current = props; }, [props]);
   const [error, setError] = useState('');
 
   useEffect(() => {

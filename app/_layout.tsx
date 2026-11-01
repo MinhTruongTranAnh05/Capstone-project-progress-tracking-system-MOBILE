@@ -2,26 +2,28 @@ import { useEffect } from 'react';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import axios from 'axios';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { isAxiosError } from 'axios';
+import { SafeAreaRoot } from '@/core/ui/SafeAreaRoot';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { SessionStatus } from '@/components/SessionStatus';
 import { SessionError } from '@/services/apiError';
 import { colors } from '@/constants/colors';
 import { requireOptionalNativeModule } from 'expo';
+import { FormationProvider } from '@/contexts/FormationContext';
+import { canUseStaffSession, canUseStudentFeatures } from '@/core/auth/access';
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       retry: (count, error) => count < 1 && !(error instanceof SessionError)
-        && !(axios.isAxiosError(error) && [401, 403].includes(error.response?.status ?? 0)),
+        && !(isAxiosError(error) && [401, 403].includes(error.response?.status ?? 0)),
       staleTime: 1000 * 60 * 5,
     },
   },
 });
 
 function RootNavigator() {
-  const { isAuthenticated, isLoading, startupError } = useAuth();
+  const { user, isAuthenticated, isLoading, startupError } = useAuth();
   if (isLoading || startupError) return <SessionStatus />;
 
   return (
@@ -30,9 +32,12 @@ function RootNavigator() {
       <Stack.Protected guard={!isAuthenticated}>
         <Stack.Screen name="(auth)" />
       </Stack.Protected>
-      <Stack.Protected guard={isAuthenticated}>
+      <Stack.Protected guard={isAuthenticated && canUseStudentFeatures(user)}>
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="(groups)" />
+      </Stack.Protected>
+      <Stack.Protected guard={isAuthenticated && canUseStaffSession(user)}>
+        <Stack.Screen name="staff" />
       </Stack.Protected>
     </Stack>
   );
@@ -56,15 +61,16 @@ export default function RootLayout() {
   }, []);
 
   return (
-    // SafeAreaProvider must wrap the entire app so useSafeAreaInsets()
-    // works correctly in every child screen.
-    <SafeAreaProvider>
+    // Native uses measured insets; Web uses CSS insets with Router 58.
+    <SafeAreaRoot>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
+          <FormationProvider>
           <StatusBar style="dark" />
           <RootNavigator />
+          </FormationProvider>
         </AuthProvider>
       </QueryClientProvider>
-    </SafeAreaProvider>
+    </SafeAreaRoot>
   );
 }

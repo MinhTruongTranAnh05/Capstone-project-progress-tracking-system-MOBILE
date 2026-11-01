@@ -1,17 +1,12 @@
 {
   "expo": {
-    "name": "Lich Do An",
+    "name": "MatchPoint FPT",
     "slug": "capstone-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "scheme": "capstone-mobile",
-    "splash": {
-      "image": "./assets/splash-icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#FBF9F5"
-    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.fpt.capstone.mobile"
@@ -25,11 +20,21 @@
     },
     "web": {
       "favicon": "./assets/favicon.png",
-      "bundler": "metro"
+      "bundler": "metro",
+      "output": "single"
     },
     "plugins": [
       "expo-secure-store",
-      "expo-router"
+      "expo-router",
+      "expo-font",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "resizeMode": "contain",
+          "backgroundColor": "#FBF9F5"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
