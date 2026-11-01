@@ -1,19 +1,22 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Switch, Text, View } from 'react-native';
 import { useAuth } from '@/contexts/AuthContext';
 import { useFormation } from '@/contexts/FormationContext';
 import { Button, Card, Field, SectionHeading, ui, useAction } from './FormationUI';
 import { authService } from '@/services/authService';
 import { colors } from '@/constants/colors';
-import type { ProfileRequest } from '@/types/auth';
+import type { MobileUser, ProfileRequest } from '@/types/auth';
 import { profileSchema } from '@/core/validation/groups';
 
 export function ProfileEditor() {
-  const { user, refreshUser } = useAuth();
+  const { user } = useAuth();
+  return <ProfileForm key={JSON.stringify([user?.id, user?.phone, user?.skills, user?.strengths, user?.weaknesses, user?.profilePrivate])} user={user} />;
+}
+function ProfileForm({ user }: { user: MobileUser | null }) {
+  const { refreshUser } = useAuth();
   const f = useFormation();
   const action = useAction();
-  const [form, setForm] = useState<ProfileRequest>({ phone: '', skills: '', strengths: '', weaknesses: '', profilePrivate: false });
-  useEffect(() => { if (user) setForm({ phone: user.phone ?? '', skills: user.skills ?? '', strengths: user.strengths ?? '', weaknesses: user.weaknesses ?? '', profilePrivate: user.profilePrivate }); }, [user]);
+  const [form, setForm] = useState<ProfileRequest>(() => ({ phone: user?.phone ?? '', skills: user?.skills ?? '', strengths: user?.strengths ?? '', weaknesses: user?.weaknesses ?? '', profilePrivate: user?.profilePrivate ?? false }));
   const editable = !f.loading && !f.error && !(f.semesters[0]?.subjects ?? []).some(s => s.phase === 'FINALIZED' || s.eligibility === 'INELIGIBLE');
   return <Card>
     <SectionHeading eyebrow="📄 Hồ sơ năng lực" title="Giới thiệu bản thân & Kỹ năng" subtitle="Ghi rõ thế mạnh kỹ năng, ưu điểm và nhược điểm để các Trưởng nhóm xem xét khi bạn gửi đơn ứng tuyển." />

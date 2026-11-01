@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react';
 import { AppState } from 'react-native';
-import axios from 'axios';
+import { isAxiosError } from 'axios';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
 import { groupApi } from '../data/groupApi';
@@ -23,7 +23,7 @@ export function FormationProvider({ children }: { children: ReactNode }) {
   const userId = user?.id;
   const queryClient = useQueryClient();
   const [selection, setSelection] = useState<{ userId: string; scopeId: string } | null>(null);
-  const [now, setNow] = useState(Date.now());
+  const [now, setNow] = useState(() => Date.now());
   const key = ['formation', userId ?? 'anonymous'] as const;
   const known = useQuery({ queryKey: [...key, 'knownGroup'], queryFn: () => storage.getKnownGroup(userId!), enabled: !!userId, staleTime: 0 });
   const semesters = useQuery({ queryKey: [...key, 'semesters'], queryFn: ({ signal }) => groupApi.getMySemesters(signal), enabled: !!userId, staleTime: 0 });
@@ -39,7 +39,7 @@ export function FormationProvider({ children }: { children: ReactNode }) {
         return result;
       } catch (error) {
         const notMember = error instanceof SessionError && error.code === 'GROUP_MEMBERSHIP_MISSING';
-        const forbidden = axios.isAxiosError(error) && [403, 404].includes(error.response?.status ?? 0);
+        const forbidden = isAxiosError(error) && [403, 404].includes(error.response?.status ?? 0);
         if ((notMember || forbidden) && sessionStore.isCurrent(revision) && !signal.aborted && known.data === groupId) await storage.setKnownGroup(userId!, null);
         throw error;
       }

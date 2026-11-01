@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import axios from 'axios';
+import { isAxiosError } from 'axios';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { SessionStatus } from '@/components/SessionStatus';
@@ -15,7 +15,7 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       retry: (count, error) => count < 1 && !(error instanceof SessionError)
-        && !(axios.isAxiosError(error) && [401, 403].includes(error.response?.status ?? 0)),
+        && !(isAxiosError(error) && [401, 403].includes(error.response?.status ?? 0)),
       staleTime: 1000 * 60 * 5,
     },
   },

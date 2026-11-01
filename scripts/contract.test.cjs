@@ -41,6 +41,25 @@ test('scope selection uses only an explicit scope or server-confirmed group summ
   assert.equal(selectScope([], undefined, 'g2'), undefined);
 });
 
+test('known group hints are user-scoped and survive logout without preserving credentials', async t => {
+  const previous = globalThis.localStorage;
+  const values = new Map();
+  globalThis.localStorage = { getItem: key => values.get(key) ?? null, setItem: (key, value) => values.set(key, value), removeItem: key => values.delete(key) };
+  t.after(() => { globalThis.localStorage = previous; });
+  const { storage } = createHarness().load('src/services/storage.web.ts');
+  await storage.setKnownGroup('user-a', 'group-a');
+  await storage.setKnownGroup('user-b', 'group-b');
+  await storage.setToken('credential');
+  await storage.clear();
+  assert.equal(await storage.getToken(), null);
+  assert.equal(await storage.getKnownGroup('user-a'), 'group-a');
+  assert.equal(await storage.getKnownGroup('user-b'), 'group-b');
+  assert.equal(await storage.getKnownGroup('unknown-user'), null);
+  await storage.setKnownGroup('user-a', null);
+  assert.equal(await storage.getKnownGroup('user-a'), null);
+  assert.equal(await storage.getKnownGroup('user-b'), 'group-b');
+});
+
 test('denial message is preserved exactly and field errors remain available', () => {
   const { getErrorMessage, getFieldErrors } = createHarness().load('src/services/apiError.ts');
   const data = { errorCode: 'NOT_ELIGIBLE', message: 'Ineligible students may only view their profile', fieldErrors: [{ field: 'skills', message: 'size must be between 0 and 1000' }] };

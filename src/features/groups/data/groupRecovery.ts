@@ -11,7 +11,7 @@ export function selectScope(semesters: MySemester[], requestedScope?: string, kn
 
 export async function loadVerifiedGroup(groupId: string, userId: string, scopeId: string, signal?: AbortSignal) {
   const group = await groupApi.getGroup(groupId, signal);
-  if (group.scopeId !== scopeId || !group.members.some(member => member.userId === userId)) {
+  if (group.id !== groupId || group.scopeId !== scopeId || !Array.isArray(group.members) || !group.members.some(member => member.userId === userId)) {
     throw new SessionError('GROUP_MEMBERSHIP_MISSING', 'Không xác minh được tư cách thành viên của bạn trong nhóm đã lưu. Vui lòng làm mới hoặc liên hệ người điều phối.');
   }
   return group;
