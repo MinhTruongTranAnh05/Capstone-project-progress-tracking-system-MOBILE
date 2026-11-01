@@ -2,6 +2,8 @@
 
 Current target: deployed v2.9. No BE/FE source edits. No live authentication or writes were performed.
 
+SDK compatibility was subsequently updated and rechecked on Expo 58 after the user's iPhone rejected SDK 57. Expo Doctor passes 20/20; lint, strict types, all 28 tests and three-platform exports pass again. The local iOS manifest returns HTTP 200 and SDK 58.0.0. Actual iPhone rendering/login remains not tested. See [sdk-58-upgrade.md](sdk-58-upgrade.md).
+
 | Check | Result | Limit |
 |---|---|---|
 | Deployed OpenAPI | PASS — HTTP 200, 76 paths, evidence in contracts/deployed-v29.json | Public contract inspection only; not authenticated endpoint testing |

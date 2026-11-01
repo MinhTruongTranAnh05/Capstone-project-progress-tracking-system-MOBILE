@@ -37,8 +37,10 @@ Chi tiết endpoint, quyền và trạng thái: [gap-report.md](docs/gap-report.
 
 ## Chạy và kiểm tra
 
+Project dùng **Expo SDK 58**, React Native 0.88 và React 19.3, tương thích về SDK với Expo Go 58 trên iPhone. Node cần bản được SDK 58 hỗ trợ (22.13+, 24.3+ hoặc 26+; không dùng các nhánh lẻ).
+
 ```sh
-npm install
+npm ci
 npm start
 npm run web
 npm run android
@@ -47,6 +49,8 @@ npm run typecheck
 npm test
 npm run build
 ```
+
+Nếu Expo Go còn báo project SDK 57, dừng Metro cũ bằng `Ctrl+C`, chạy `npm start -- --clear --go`, rồi quét QR mới. iPhone và máy chạy Metro cần truy cập được nhau qua mạng LAN. Nâng SDK chỉ xử lý lỗi phiên bản; Google Sign-In native vẫn cần development build như phần dưới.
 
 Copy `.env.example` thành `.env` nếu chưa có. `EXPO_PUBLIC_API_URL` phải chứa `/api/v1`. API base URL không hard-code trong code runtime. Bản làm việc này đã đổi riêng giá trị đó sang test tunnel đã được cung cấp; URL cũ lưu trong `.expo/api-url-before-alignment.txt` (không commit).
 

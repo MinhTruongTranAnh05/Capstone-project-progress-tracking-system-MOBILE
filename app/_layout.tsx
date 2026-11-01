@@ -3,7 +3,7 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { isAxiosError } from 'axios';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { SafeAreaRoot } from '@/core/ui/SafeAreaRoot';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { SessionStatus } from '@/components/SessionStatus';
 import { SessionError } from '@/services/apiError';
@@ -57,9 +57,8 @@ export default function RootLayout() {
   }, []);
 
   return (
-    // SafeAreaProvider must wrap the entire app so useSafeAreaInsets()
-    // works correctly in every child screen.
-    <SafeAreaProvider>
+    // Native uses measured insets; Web uses CSS insets with Router 58.
+    <SafeAreaRoot>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <FormationProvider>
@@ -68,6 +67,6 @@ export default function RootLayout() {
           </FormationProvider>
         </AuthProvider>
       </QueryClientProvider>
-    </SafeAreaProvider>
+    </SafeAreaRoot>
   );
 }

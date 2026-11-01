@@ -4,6 +4,7 @@ Target changed by explicit user decision on 2026-11-01. API contract: public `/v
 
 | Web feature / lecturer requirement | API | Roles | Mobile screen | Status |
 |---|---|---|---|---|
+| iPhone Expo Go compatibility | No BE change | Student; Leader membership | App entry | Upgraded to SDK 58; Doctor 20/20 and iOS manifest checked; physical device rendering not tested |
 | Google login | GET `/auth/google/config`, POST `/auth/google` `{idToken}`, GET `/auth/me` | STUDENT; Leader membership | Login | Implemented and unit/contract checked; real Google login not tested |
 | Create account | POST `/auth/register` absent; `/auth/campuses` absent | Neither Student nor Leader exposed | Account-access / registration explanation | **blocked by BE**: no self-registration controller; latest web register is inactive |
 | Semester/subject context | GET `/me/semesters`, GET `/groups/{id}` | Student; Leader membership | Shared scope selector | Implemented: per-user known hint, fresh membership/scope verification, no guessing; unit tests pass |
