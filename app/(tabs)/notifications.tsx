@@ -16,7 +16,7 @@ export default function NotificationsScreen() {
     queryFn: ({ pageParam, signal }) => notificationService.getNotifications({ page: pageParam, size: 20, unreadOnly: unread }, signal),
     getNextPageParam: page => page.last ? undefined : page.number + 1, enabled: !!user });
   const items = query.data?.pages.flatMap(page => page.content) ?? [];
-  return <FormationPage title="Trung tâm thông báo">
+  return <FormationPage requiresFormation={false} title="Trung tâm thông báo">
     {action.feedback}
     <Card><SectionHeading title="Trung tâm Thông báo" subtitle="Cập nhật thông tin ghép nhóm và các yêu cầu mới nhất từ hệ thống." />{!!count.data?.unread && <Badge tone="danger">{count.data.unread} chưa đọc</Badge>}
       <Button title="✓ Đọc tất cả" secondary busy={action.busy} onPress={() => action.run(() => notificationService.markAllAsRead())} />

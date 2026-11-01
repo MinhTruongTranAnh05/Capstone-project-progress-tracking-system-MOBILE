@@ -8,7 +8,7 @@ import { colors } from '@/constants/colors';
 export default function ProfileScreen() {
   const { user } = useAuth();
   const f = useFormation();
-  return <FormationPage title="Hồ sơ cá nhân">
+  return <FormationPage requiresFormation={false} title="Hồ sơ cá nhân">
     <Card style={{ borderBottomWidth: 3, borderBottomColor: '#F3B58C' }}><SectionHeading icon="♙" eyebrow="Tài khoản của tôi" title="Hồ sơ cá nhân" subtitle="Thông tin định danh và vai trò trong hệ thống MatchPoint FPT Capstone." /></Card>
     <Columns asideFirst main={<>
       <Card><View style={[ui.row, { justifyContent: 'space-between' }]}><SectionHeading eyebrow="Thông tin tài khoản" title="Thông tin chi tiết" /><Badge tone="neutral">▤ Chỉ xem</Badge></View>

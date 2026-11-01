@@ -9,6 +9,7 @@ import { useFormation } from '@/contexts/FormationContext';
 import { getErrorMessage } from '@/services/apiError';
 import { notificationService } from '@/services/notificationService';
 import { colors } from '@/constants/colors';
+import { studentPages } from '@/core/navigation';
 import { PHASE_LABELS, formatDate } from '@/constants/formation';
 import type { ProfileView } from '@/types/models';
 
@@ -108,14 +109,7 @@ function DashboardSidebar({ onNavigate }: { onNavigate: () => void }) {
   const f = useFormation();
   const router = useRouter();
   const pathname = usePathname();
-  const groupNav = [
-    { href: '/(tabs)', path: '/', label: 'Tổng quan nhóm', icon: '📊' },
-    { href: '/(tabs)/members', path: '/members', label: f.group ? 'Thành viên nhóm (3–5 người)' : 'Hồ sơ & Đăng ký vào nhóm', icon: '👥' },
-    { href: '/(tabs)/requests', path: '/requests', label: 'Đơn Apply & Vote', icon: '📝' },
-    { href: '/(tabs)/management', path: '/management', label: 'Quản lý trạng thái & Rời nhóm', icon: '🔒' },
-    { href: '/(tabs)/profile', path: '/profile', label: 'Hồ sơ cá nhân', icon: '⚙️' },
-  ] as const;
-  const nav = f.group ? groupNav : [{ href: '/(tabs)', path: '/', label: 'Tạo nhóm', icon: '🚀' }, groupNav[4]] as const;
+  const nav = studentPages.filter(page => !page.grouped || !!f.group);
   return <View style={{ flex: 1, backgroundColor: colors.surface, borderRightWidth: 1, borderColor: colors.border }}>
     <ScrollView contentContainerStyle={{ padding: 24, gap: 24, flexGrow: 1 }}>
       <View style={[ui.row, { flexWrap: 'nowrap', gap: 12 }]}><View style={shell.logo}><Text style={{ color: 'white', fontWeight: '900', fontSize: 20 }}>✓</Text></View><View style={{ flex: 1 }}><Text style={[ui.heading, { fontSize: 14 }]}>Quản Lý Sinh Viên</Text><Text style={[ui.text, { fontSize: 11 }]}>MatchPoint FPT Capstone.</Text></View></View>
@@ -132,7 +126,7 @@ function DashboardSidebar({ onNavigate }: { onNavigate: () => void }) {
     </ScrollView>
   </View>;
 }
-export function FormationPage({ title, children, back = false }: { title: string; children: ReactNode; back?: boolean }) {
+export function FormationPage({ title, children, back = false, requiresFormation = true }: { title: string; children: ReactNode; back?: boolean; requiresFormation?: boolean }) {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { width } = useWindowDimensions();
@@ -160,8 +154,9 @@ export function FormationPage({ title, children, back = false }: { title: string
           {scopes && <Card>{f.semesters.map(sem => <View key={sem.semesterCode} style={{ gap: 10 }}><Text style={ui.strong}>{sem.semesterName} · {sem.majorName}{sem.readOnly ? ' · Chỉ xem' : ''}</Text><View style={ui.row}>{sem.subjects.map(sub => <TouchableOpacity key={sub.scopeId} accessibilityRole="radio" accessibilityState={{ checked: f.subject?.scopeId === sub.scopeId }} onPress={() => { f.selectScope(sub.scopeId); setScopes(false); }} style={{ minHeight: 44, justifyContent: 'center' }}><Text style={[ui.tag, f.subject?.scopeId === sub.scopeId && { backgroundColor: colors.primary, color: 'white' }]}>{sub.name}</Text></TouchableOpacity>)}</View></View>)}</Card>}
           {f.subject?.eligibility === 'INELIGIBLE' && <Text style={ui.notice}>Chỉ được xem: {f.subject.eligibilityReason || 'Chưa đủ điều kiện lập nhóm.'}</Text>}{f.semester?.readOnly && <Text style={ui.notice}>Học kỳ trước chỉ được xem.</Text>}
         </View>}
+        {!!f.recoveryNotice && requiresFormation && <Text style={ui.notice}>{f.recoveryNotice}</Text>}
         <Text accessibilityRole="header" style={ui.eyebrow}>{title}</Text>
-        {f.loading ? <ActivityIndicator size="large" color={colors.primary} /> : f.error ? <ErrorState error={f.error} retry={() => void f.refresh()} /> : children}
+        {requiresFormation && f.loading ? <ActivityIndicator size="large" color={colors.primary} /> : requiresFormation && f.error ? <ErrorState error={f.error} retry={() => void f.refresh()} /> : children}
       </ScrollView>
     </View>
     <Modal visible={menu && !wide} transparent animationType="fade" onRequestClose={() => setMenu(false)}><View style={{ flex: 1, flexDirection: 'row', backgroundColor: colors.overlayDark }}><View style={{ width: Math.min(width - 40, 320), paddingTop: insets.top, paddingBottom: insets.bottom, backgroundColor: 'white' }}><View style={{ alignItems: 'flex-end', paddingRight: 12 }}><TouchableOpacity accessibilityRole="button" accessibilityLabel="Đóng menu" onPress={() => setMenu(false)} style={shell.iconButton}><Ionicons name="close" size={24} color={colors.textSecondary} /></TouchableOpacity></View><DashboardSidebar onNavigate={() => setMenu(false)} /></View><TouchableOpacity accessibilityRole="button" accessibilityLabel="Đóng menu" style={{ flex: 1 }} onPress={() => setMenu(false)} /></View></Modal>
