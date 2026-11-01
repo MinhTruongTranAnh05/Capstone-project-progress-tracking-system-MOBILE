@@ -1,29 +1,32 @@
 import api from '@/services/api';
-import type { FormationWindow, GroupMember, GroupRequest, JoinRequest, LeaveRequest, Page, StudentGroup, Vote, VoteType } from '../domain/models';
-const id = (value: string) => { if (!value.trim()) throw new Error('Thiếu định danh cho thao tác.'); return encodeURIComponent(value); };
+import type { GroupRequest, JoinRequest, LeaderTransfer, LeaveRequest, MySemester, ProfileView, StudentGroup } from '@/types/models';
+
+const id = (value: string) => {
+  if (!value) throw new Error('Thiếu định danh cho thao tác.');
+  return encodeURIComponent(value);
+};
 export const groupApi = {
-  list: (page = 0, available = false, signal?: AbortSignal) => api.get<Page<StudentGroup>>('/groups', { params: { page, size: 20, available }, signal }).then(r => r.data),
-  get: (groupId: string, signal?: AbortSignal) => api.get<StudentGroup>(`/groups/${id(groupId)}`, { signal }).then(r => r.data),
-  window: (semester: string, signal?: AbortSignal) => api.get<FormationWindow>('/me/formation-window', { params: { semester }, signal }).then(r => r.data),
-  create: (data: GroupRequest) => api.post<StudentGroup>('/groups', data).then(r => r.data),
+  getMySemesters: (signal?: AbortSignal) => api.get<MySemester[]>('/me/semesters', { signal }).then(r => r.data),
+  getGroup: (groupId: string, signal?: AbortSignal) => api.get<StudentGroup>(`/groups/${id(groupId)}`, { signal }).then(r => r.data),
+  openGroups: (subjectId: string, q: string, skill: string, signal?: AbortSignal) => api.get<StudentGroup[]>(`/subjects/${id(subjectId)}/open-groups`, { params: { q, skill }, signal }).then(r => r.data),
+  candidates: (subjectId: string, q: string, skill: string, signal?: AbortSignal) => api.get<ProfileView[]>(`/subjects/${id(subjectId)}/candidates`, { params: { q, skill }, signal }).then(r => r.data),
+  createGroup: (subjectId: string, data: GroupRequest) => api.post<StudentGroup>(`/subjects/${id(subjectId)}/groups`, data).then(r => r.data),
+  updateGroup: (groupId: string, data: GroupRequest) => api.put<StudentGroup>(`/groups/${id(groupId)}`, data).then(r => r.data),
   lock: (groupId: string, locked: boolean) => api.post<StudentGroup>(`/groups/${id(groupId)}/${locked ? 'lock' : 'unlock'}`).then(r => r.data),
-  kick: (groupId: string, memberId: string) => api.delete(`/groups/${id(groupId)}/members/${id(memberId)}`),
+  kick: (groupId: string, userId: string) => api.delete(`/groups/${id(groupId)}/members/${id(userId)}`),
   apply: (groupId: string, message: string) => api.post<JoinRequest>(`/groups/${id(groupId)}/applications`, { message }).then(r => r.data),
-  invite: (groupId: string, studentCode: string, message: string) => api.post<JoinRequest>(`/groups/${id(groupId)}/invites`, { studentCode, message }).then(r => r.data),
-  applications: (groupId: string, signal?: AbortSignal) => api.get<JoinRequest[]>(`/groups/${id(groupId)}/applications`, { signal }).then(r => r.data),
-  invitations: (groupId: string, signal?: AbortSignal) => api.get<JoinRequest[]>(`/groups/${id(groupId)}/invites`, { signal }).then(r => r.data),
-  myApplications: (signal?: AbortSignal) => api.get<JoinRequest[]>('/me/applications', { signal }).then(r => r.data),
-  myInvitations: (signal?: AbortSignal) => api.get<JoinRequest[]>('/me/invites', { signal }).then(r => r.data),
-  approveApplication: (requestId: string) => api.post<JoinRequest>(`/applications/${id(requestId)}/approve`).then(r => r.data),
-  rejectApplication: (requestId: string, reason: string) => api.post<JoinRequest>(`/applications/${id(requestId)}/reject`, { reason }).then(r => r.data),
-  withdrawApplication: (requestId: string) => api.post<JoinRequest>(`/applications/${id(requestId)}/withdraw`).then(r => r.data),
-  acceptInvitation: (requestId: string) => api.post<GroupMember>(`/invites/${id(requestId)}/accept`).then(r => r.data),
-  declineInvitation: (requestId: string) => api.post<JoinRequest>(`/invites/${id(requestId)}/decline`).then(r => r.data),
-  revokeInvitation: (requestId: string) => api.post<JoinRequest>(`/invites/${id(requestId)}/revoke`).then(r => r.data),
-  vote: (requestId: string, vote: VoteType, comment: string) => api.post<Vote>(`/applications/${id(requestId)}/votes`, { vote, comment }).then(r => r.data),
-  votes: (requestId: string, signal?: AbortSignal) => api.get<Vote[]>(`/applications/${id(requestId)}/votes`, { signal }).then(r => r.data),
-  requestLeave: (groupId: string, reason: string) => api.post<LeaveRequest>(`/groups/${id(groupId)}/leave-requests`, { reason }).then(r => r.data),
-  leaves: (groupId: string, signal?: AbortSignal) => api.get<LeaveRequest[]>(`/groups/${id(groupId)}/leave-requests`, { signal }).then(r => r.data),
-  decideLeave: (requestId: string, approve: boolean) => api.post<LeaveRequest>(`/leave-requests/${id(requestId)}/${approve ? 'approve' : 'reject'}`).then(r => r.data),
+  invite: (groupId: string, studentCode: string, message: string) => api.post<JoinRequest>(`/groups/${id(groupId)}/invitations`, { studentCode, message }).then(r => r.data),
+  requests: (groupId: string, signal?: AbortSignal) => api.get<JoinRequest[]>(`/groups/${id(groupId)}/requests`, { signal }).then(r => r.data),
+  myRequests: (subjectId: string, signal?: AbortSignal) => api.get<JoinRequest[]>(`/subjects/${id(subjectId)}/my-requests`, { signal }).then(r => r.data),
+  answer: (requestId: string, action: 'accept' | 'reject' | 'withdraw', reason = '') => api.post<JoinRequest>(`/requests/${id(requestId)}/${action}`, action === 'reject' ? { reason } : undefined).then(r => r.data),
+  like: (requestId: string, liked: boolean) => liked ? api.put<{ likes: number }>(`/requests/${id(requestId)}/like`) : api.delete<{ likes: number }>(`/requests/${id(requestId)}/like`),
+  leave: (groupId: string, reason: string) => api.post<{ left: boolean; request: LeaveRequest | null }>(`/groups/${id(groupId)}/leave`, { reason }).then(r => r.data),
+  groupLeaves: (groupId: string, signal?: AbortSignal) => api.get<LeaveRequest[]>(`/groups/${id(groupId)}/leave-requests`, { signal }).then(r => r.data),
+  myLeaves: (signal?: AbortSignal) => api.get<LeaveRequest[]>('/me/leave-requests', { signal }).then(r => r.data),
+  decideLeave: (requestId: string, approve: boolean, note: string) => api.post<LeaveRequest>(`/leave-requests/${id(requestId)}/leader-decision`, { approve, note }).then(r => r.data),
   withdrawLeave: (requestId: string) => api.post<LeaveRequest>(`/leave-requests/${id(requestId)}/withdraw`).then(r => r.data),
+  complain: (requestId: string, reason: string) => api.post<LeaveRequest>(`/leave-requests/${id(requestId)}/complaint`, { reason }).then(r => r.data),
+  transfers: (signal?: AbortSignal) => api.get<LeaderTransfer[]>('/me/leader-transfers', { signal }).then(r => r.data),
+  offerTransfer: (groupId: string, toUserId: string, leaveAfter: boolean) => api.post<LeaderTransfer>(`/groups/${id(groupId)}/leader-transfers`, { toUserId, leaveAfter }).then(r => r.data),
+  answerTransfer: (transferId: string, action: 'accept' | 'decline' | 'cancel') => api.post<LeaderTransfer>(`/leader-transfers/${id(transferId)}/${action}`).then(r => r.data),
 };

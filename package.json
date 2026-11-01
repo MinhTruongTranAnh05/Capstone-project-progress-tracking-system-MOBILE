@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "expo-router/entry",
   "scripts": {
-    "test": "node --test scripts/auth.test.cjs scripts/formation.test.cjs",
+    "test": "node --test scripts/auth.test.cjs scripts/formation.test.cjs scripts/contract.test.cjs",
     "typecheck": "tsc --noEmit --noUnusedLocals --noUnusedParameters",
     "test:auth": "node --test scripts/auth.test.cjs",
     "start": "expo start",
