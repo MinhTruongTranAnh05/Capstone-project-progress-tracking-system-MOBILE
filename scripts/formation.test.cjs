@@ -1,129 +1,56 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const fs = require('node:fs');
-const path = require('node:path');
+const axios = require('axios');
 const { createHarness } = require('./testHarness.cjs');
+const student = { id: 'u1', email: 'student@example.test', fullName: 'Student', role: 'STUDENT', status: 'ACTIVE' };
+function adapter(h, handler) { h.api.defaults.adapter = async config => ({ config, status: 200, statusText: 'OK', headers: {}, data: await handler(config) }); }
+function memory(initial = {}) { const values = new Map(Object.entries(initial)); return { values, async getKnownGroup(id) { return values.get(id) ?? null; }, async setKnownGroup(id, value) { if (value === null) values.delete(id); else values.set(id, value); } }; }
+const group = (id, userId = 'u1') => ({ id, groupCode: id, members: [{ id: 'membership', userId, status: 'ACTIVE', isLeader: false }] });
 
-const semester = { readOnly: false };
-const subject = { canAct: true, phase: 'OPEN', eligibility: 'UNDECIDED', deadline: '2026-11-01T00:00:00Z' };
-const now = Date.parse('2026-10-30T00:00:00Z');
-
-test('formation respects authoritative canAct, semester history, eligibility, phase and deadline', () => {
-  const { canRecruit } = createHarness().load('src/constants/formation.ts');
-  assert.equal(canRecruit(semester, subject, now), true);
-  for (const eligibility of ['ELIGIBLE', 'UNDECIDED']) assert.equal(canRecruit(semester, { ...subject, eligibility }, now), true);
-  assert.equal(canRecruit({ readOnly: true }, subject, now), false);
-  assert.equal(canRecruit(semester, { ...subject, canAct: false }, now), false);
-  assert.equal(canRecruit(semester, { ...subject, eligibility: 'INELIGIBLE' }, now), false);
-  for (const phase of ['PREPARING', 'LOCKED', 'FINALIZED']) assert.equal(canRecruit(semester, { ...subject, phase }, now), false);
-  assert.equal(canRecruit(semester, { ...subject, deadline: new Date(now).toISOString() }, now), false);
-  assert.equal(canRecruit(undefined, undefined, now), false);
+test('recovery verifies saved membership and does not inspect recruiting groups for a STUDENT', async () => {
+  const h = createHarness(); const disk = memory({ u1: 'g1', u2: 'private' }); const calls = [];
+  adapter(h, c => { calls.push(c.url); return c.url === '/me/invites' ? [] : group('g1'); });
+  const { recoverGroups } = h.load('src/features/groups/data/groupRecovery.ts');
+  const result = await recoverGroups(student, disk);
+  assert.equal(result.selectedId, 'g1'); assert.deepEqual(calls, ['/groups/g1', '/me/invites']); assert.equal(disk.values.get('u2'), 'private');
 });
-
-test('five members including the leader disable invitations, even if the full flag is stale', () => {
-  const { canInvite } = createHarness().load('src/constants/formation.ts');
-  const group = { size: 4, state: 'OPEN', full: false, finalized: false };
-  assert.equal(canInvite(group), true);
-  assert.equal(canInvite({ ...group, size: 5 }), false);
-  assert.equal(canInvite({ ...group, size: 6 }), false);
-  assert.equal(canInvite({ ...group, full: true }), false);
-  assert.equal(canInvite({ ...group, finalized: true }), false);
-  assert.equal(canInvite({ ...group, state: 'DISSOLVED' }), false);
+test('nonmembership clears the saved ID and returns no guessed group', async () => {
+  const h = createHarness(); const disk = memory({ u1: 'g1' });
+  adapter(h, c => c.url === '/me/invites' ? [] : group('g1', 'other-user'));
+  const { recoverGroups } = h.load('src/features/groups/data/groupRecovery.ts');
+  const result = await recoverGroups(student, disk);
+  assert.equal(result.selectedId, undefined); assert.deepEqual(result.groups, []); assert.equal(disk.values.has('u1'), false);
 });
-
-test('requests past their lifetime are disabled before the backend sweeper updates status', () => {
-  const { isPending } = createHarness().load('src/constants/formation.ts');
-  assert.equal(isPending({ status: 'PENDING', expiresAt: new Date(now + 1).toISOString() }, now), true);
-  assert.equal(isPending({ status: 'PENDING', expiresAt: new Date(now).toISOString() }, now), false);
-  for (const status of ['ACCEPTED', 'REJECTED', 'WITHDRAWN', 'EXPIRED', 'CANCELLED']) {
-    assert.equal(isPending({ status, expiresAt: new Date(now + 1000).toISOString() }, now), false);
-  }
+test('offline recovery retains the known ID for retry instead of claiming no group', async () => {
+  const h = createHarness(); const disk = memory({ u1: 'g1' });
+  h.api.defaults.adapter = async () => { throw new axios.AxiosError('Offline', 'ERR_NETWORK'); };
+  const { recoverGroups } = h.load('src/features/groups/data/groupRecovery.ts');
+  await assert.rejects(recoverGroups(student, disk)); assert.equal(disk.values.get('u1'), 'g1');
 });
-
-test('Google payload contains only idToken and has no Bearer header', async () => {
-  const h = createHarness();
-  h.api.defaults.adapter = async config => {
-    assert.equal(config.url, '/auth/google');
-    assert.deepEqual(JSON.parse(config.data), { idToken: 'google-credential' });
-    assert.equal(config.headers.has('Authorization'), false);
-    return { config, status: 200, statusText: 'OK', headers: {}, data: {} };
-  };
-  await h.authService.loginWithGoogle({ idToken: 'google-credential' });
+test('accepted invitation can recover a group only after fresh membership verification', async () => {
+  const h = createHarness(); const disk = memory();
+  adapter(h, c => c.url === '/me/invites' ? [{ groupId: 'g1', status: 'ACCEPTED' }, { groupId: 'g2', status: 'PENDING' }] : group('g1'));
+  const { recoverGroups } = h.load('src/features/groups/data/groupRecovery.ts');
+  const result = await recoverGroups(student, disk); assert.equal(result.selectedId, 'g1');
 });
-
-test('current group is supplied by me/semesters even for full and locked groups', async () => {
-  const h = createHarness();
-  const groups = h.load('src/services/groupService.ts').groupService;
-  for (const state of ['FULL', 'LOCKED']) {
-    const fixture = [{ semesterCode: 'FA26', subjects: [{ subjectId: 'subject-1', group: { id: 'my-group', state, size: 5 } }] }];
-    h.api.defaults.adapter = async config => {
-      assert.equal(config.url, '/me/semesters');
-      return { config, status: 200, statusText: 'OK', headers: {}, data: fixture };
-    };
-    const semesters = await groups.getMySemesters();
-    assert.equal(semesters[0].subjects[0].group.id, 'my-group');
-    assert.equal(semesters[0].subjects[0].group.state, state);
-  }
+test('leader recovery follows pagination and requires selection for multiple verified groups', async () => {
+  const h = createHarness(); const pages = [];
+  adapter(h, c => { if (c.url === '/groups') { pages.push(c.params.page); return { content: [{ id: 'g' + c.params.page }], last: c.params.page === 1 }; } return group(c.url.split('/').pop()); });
+  const { recoverGroups } = h.load('src/features/groups/data/groupRecovery.ts');
+  const result = await recoverGroups({ ...student, role: 'GROUP_LEADER' }, memory());
+  assert.deepEqual(pages, [0, 1]); assert.equal(result.groups.length, 2); assert.equal(result.selectedId, undefined);
 });
-
-test('create, invite, accept, kick, leave and transfer use v2.9 request contracts', async () => {
-  const h = createHarness();
-  const service = h.load('src/services/groupService.ts').groupService;
-  const seen = [];
-  h.api.defaults.adapter = async config => {
-    seen.push({ method: config.method, url: config.url, body: config.data ? JSON.parse(config.data) : null });
-    return { config, status: 200, statusText: 'OK', headers: {}, data: {} };
-  };
-  await service.createGroup('subject-1', { name: 'Team', wantedSkills: 'React' });
-  await service.invite('group-1', 'SE123456', 'Hello');
-  await service.answer('request-1', 'accept');
-  await service.kick('group-1', 'user-2');
-  await service.leave('group-1', 'Reason');
-  await service.offerTransfer('group-1', 'user-2', true);
-  assert.deepEqual(seen, [
-    { method: 'post', url: '/subjects/subject-1/groups', body: { name: 'Team', wantedSkills: 'React' } },
-    { method: 'post', url: '/groups/group-1/invitations', body: { studentCode: 'SE123456', message: 'Hello' } },
-    { method: 'post', url: '/requests/request-1/accept', body: null },
-    { method: 'delete', url: '/groups/group-1/members/user-2', body: null },
-    { method: 'post', url: '/groups/group-1/leave', body: { reason: 'Reason' } },
-    { method: 'post', url: '/groups/group-1/leader-transfers', body: { toUserId: 'user-2', leaveAfter: true } },
-  ]);
+test('approve is distinct from invite acceptance and kick uses the membership ID', async () => {
+  const h = createHarness(); const calls = []; adapter(h, c => { calls.push([c.method, c.url, c.data ? JSON.parse(c.data) : null]); return {}; });
+  const { groupApi } = h.load('src/features/groups/data/groupApi.ts');
+  await groupApi.approveApplication('a1'); await groupApi.acceptInvitation('i1'); await groupApi.kick('g1', 'membership-2'); await groupApi.vote('a1', 'OPPOSE', 'Reason');
+  assert.deepEqual(calls, [['post', '/applications/a1/approve', null], ['post', '/invites/i1/accept', null], ['delete', '/groups/g1/members/membership-2', null], ['post', '/applications/a1/votes', { vote: 'OPPOSE', comment: 'Reason' }]]);
 });
-
-test('empty identifiers are rejected before issuing a request', async () => {
-  const h = createHarness();
-  const service = h.load('src/services/groupService.ts').groupService;
-  h.api.defaults.adapter = async () => { assert.fail('Must not send a request with an empty group ID'); };
-  assert.throws(() => service.getGroup(''));
-});
-
-test('active mobile source does not retain removed APIs or old leadership field names', () => {
-  const root = path.resolve(__dirname, '..');
-  const files = fs.readdirSync(path.join(root, 'src/services')).filter(name => /\.ts$/.test(name));
-  const text = files.map(name => fs.readFileSync(path.join(root, 'src/services', name), 'utf8')).join('\n');
-  assert.doesNotMatch(text, /\/auth\/(register|campuses)|\/slots|\/bookings|\/topics|\/progress|\/documents|\/invites|\/applications\/\$|memberId:/);
-  for (const file of ['register.tsx']) assert.equal(fs.existsSync(path.join(root, 'app/(auth)', file)), false);
-  for (const file of ['topics.tsx', 'progress.tsx', 'documents.tsx']) assert.equal(fs.existsSync(path.join(root, 'app/(groups)', file)), false);
-});
-
-test('private profile rendering never exposes fields outside the server privacy boundary', () => {
-  const React = require('react');
-  const { renderToStaticMarkup } = require('react-dom/server');
-  const Text = ({ children }) => React.createElement('span', null, children);
-  const View = ({ children }) => React.createElement('div', null, children);
-  const h = createHarness(null, {
-    'react-native': { Text, View, StyleSheet: { create: styles => styles } },
-    'react-native-safe-area-context': {},
-    '@expo/vector-icons': {},
-    'expo-router': {},
-  });
-  const { ProfileDetails } = h.load('src/components/FormationUI.tsx');
-  const profile = { userId: 'student-1', fullName: 'Student', studentCode: 'SE123456', full: false,
-    email: 'private@example.test', phone: '0123456789', skills: 'private-skill', strengths: 'private-strength', weaknesses: 'private-weakness' };
-  const privateHtml = renderToStaticMarkup(React.createElement(ProfileDetails, { profile }));
-  assert.match(privateHtml, /Student/);
-  assert.match(privateHtml, /SE123456/);
-  for (const field of ['email', 'phone', 'skills', 'strengths', 'weaknesses']) assert.equal(privateHtml.includes(profile[field]), false);
-  const fullHtml = renderToStaticMarkup(React.createElement(ProfileDetails, { profile: { ...profile, full: true } }));
-  assert.equal(fullHtml.includes(profile.email), true);
+test('real recruiting rules respect eligibility, deadline, lock and terminal states', () => {
+  const { canRecruit, hasRoom } = createHarness().load('src/features/groups/domain/rules.ts');
+  const window = { open: true, formationDeadline: '2026-12-01T00:00:00Z' }; const now = Date.parse('2026-11-01T00:00:00Z'); const current = { status: 'FORMED', locked: false, memberCount: 4, full: false };
+  assert.equal(canRecruit(current, window, true, now), true);
+  for (const patch of [{ locked: true }, { status: 'ARCHIVED' }, { status: 'FAILED' }, { status: 'COMPLETED' }]) assert.equal(canRecruit({ ...current, ...patch }, window, true, now), false);
+  assert.equal(canRecruit(current, window, false, now), false); assert.equal(canRecruit(current, window, true, Date.parse(window.formationDeadline)), false);
+  assert.equal(hasRoom({ ...current, memberCount: 5 }), false);
 });
