@@ -161,6 +161,19 @@ test('password validation rejects empty credentials without issuing a request', 
   await assert.rejects(h.authService.loginWithPassword({ email: 'admin@example.test', password: '   ' }));
 });
 
+test('empty login fields report one required error each, with format errors only for a nonempty email', () => {
+  const h = createHarness();
+  const { passwordLoginSchema } = h.load('src/core/validation/auth.ts');
+  const { getFieldErrors } = h.load('src/services/apiError.ts');
+  const empty = passwordLoginSchema.safeParse({ email: '  ', password: '' });
+  assert.equal(empty.success, false);
+  assert.equal(empty.error.issues.length, 2);
+  assert.deepEqual(getFieldErrors(empty.error), { email: 'Vui lòng nhập email.', password: 'Vui lòng nhập mật khẩu.' });
+  const malformed = passwordLoginSchema.safeParse({ email: 'invalid-email', password: 'test-password' });
+  assert.equal(malformed.success, false);
+  assert.deepEqual(getFieldErrors(malformed.error), { email: 'Vui lòng nhập email hợp lệ.' });
+});
+
 test('a delayed 401 from an old request cannot log out the next account', async () => {
   const h = createHarness();
   await signIn(h);

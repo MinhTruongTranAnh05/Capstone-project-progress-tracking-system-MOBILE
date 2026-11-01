@@ -2,6 +2,8 @@
 
 Current target: deployed v2.9. No BE/FE source edits. No live authentication or writes were performed.
 
+Latest empty-login-field fix: **36 tests**, zero-warning lint, strict types and Web/Android/iOS exports pass. A regression verifies that empty email yields only its required error, while a nonempty malformed email yields its format error. Local errors are displayed per field; ambiguous placeholder examples were replaced. No real login/device result is claimed.
+
 Latest screenshot/login extension: the user approved Admin/Coordinator password login. Lint (zero warnings), strict types, **35 tests** and Web/Android/iOS exports pass after adding that form, method/role guards and the separate staff account screen. Tests include both public login methods' 401 isolation, exact password payload, active staff restore and denied student-route access for staff. No real staff credential was used; actual sign-in and device rendering remain unverified. See [login-layout.md](login-layout.md).
 
 Latest recheck against the actual newly cloned FE `7078a14`: lint (zero warnings), strict typecheck, **30 tests**, and Web/Android/iOS exports pass. The test tunnel still returns HTTP 200 with unchanged path/method sets and the eight audited mobile schemas. Added coverage checks overview expiry/leave counts, required application skills/default introduction and MSSV normalization. See [frontend-recheck.md](frontend-recheck.md). Visual/device and authenticated checks remain not tested.
@@ -12,7 +14,7 @@ SDK compatibility was subsequently updated and rechecked on Expo 58 after the us
 |---|---|---|
 | Deployed OpenAPI | PASS — HTTP 200, 76 paths, evidence in contracts/deployed-v29.json | Public contract inspection only; not authenticated endpoint testing |
 | TypeScript | PASS — strict typecheck, unused locals/parameters enabled | Static types are not a device test |
-| Unit/contract tests | PASS — 35 tests | HTTP/storage adapters; covers session races/401, deployed operation paths, membership/scope verification, per-user hints, 3–5 capacity, privacy, overview counts, application validation and staff authentication boundaries |
+| Unit/contract tests | PASS — 36 tests | HTTP/storage adapters; covers session races/401, deployed operation paths, membership/scope verification, per-user hints, 3–5 capacity, privacy, overview counts, application validation, staff authentication boundaries and single-error login validation |
 | ESLint | PASS — zero warnings allowed | No compiler rules disabled to hide errors; fixes include keyed forms, lazy initialization and async session hydration |
 | Web/Android/iOS export | PASS | JS/Hermes export only; no APK/IPA build or install |
 | Active source audit | PASS — no Instructor/GVHD/slot/booking logic, explicit any, runtime mocks or console calls | Historical docs/tests may mention removed contracts as evidence |

@@ -12,3 +12,5 @@ The user requested the supplied login design and explicitly selected **add Admin
 Tests cover staff-session acceptance, unknown/inactive roles, fresh role verification, login-method boundaries, exact password/public HTTP contract, invalid credentials, public 401 isolation and the existing session races/privacy/group rules. No supplied real credential was embedded in code, docs, tests or logs, and no real account login or test-data write was performed.
 
 Static/type/test/export results are in [verification.md](verification.md). Device rendering and authenticated BE behavior remain unverified.
+
+Empty-field screenshot follow-up: the initial email example and password dots were placeholders, not entered credentials. These now read “Nhập email tài khoản” and “Nhập mật khẩu”. Validation shows one message under each invalid field, clears the field's message on edits, and rejects empty fields before starting authentication/loading. A blank email no longer reports both required and format errors. Server errors remain unchanged. The regression suite now has 36 passing tests; lint/types and three-platform exports pass again.

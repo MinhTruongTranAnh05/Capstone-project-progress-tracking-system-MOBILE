@@ -9,6 +9,7 @@ export const authStyles = StyleSheet.create({
   heading: { color: colors.authText, fontSize: 26, lineHeight: 32, fontWeight: '900', letterSpacing: -0.8 },
   body: { color: colors.authBody, fontSize: 12, lineHeight: 19 },
   label: { color: colors.authText, fontSize: 12, lineHeight: 18, fontWeight: '700' },
+  fieldError: { color: colors.error, fontSize: 12, lineHeight: 18 },
   input: { backgroundColor: colors.authField, borderWidth: 1, borderColor: colors.authBorder, borderRadius: 12, minHeight: 48, paddingHorizontal: 14, paddingVertical: 12, fontSize: 13, color: colors.authText },
   primaryButton: { backgroundColor: colors.primary, borderRadius: 12, minHeight: 48, padding: 12, alignItems: 'center', justifyContent: 'center', boxShadow: '0 3px 6px rgba(230,81,0,0.15)' },
   primaryButtonText: { color: colors.textLight, fontSize: 13, fontWeight: '800', textAlign: 'center' },
