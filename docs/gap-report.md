@@ -2,7 +2,7 @@
 
 ## Google native checkpoint — 2026-11-03
 
-The owner supplied separate Web/server and iOS client IDs from their own Google Cloud project. Mobile `.env` and `.env.example` now use those public IDs; the iOS URL scheme derives from its iOS client ID. Development-build dependencies/profiles, a local/EAS preflight and native provider tests are added. Expo Go is detected using `isRunningInExpoGo()` and shows an upfront unavailable notice; it is not falsely treated as supporting native Google login. No BE/FE edits, secrets, credentials or test writes were made. See [google-login-setup.md](google-login-setup.md).
+The owner supplied separate Web/server and iOS client IDs from their own Google Cloud project. Mobile `.env` and `.env.example` now use those public IDs; the iOS URL scheme derives from its iOS client ID. Development-build dependencies/profiles, a local/EAS preflight and native provider tests are added. When a mobile Web ID is explicitly configured, the button opens Google without fetching the public BE config first; POST `/auth/google` still authoritatively validates credentials, and exact BE errors are retained. Expo Go is detected using `isRunningInExpoGo()` and shows an upfront unavailable notice; it is not falsely treated as supporting native Google login. No BE/FE edits, secrets, credentials or test writes were made. See [google-login-setup.md](google-login-setup.md).
 
 | Area | Web behavior | Mobile current | Difference | Severity (High/Med/Low) | Fix |
 |---|---|---|---|---|---|

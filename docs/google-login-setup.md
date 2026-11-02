@@ -8,7 +8,7 @@ Only the mobile repository is changed. The Google Cloud project belongs to the a
 - `EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID`: iOS client used for native authentication and the reversed callback URL scheme in `app.config.js`.
 - `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID`: server audience requested by the native SDK. This is also needed for a native mobile app; creating it does not modify the existing website.
 - Google returns an ID token; mobile sends only `{idToken}` to `POST /api/v1/auth/google`. The existing BE validates it and returns the application session. No Google profile is trusted as an application session, and no Google token/password is persisted or logged.
-- `GET /auth/google/config` must report `enabled: true`; the configured mobile Web ID overrides the response's default client ID without changing the website.
+- When `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID` is configured, the button opens Google directly with that ID without waiting for `GET /auth/google/config`. When it is absent, the public config endpoint supplies an enabled client ID as a discovery fallback. This does not change the website or skip BE token/audience validation at `POST /auth/google`.
 - Expo Go displays an upfront unavailable notice and a disabled Google button. The native module is loaded only in a configured native build. Cancellation does not contact BE; the SDK offers account selection again after logout or a denied login. Late provider results after the login screen unmounts are ignored.
 
 ## Backend handoff (the BE owner performs this)

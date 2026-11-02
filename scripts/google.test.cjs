@@ -1,5 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
+const axios = require('axios');
 const { createHarness } = require('./testHarness.cjs');
 const { checkGoogleConfig } = require('./check-google-config.cjs');
 
@@ -50,6 +51,27 @@ test('Android checks Play Services before signing in and propagates provider fai
   google.hasPlayServices = async () => { throw denied; };
   await assert.rejects(getNativeGoogleCredential(google, { platform: 'android', webClientId: webId }), error => error === denied);
   assert.equal(google.calls.some(call => call[0] === 'signIn'), false);
+});
+test('a Google credential reaches the real login API and a BE denial cannot create an app session', async () => {
+  const h = createHarness();
+  const { getNativeGoogleCredential } = h.load('src/features/auth/data/nativeGoogle.ts');
+  const { getErrorMessage } = h.load('src/services/apiError.ts');
+  const idToken = await getNativeGoogleCredential(client(), { platform: 'ios', webClientId: webId, iosClientId: iosId });
+  let calls = 0;
+  h.api.defaults.adapter = async config => {
+    calls += 1;
+    assert.equal(config.url, '/auth/google');
+    assert.equal(config.method, 'post');
+    assert.equal(config.headers.Authorization, undefined);
+    assert.deepEqual(JSON.parse(config.data), { idToken: 'test-id-token' });
+    throw new axios.AxiosError('Unauthorized', 'ERR_BAD_RESPONSE', config, null, {
+      config, status: 401, headers: {}, data: { message: 'Google ID token was not issued for this application' },
+    });
+  };
+  await assert.rejects(h.authService.loginWithGoogle({ idToken }), error => getErrorMessage(error) === 'Google ID token was not issued for this application');
+  assert.equal(calls, 1);
+  assert.equal(h.store.getSnapshot().user, null);
+  assert.equal(h.disk.token, null);
 });
 test('native preflight rejects missing cloud environment and incorrect reversed iOS scheme', () => {
   const environment = { EXPO_PUBLIC_API_URL: 'https://api.example.test/api/v1', EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID: webId, EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID: iosId };

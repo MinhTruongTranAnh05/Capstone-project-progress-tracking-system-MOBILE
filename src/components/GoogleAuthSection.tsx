@@ -12,21 +12,24 @@ import { authStyles } from '@/features/auth/presentation/authStyles';
 export function GoogleAuthSection({ compact = false, disabled = false, onBusyChange }: { compact?: boolean; disabled?: boolean; onBusyChange?: (busy: boolean) => void }) {
   const { loginWithGoogle } = useAuth();
   const unavailable = getGoogleSignInUnavailableReason();
-  const settings = useQuery({ queryKey: ['public', 'googleConfig'], queryFn: authService.getGoogleConfig, enabled: !unavailable });
-  const clientId = process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID || settings.data?.clientId;
+  const configuredClientId = process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID?.trim();
+  // A configured native/web client can open Google directly. BE still validates the
+  // credential at POST /auth/google; the public config endpoint is a discovery fallback.
+  const settings = useQuery({ queryKey: ['public', 'googleConfig'], queryFn: authService.getGoogleConfig, enabled: !unavailable && !configuredClientId });
+  const clientId = configuredClientId || (settings.data?.enabled ? settings.data.clientId : null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<unknown>(null);
   const mounted = useRef(false);
   useEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
   return <View style={{ gap: compact ? 10 : 14 }}>
-    {unavailable ? <><GoogleSignInButton clientId={clientId || ''} disabled onBusyChange={() => {}} onCredential={async () => {}} onError={() => {}} /><Text style={ui.notice}>{unavailable}</Text></>
-      : settings.isPending ? <><ActivityIndicator color={colors.primary} /><Text style={authStyles.body}>Đang kiểm tra đăng nhập Google...</Text></>
-      : settings.isError ? <><Text accessibilityRole="alert" style={ui.error}>{getErrorMessage(settings.error)}</Text><Button title="Thử lại" secondary onPress={() => void settings.refetch()} /></>
-      : settings.data?.enabled && clientId ? <GoogleSignInButton clientId={clientId}
-        disabled={disabled || busy} onBusyChange={value => { if (mounted.current) { setBusy(value); onBusyChange?.(value); if (value) setError(null); } }}
+    {clientId || unavailable ? <GoogleSignInButton clientId={clientId || ''}
+        disabled={disabled || busy || !!unavailable} onBusyChange={value => { if (mounted.current) { setBusy(value); onBusyChange?.(value); if (value) setError(null); } }}
         onCredential={async idToken => { await loginWithGoogle({ idToken }); }}
         onError={failure => { if (mounted.current) setError(failure); }} />
+      : settings.isPending ? <><ActivityIndicator color={colors.primary} /><Text style={authStyles.body}>Đang kiểm tra đăng nhập Google...</Text></>
+      : settings.isError ? <><Text accessibilityRole="alert" style={ui.error}>{getErrorMessage(settings.error)}</Text><Button title="Thử lại" secondary onPress={() => void settings.refetch()} /></>
       : <Text style={authStyles.footnote}>Đăng nhập Google chưa được bật: máy chủ chưa cấu hình Google.</Text>}
+    {!!unavailable && <Text style={ui.notice}>{unavailable}</Text>}
     {busy && <ActivityIndicator color={colors.primary} />}
     {!!error && <Text accessibilityRole="alert" style={ui.error}>{getErrorMessage(error)}</Text>}
     {!compact && <Text style={authStyles.body}>Dùng email Google cá nhân đã có trong danh sách của phòng đào tạo. Tài khoản @fpt.edu.vn không được hỗ trợ cho đăng nhập sinh viên.</Text>}
