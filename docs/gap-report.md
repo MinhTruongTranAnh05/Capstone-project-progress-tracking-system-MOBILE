@@ -1,5 +1,17 @@
 # Mobile parity gap report — current target: deployed v2.9
 
+## Google native checkpoint — 2026-11-03
+
+The owner supplied separate Web/server and iOS client IDs from their own Google Cloud project. Mobile `.env` and `.env.example` now use those public IDs; the iOS URL scheme derives from its iOS client ID. Development-build dependencies/profiles, a local/EAS preflight and native provider tests are added. Expo Go is detected using `isRunningInExpoGo()` and shows an upfront unavailable notice; it is not falsely treated as supporting native Google login. No BE/FE edits, secrets, credentials or test writes were made. See [google-login-setup.md](google-login-setup.md).
+
+| Area | Web behavior | Mobile current | Difference | Severity (High/Med/Low) | Fix |
+|---|---|---|---|---|---|
+| Google native sign-in | Browser Google client; server verifies ID token | iOS/server OAuth IDs configured; native SDK sends only idToken | Existing website client does not alone configure iOS | High | Mobile config/dev-client/profile implemented; real device sign-in **not tested**, awaits signing/install |
+| BE allowed audiences | Existing website ID remains valid | New mobile Web ID overrides public default | BE must allow the new Web ID in GOOGLE_CLIENT_IDS | High | **Awaiting BE owner configuration** on the hosting process; no database migration or mobile-only workaround |
+| Test environment | Historical deployed v2.9 evidence below | Config preserves supplied URL | Previous tunnel failed DNS on 2026-11-02 | High | **Blocked pending new URL**; do not claim current HTTP 200 or attempt live writes |
+
+The later request for full Admin/lecturer mobile portals is acknowledged but remains unimplemented. Staff still has only the approved login/identity/refresh/logout screen; older “out of scope” text below records prior scope, not completion of the later portal request.
+
 Latest explicit scope update: the user approved the screenshot's Admin/Coordinator password form. POST `/auth/login` is now implemented for ADMIN/LECTURER, with a separate identity/refresh/logout landing screen. Student formation routes and automatic group queries remain STUDENT-only; no staff portal is included. Earlier statements that all staff sessions are refused are superseded by this approval. Login styling follows the supplied screenshot and retains the requested removal of the orange introduction on mobile.
 
 Latest actual-FE recheck: the newly cloned `main` is `7078a14`. Remaining navigation, overview, validation, notification and identity differences have been corrected in mobile; see [frontend-recheck.md](frontend-recheck.md) for the comparison and specific Web defects excluded. The deployed contract still exposes the same 76 path/method sets and eight audited mobile schemas. Required capstone APIs remain absent; authenticated and device checks are not signed off.

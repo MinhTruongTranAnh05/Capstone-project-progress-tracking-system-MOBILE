@@ -2,6 +2,14 @@
 
 Ứng dụng sinh viên ghép nhóm đồ án, đã có sẵn và được chỉnh sửa tiếp trên nhánh `align-with-web-be`. Backend và Frontend chỉ được đọc để đối chiếu.
 
+## Cập nhật Google native — 2026-11-03
+
+Đã cấu hình hai OAuth Client ID do chủ ứng dụng cung cấp trong `.env` local và `.env.example`: Web ID dùng làm audience gửi BE, iOS ID cho bundle `com.fpt.capstone.mobile`. Callback iOS được tạo từ iOS ID qua config plugin. Có `expo-dev-client`, profile EAS development và kiểm tra cấu hình `npm run google:check`; mở Metro cho bản cài bằng `npm run start:dev`. Expo Go hiển thị thông báo và khóa nút Google ngay từ đầu. Đăng nhập Google vẫn chỉ gọi POST `/auth/google` với `{idToken}`; không dùng client secret, không thay đổi website/BE.
+
+**Chưa kiểm thử đăng nhập thật:** cần BE thêm Web Client ID mới vào `GOOGLE_CLIENT_IDS` trên tiến trình hosting BE, giữ lại ID website và restart/redeploy. Tunnel cũ lỗi DNS ngày 2026-11-02; cần URL mới. Chưa có EAS project/signing hoặc IPA được tạo; cần Expo/Apple Developer cho bản iPhone qua EAS. Hướng dẫn từng bước và điều kiện Android/iPhone: [google-login-setup.md](docs/google-login-setup.md). `npm run build` vẫn chỉ export JS/Hermes, không tạo bản cài.
+
+Yêu cầu mở rộng portal Admin/giảng viên đã được ghi nhận ở trao đổi sau checkpoint login; chưa triển khai. Màn staff hiện vẫn là xác nhận tài khoản/làm mới/đăng xuất. Các mô tả phạm vi cũ bên dưới không phải xác nhận hoàn tất portal.
+
 ## Contract đang sử dụng
 
 - Theo quyết định mới nhất của người dùng: **BE triển khai v2.9**, không phải BE `main` cũ trong workspace.
@@ -61,7 +69,7 @@ Nếu Expo Go còn báo project SDK 57, dừng Metro cũ bằng `Ctrl+C`, chạy
 
 Copy `.env.example` thành `.env` nếu chưa có. `EXPO_PUBLIC_API_URL` phải chứa `/api/v1`. API base URL không hard-code trong code runtime. Bản làm việc này đã đổi riêng giá trị đó sang test tunnel đã được cung cấp; URL cũ lưu trong `.expo/api-url-before-alignment.txt` (không commit).
 
-Google native cần development build có module Google Sign-In, không hoạt động trong Expo Go. BE trả Google Web client ID qua `/auth/google/config`; có thể cấu hình `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID` và `EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID` theo OAuth app đã được cấp. Origin Web/native client phải được cấu hình hợp lệ; không bỏ qua lỗi OAuth hoặc đưa token vào chat/log.
+Google native cần development build có module Google Sign-In, không hoạt động trong Expo Go. Hai public OAuth ID đã có trong `.env.example`; `.env` local vẫn được ignore. EAS cloud cần ba biến EXPO_PUBLIC_* trong development environment vì không tự nhận `.env` local. BE trả cấu hình bật/tắt qua `/auth/google/config`; Web ID cấu hình riêng cho mobile được ưu tiên. Origin cho bản Web, native client, signing và BE audience phải hợp lệ; không bỏ qua lỗi OAuth hoặc đưa token vào chat/log. Xem [google-login-setup.md](docs/google-login-setup.md).
 
 `npm run build` export Web/Android/iOS vào `.expo/alignment-build`; đây là bundle JS/Hermes, **không phải APK/IPA**. Kiểm tra thiết bị/native build và đăng nhập thật là bước riêng. `npm test` dùng adapter HTTP/storage trong Node và contract đã chụp, không ghi vào DB thật.
 
@@ -78,4 +86,4 @@ Google native cần development build có module Google Sign-In, không hoạt �
 
 Chưa có đăng nhập OAuth hoặc ghi dữ liệu BE trong đợt này. Computer Use bị dừng vì không xác định chắc chắn URL hiện tại của Chrome; không tiếp tục tự động hóa trình duyệt trong turn đó. Kiểm tra ảnh render và hành vi thực tế chưa được ký duyệt.
 
-Chỉ dùng dữ liệu `TEST-` trên test DB được cho phép; không sửa bản ghi khác. Hai tài khoản được cung cấp cần người dùng đăng nhập Google trực tiếp. Luồng cần 3+ thành viên ghi **not tested**. Tài khoản staff không có và cũng không thuộc phạm vi mobile.
+Chỉ dùng dữ liệu `TEST-` trên test DB được cho phép; không sửa bản ghi khác. Hai tài khoản được cung cấp cần người dùng đăng nhập Google trực tiếp. Luồng cần 3+ thành viên ghi **not tested**. Chưa thực hiện đăng nhập staff bằng công cụ; portal staff được yêu cầu sau checkpoint ban đầu và còn chưa triển khai.

@@ -11,7 +11,7 @@ Rechecked against the newly cloned FE `main` at `7078a14`; see [frontend-recheck
 | iPhone Expo Go compatibility | No BE change | Student; Leader membership | App entry | Upgraded to SDK 58; Doctor 20/20 and iOS manifest checked; physical device rendering not tested |
 | Membership-aware menu / create-discover tabs | Verified membership from GET `/groups/{id}` | Student; Leader membership | Shared shell / create-discover workspace | Implemented with current FE labels; own request history preserved; device navigation not tested |
 | Group overview | GET `/groups/{id}`, `/groups/{id}/requests`, `/groups/{id}/leave-requests` | Member (own leaves); Leader (all leaves) | Overview | Added roster/vacancies, lock warning and quick links; counts respect expiry and deployed leave statuses; live reads not tested |
-| Google login | GET `/auth/google/config`, POST `/auth/google` `{idToken}`, GET `/auth/me` | STUDENT; Leader membership | Login | Implemented and unit/contract checked; real Google login not tested |
+| Google login | GET `/auth/google/config`, POST `/auth/google` `{idToken}`, GET `/auth/me` | STUDENT; Leader membership | Login | Native iOS/server IDs, callback scheme, dev-client/EAS profiles and preflight configured 2026-11-03; cancellation/missing-token tests pass; Expo Go correctly unavailable; **real login not tested** pending BE audience allowlist/new URL and signed install; see google-login-setup.md |
 | Admin/Coordinator password login (new approval) | POST `/auth/login` `{email,password}`, GET `/auth/me` | ADMIN, LECTURER | Login → Staff session confirmation | Implemented; exact password preserved, public request omits Bearer, role-specific routing and session checks covered; real login not tested |
 | Create account | POST `/auth/register` absent; `/auth/campuses` absent | Neither Student nor Leader exposed | Account-access / registration explanation | **blocked by BE**: no self-registration controller; latest web register is inactive |
 | Semester/subject context | GET `/me/semesters`, GET `/groups/{id}` | Student; Leader membership | Shared scope selector | Implemented: per-user known hint, fresh membership/scope verification, no guessing; unit tests pass |
@@ -27,7 +27,7 @@ Rechecked against the newly cloned FE `main` at `7078a14`; see [frontend-recheck
 | Advisory/guidance timetable | No advisory/guidance schedule endpoint | Neither Student nor Leader exposed | Lịch tư vấn & hướng dẫn đồ án | **blocked by BE**: formation deadlines are not a guidance schedule |
 | Link documents (earlier approved scope) | Document submission/list endpoints absent | Neither Student nor Leader exposed | None | **blocked by BE**: no deployed document controller; no fake submission |
 | Booking/appointments | Not used | None in mobile | None | Excluded by lecturer; no booking implementation/testing |
-| Admin/Coordinator portals | Staff-only APIs | Staff | None | Out of scope |
+| Admin/Coordinator portals | Staff-only APIs | Staff | None | Later requested by user; **not implemented**; current staff screen only confirms identity/refresh/logout |
 
 “Blocked by BE” above is based on the published contract plus matching source, not a guessed 403/404. Authenticated denials will be copied exactly when real testing is possible. No test data has been written. Only authorized `TEST-` disposable data may be used. Flows needing 3+ signed-in members are not tested with the two supplied accounts. No Phase 3 sign-off yet.
 

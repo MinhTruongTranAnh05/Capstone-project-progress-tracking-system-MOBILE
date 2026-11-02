@@ -1,6 +1,8 @@
-# Verification — 2026-11-01
+# Verification — latest checkpoint 2026-11-03
 
 Current target: deployed v2.9. No BE/FE source edits. No live authentication or writes were performed.
+
+Latest Google native configuration: **42 tests**, zero-warning lint, strict typecheck, local iOS configuration preflight and Web/Android/iOS JS/Hermes export all pass. Expo config introspection confirms the generated iOS plist includes the supplied iOS client's reversed callback scheme with bundle `com.fpt.capstone.mobile`. New provider-boundary tests cover separate client IDs, account selection, cancellation, missing tokens, Play Services failure and build-config validation. These checks do not contact Google/BE or sign an IPA. New public OAuth IDs are configured in mobile only; BE audience configuration, a new reachable test URL, Expo/Apple signing and device login remain pending. The historical tunnel failed DNS resolution on 2026-11-02. See [google-login-setup.md](google-login-setup.md).
 
 Latest empty-login-field fix: **36 tests**, zero-warning lint, strict types and Web/Android/iOS exports pass. A regression verifies that empty email yields only its required error, while a nonempty malformed email yields its format error. Local errors are displayed per field; ambiguous placeholder examples were replaced. No real login/device result is claimed.
 
@@ -12,14 +14,14 @@ SDK compatibility was subsequently updated and rechecked on Expo 58 after the us
 
 | Check | Result | Limit |
 |---|---|---|
-| Deployed OpenAPI | PASS — HTTP 200, 76 paths, evidence in contracts/deployed-v29.json | Public contract inspection only; not authenticated endpoint testing |
+| Deployed OpenAPI | Historical PASS on 2026-11-01 — HTTP 200, 76 paths, evidence in contracts/deployed-v29.json; current live verification BLOCKED pending new URL after DNS failure | Public contract inspection only; not authenticated endpoint testing |
 | TypeScript | PASS — strict typecheck, unused locals/parameters enabled | Static types are not a device test |
-| Unit/contract tests | PASS — 36 tests | HTTP/storage adapters; covers session races/401, deployed operation paths, membership/scope verification, per-user hints, 3–5 capacity, privacy, overview counts, application validation, staff authentication boundaries and single-error login validation |
+| Unit/contract tests | PASS — 42 tests | HTTP/storage/provider adapters; covers session races/401, deployed operation paths, membership/scope verification, per-user hints, 3–5 capacity, privacy, overview counts, application validation, staff authentication boundaries, login validation and native Google/config conditions |
 | ESLint | PASS — zero warnings allowed | No compiler rules disabled to hide errors; fixes include keyed forms, lazy initialization and async session hydration |
 | Web/Android/iOS export | PASS | JS/Hermes export only; no APK/IPA build or install |
 | Active source audit | PASS — no Instructor/GVHD/slot/booking logic, explicit any, runtime mocks or console calls | Historical docs/tests may mention removed contracts as evidence |
 | Visual/device QA | NOT TESTED | Computer Use stopped because Chrome URL could not be determined confidently enough for policy enforcement; no further browser control attempted |
-| Google login, Student read/write | NOT TESTED | Needs interactive login on a supported browser/native OAuth origin |
+| Google login, Student read/write | NOT TESTED | New IDs/callback scheme/dev-client configured; needs BE allowed audience and new URL, signed app and interactive Google login |
 | Leader create/accept/Like/lock/kick/leave | NOT TESTED on real BE | Requires verified Student A/B sessions and disposable TEST- data; no success/denial inferred |
 | 3+ member cases | NOT TESTED | Only two Google accounts supplied |
 | Topic catalog/selection, weekly progress, guidance schedule, registration | BLOCKED BY BE | Required routes are absent from deployment/matching source; no fabricated 403/404 or fallback to old BE |
