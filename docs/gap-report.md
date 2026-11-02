@@ -1,5 +1,9 @@
 # Mobile parity gap report — current target: deployed v2.9
 
+## Authorized BE configuration change — 2026-11-03
+
+The user explicitly authorized adding the mobile Google client to BE, superseding the earlier mobile-only restriction **for this auth configuration change**. A separate BE worktree `../Capstone-project-progress-tracking-system-BE-mobile-google`, branch `fix/mobile-google-oauth`, is based on the matching deployed v2.9 source (`e0d89ec`). It appends the mobile Web/server audience to `app.google.client-ids` by default, preserving website IDs from GOOGLE_CLIENT_IDS first. The original BE main worktree and its pre-existing application.yml edit are preserved; FE is unchanged. **14 BE tests pass** (configuration/verifier boundary, Google login and password/session regression, H2 only). This is a local source change, not a remote deployment or real Google login. Existing native signing and API reachability blockers remain.
+
 ## Google native checkpoint — 2026-11-03
 
 The owner supplied separate Web/server and iOS client IDs from their own Google Cloud project. Mobile `.env` and `.env.example` now use those public IDs; the iOS URL scheme derives from its iOS client ID. Development-build dependencies/profiles, a local/EAS preflight and native provider tests are added. When a mobile Web ID is explicitly configured, the button opens Google without fetching the public BE config first; POST `/auth/google` still authoritatively validates credentials, and exact BE errors are retained. Expo Go is detected using `isRunningInExpoGo()` and shows an upfront unavailable notice; it is not falsely treated as supporting native Google login. No BE/FE edits, secrets, credentials or test writes were made. See [google-login-setup.md](google-login-setup.md).
@@ -7,7 +11,7 @@ The owner supplied separate Web/server and iOS client IDs from their own Google 
 | Area | Web behavior | Mobile current | Difference | Severity (High/Med/Low) | Fix |
 |---|---|---|---|---|---|
 | Google native sign-in | Browser Google client; server verifies ID token | iOS/server OAuth IDs configured; native SDK sends only idToken | Existing website client does not alone configure iOS | High | Mobile config/dev-client/profile implemented; real device sign-in **not tested**, awaits signing/install |
-| BE allowed audiences | Existing website ID remains valid | New mobile Web ID overrides public default | BE must allow the new Web ID in GOOGLE_CLIENT_IDS | High | **Awaiting BE owner configuration** on the hosting process; no database migration or mobile-only workaround |
+| BE allowed audiences | Existing website ID remains valid | New mobile Web ID overrides public default; authorized v2.9 BE patch appends it by default | Running BE must include the updated configuration | High | **Implemented locally, not deployed** on separate BE branch; 14 tests pass; no database migration or validation bypass |
 | Test environment | Historical deployed v2.9 evidence below | Config preserves supplied URL | Previous tunnel failed DNS on 2026-11-02 | High | **Blocked pending new URL**; do not claim current HTTP 200 or attempt live writes |
 
 The later request for full Admin/lecturer mobile portals is acknowledged but remains unimplemented. Staff still has only the approved login/identity/refresh/logout screen; older “out of scope” text below records prior scope, not completion of the later portal request.

@@ -1,12 +1,12 @@
 # MatchPoint FPT Mobile
 
-Ứng dụng sinh viên ghép nhóm đồ án, đã có sẵn và được chỉnh sửa tiếp trên nhánh `align-with-web-be`. Backend và Frontend chỉ được đọc để đối chiếu.
+Ứng dụng sinh viên ghép nhóm đồ án, đã có sẵn và được chỉnh sửa tiếp trên nhánh `align-with-web-be`. Frontend chỉ được đọc để đối chiếu. Ngày 2026-11-03, người dùng cho phép bổ sung cấu hình Google vào BE; thay đổi được tách trên nhánh `fix/mobile-google-oauth`, worktree `../Capstone-project-progress-tracking-system-BE-mobile-google`, từ source v2.9. BE `main` gốc và thay đổi local có sẵn được giữ nguyên.
 
 ## Cập nhật Google native — 2026-11-03
 
 Đã cấu hình hai OAuth Client ID do chủ ứng dụng cung cấp trong `.env` local và `.env.example`: Web ID dùng làm audience gửi BE, iOS ID cho bundle `com.fpt.capstone.mobile`. Callback iOS được tạo từ iOS ID qua config plugin. Có `expo-dev-client`, profile EAS development và kiểm tra cấu hình `npm run google:check`; mở Metro cho bản cài bằng `npm run start:dev`. Expo Go hiển thị thông báo và khóa nút Google ngay từ đầu. Đăng nhập Google vẫn chỉ gọi POST `/auth/google` với `{idToken}`; không dùng client secret, không thay đổi website/BE.
 
-**Chưa kiểm thử đăng nhập thật:** cần BE chấp nhận Web Client ID mới trên tiến trình hosting BE, giữ lại ID website. Tunnel cũ lỗi DNS ngày 2026-11-02; cần URL mới. Đã tạo/liên kết [Expo project capstone-mobile](https://expo.dev/accounts/minhtruongtrananh05/projects/capstone-mobile) và lưu hai OAuth ID công khai trong development environment; chưa đặt API URL cloud vì URL mới chưa được cung cấp. Chưa tạo signing hoặc IPA; cần Apple Developer cho bản iPhone qua EAS. Hướng dẫn từng bước và điều kiện Android/iPhone: [google-login-setup.md](docs/google-login-setup.md). `npm run build` vẫn chỉ export JS/Hermes, không tạo bản cài.
+**Chưa kiểm thử đăng nhập thật:** bản BE v2.9 ở worktree riêng đã được bổ sung mặc định Web Client ID mobile, giữ lại ID website từ env; cần chạy/deploy bản BE đã sửa thì thay đổi mới có hiệu lực. BE remote cũ không tự nhận thay đổi local. Tunnel cũ lỗi DNS ngày 2026-11-02; cần URL mới. Đã tạo/liên kết [Expo project capstone-mobile](https://expo.dev/accounts/minhtruongtrananh05/projects/capstone-mobile) và lưu hai OAuth ID công khai trong development environment; chưa đặt API URL cloud vì URL mới chưa được cung cấp. Chưa tạo signing hoặc IPA; cần Apple Developer cho bản iPhone qua EAS. Hướng dẫn từng bước và điều kiện Android/iPhone: [google-login-setup.md](docs/google-login-setup.md). `npm run build` vẫn chỉ export JS/Hermes, không tạo bản cài.
 
 Yêu cầu mở rộng portal Admin/giảng viên đã được ghi nhận ở trao đổi sau checkpoint login; chưa triển khai. Màn staff hiện vẫn là xác nhận tài khoản/làm mới/đăng xuất. Các mô tả phạm vi cũ bên dưới không phải xác nhận hoàn tất portal.
 

@@ -1,6 +1,8 @@
 # Verification — latest checkpoint 2026-11-03
 
-Current target: deployed v2.9. No BE/FE source edits. No live authentication or writes were performed.
+Current target: deployed v2.9. FE is unchanged. The user subsequently authorized the BE Google configuration patch described below. No live authentication or real DB writes were performed.
+
+Authorized BE patch — 2026-11-03: a separate matching v2.9 worktree (`../Capstone-project-progress-tracking-system-BE-mobile-google`, branch `fix/mobile-google-oauth`, base e0d89ec) now appends the supplied mobile Web/server audience in application.yml while retaining the website's GOOGLE_CLIENT_IDS first. **14 targeted BE tests pass**: 5 configuration/real-verifier boundary cases, 6 Google login integration cases, 3 password/session cases. Tests use mocked Google HTTP and H2 only. Runnable JAR packaging also passes, and the configuration inside the JAR was checked for the appended mobile ID and preserved website placeholder. Artifact: the BE worktree's `target/capstone-tracking-backend-0.1.0.jar`. Existing BE main/local changes are preserved. No remote deployment, real Google token, or native signed install is claimed; the running remote BE still requires the patch or equivalent audience configuration.
 
 Expo build preparation on 2026-11-03: successfully authenticated the local Expo account, created/linked `@minhtruongtrananh05/capstone-mobile` (`0f5d9332-5ac4-4fe8-8a78-42c5c6f6faa8`) and saved the supplied Web/iOS OAuth IDs as project-scoped plaintext development variables. No API URL was set in cloud because the previous tunnel is known to be down and no replacement was supplied. No native cloud build, Apple signing, device registration or paid operation was started; actual Google/app login remains **NOT TESTED**. No local BE listener was found on the common application ports checked; this does not establish the state of a remote BE.
 

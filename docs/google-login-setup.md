@@ -1,6 +1,6 @@
 # Google login — native setup (2026-11-03)
 
-Only the mobile repository is changed. The Google Cloud project belongs to the app owner. Its public Web and iOS OAuth Client IDs are recorded in `.env.example` and configured in the ignored local `.env`. The client secret is not used by the mobile app and must not be committed. The previously disclosed secret should be revoked in Google Cloud.
+The owner authorized an additional BE configuration change on 2026-11-03 after the mobile-only checkpoint. It is isolated on `fix/mobile-google-oauth` (commit `3da93b7`) in `../Capstone-project-progress-tracking-system-BE-mobile-google`, based on v2.9 (`e0d89ec`); the original BE main worktree and its pre-existing changes are untouched. Frontend is unchanged. The Google Cloud project belongs to the app owner. Its public Web and iOS OAuth Client IDs are recorded in `.env.example` and configured in the ignored local `.env`. The client secret is not used by the mobile app and must not be committed. The previously disclosed secret should be revoked in Google Cloud.
 
 ## What is configured
 
@@ -11,13 +11,15 @@ Only the mobile repository is changed. The Google Cloud project belongs to the a
 - When `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID` is configured, the button opens Google directly with that ID without waiting for `GET /auth/google/config`. When it is absent, the public config endpoint supplies an enabled client ID as a discovery fallback. This does not change the website or skip BE token/audience validation at `POST /auth/google`.
 - Expo Go displays an upfront unavailable notice and a disabled Google button. The native module is loaded only in a configured native build. Cancellation does not contact BE; the SDK offers account selection again after logout or a denied login. Late provider results after the login screen unmounts are ignored.
 
-## Backend handoff (the BE owner performs this)
+## Backend configuration patch
 
-Add the mobile **Web** Client ID from `.env.example` to `GOOGLE_CLIENT_IDS`, preserving the website's existing allowed client IDs, then restart/redeploy the process with that environment. This is the environment of the process hosting BE, not mobile's `.env`, and does not require a database migration. Do not replace the website client ID or its public default just to configure mobile.
+The patched v2.9 `application.yml` retains `GOOGLE_CLIENT_IDS` for the website first, and appends the mobile **Web** ID from `.env.example` by default. Running this patched BE no longer requires adding that mobile ID manually to the environment. The extra audience can be overridden/disabled by `GOOGLE_MOBILE_CLIENT_IDS` on the BE process. No JWT validation, user-role or roster checks were bypassed, and no database migration was changed.
 
-If BE runs on a teammate's machine/server, that host needs the environment update. If the demo will run BE on this computer, obtain its startup instructions and approved test DB connection from the BE owner first; the mobile app does not need its own database. No BE/FE repository file was edited for this handoff.
+The source patch must be built and started/deployed to take effect. An already running unpatched remote BE still needs its host to accept the mobile Web ID (either through this patch or its existing GOOGLE_CLIENT_IDS setting). This is the environment of the process hosting BE, not mobile's `.env`. The website client ID and its public default remain intact.
 
-The old API tunnel failed DNS resolution on 2026-11-02. A new working test API URL and confirmation of the audience configuration are still required. Update `EXPO_PUBLIC_API_URL` in `.env` only after the owner supplies that URL; retain `/api/v1`. No real OAuth login or BE write has been performed with these new IDs.
+If BE runs on a teammate's machine/server, that host needs the patched build or the environment update. If the demo will run BE on this computer, an approved test DB connection/startup configuration is still needed; the mobile app does not need its own database. Do not start the old BE main contract just because its local configuration exists: mobile targets v2.9.
+
+The old API tunnel failed DNS resolution on 2026-11-02. A reachable API running the patched BE or accepting the new audience is still required. Update `EXPO_PUBLIC_API_URL` in `.env` only after its actual URL is known; retain `/api/v1`. No real OAuth login or BE database write has been performed with these new IDs.
 
 ## Google Cloud
 
