@@ -34,11 +34,13 @@ npm run google:check
 
 This command checks local configuration only. It cannot verify Google client types, test users, BE allowlisting, tunnel reachability, signing or a successful login.
 
-The project includes `expo-dev-client` and `eas.json` profiles `development` (physical device) and `development-simulator` (iOS Simulator). `.env` is ignored, so EAS cloud builds do not receive it automatically. Once the owner has linked an Expo project, set these three **plaintext** variables in its **development** environment on the Expo dashboard:
+The project includes `expo-dev-client` and `eas.json` profiles `development` (physical device) and `development-simulator` (iOS Simulator). It is linked to [@minhtruongtrananh05/capstone-mobile](https://expo.dev/accounts/minhtruongtrananh05/projects/capstone-mobile), project ID `0f5d9332-5ac4-4fe8-8a78-42c5c6f6faa8`. Expo account access was verified and both public OAuth IDs below were saved as project-scoped plaintext variables in the **development** cloud environment on 2026-11-03. No other project's variables or website credentials were changed.
 
-- `EXPO_PUBLIC_API_URL`: current approved test URL ending in `/api/v1`.
-- `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID`: Web ID from `.env.example`.
-- `EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID`: iOS ID from `.env.example`.
+`.env` is ignored, so EAS cloud builds do not receive it automatically. The three required cloud variables are:
+
+- `EXPO_PUBLIC_API_URL`: **still missing in cloud**, awaiting a current approved test URL ending in `/api/v1`; the known-dead tunnel was not uploaded.
+- `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID`: **configured**, Web ID from `.env.example`.
+- `EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID`: **configured**, iOS ID from `.env.example`.
 
 The `eas-build-post-install` hook rejects a missing environment or iOS scheme. Do not mark these as secret visibility: they must be available during local app config resolution and are embedded in the app. Do not upload the OAuth client secret.
 
@@ -46,12 +48,11 @@ With the owner signed into Expo and, for a physical iPhone cloud build, a paid A
 
 ```sh
 npx eas-cli@latest login
-npx eas-cli@latest init
 npx eas-cli@latest device:create
 npx eas-cli@latest build --platform ios --profile development
 ```
 
-Complete account authentication/signing interactively. No EAS project, Apple credentials, paid signing, device registration or cloud build has been created by this change. After installing the resulting app, enable iOS Developer Mode and start Metro with:
+The EAS project and its OAuth variables are already configured; do not reinitialize it just to build. Complete Apple account authentication/signing interactively and configure the current API URL first. No Apple credentials, paid signing, device registration or cloud build has been created by this change. After installing the resulting app, enable iOS Developer Mode and start Metro with:
 
 ```sh
 npm run start:dev -- --clear
