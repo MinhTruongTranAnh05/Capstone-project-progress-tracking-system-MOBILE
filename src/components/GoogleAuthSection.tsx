@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Text, View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
-import { GoogleSignInButton } from './GoogleSignInButton';
+import { GoogleSignInButton, getGoogleSignInUnavailableReason } from './GoogleSignInButton';
 import { Button, ui } from './FormationUI';
 import { useAuth } from '@/contexts/AuthContext';
 import { authService } from '@/services/authService';
@@ -11,15 +11,18 @@ import { authStyles } from '@/features/auth/presentation/authStyles';
 
 export function GoogleAuthSection({ compact = false, disabled = false, onBusyChange }: { compact?: boolean; disabled?: boolean; onBusyChange?: (busy: boolean) => void }) {
   const { loginWithGoogle } = useAuth();
-  const settings = useQuery({ queryKey: ['public', 'googleConfig'], queryFn: authService.getGoogleConfig });
+  const unavailable = getGoogleSignInUnavailableReason();
+  const settings = useQuery({ queryKey: ['public', 'googleConfig'], queryFn: authService.getGoogleConfig, enabled: !unavailable });
+  const clientId = process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID || settings.data?.clientId;
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<unknown>(null);
   const mounted = useRef(false);
   useEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
   return <View style={{ gap: compact ? 10 : 14 }}>
-    {settings.isPending ? <><ActivityIndicator color={colors.primary} /><Text style={authStyles.body}>Đang kiểm tra đăng nhập Google...</Text></>
+    {unavailable ? <><GoogleSignInButton clientId={clientId || ''} disabled onBusyChange={() => {}} onCredential={async () => {}} onError={() => {}} /><Text style={ui.notice}>{unavailable}</Text></>
+      : settings.isPending ? <><ActivityIndicator color={colors.primary} /><Text style={authStyles.body}>Đang kiểm tra đăng nhập Google...</Text></>
       : settings.isError ? <><Text accessibilityRole="alert" style={ui.error}>{getErrorMessage(settings.error)}</Text><Button title="Thử lại" secondary onPress={() => void settings.refetch()} /></>
-      : settings.data?.enabled && settings.data.clientId ? <GoogleSignInButton clientId={process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID || settings.data.clientId}
+      : settings.data?.enabled && clientId ? <GoogleSignInButton clientId={clientId}
         disabled={disabled || busy} onBusyChange={value => { if (mounted.current) { setBusy(value); onBusyChange?.(value); if (value) setError(null); } }}
         onCredential={async idToken => { await loginWithGoogle({ idToken }); }}
         onError={failure => { if (mounted.current) setError(failure); }} />

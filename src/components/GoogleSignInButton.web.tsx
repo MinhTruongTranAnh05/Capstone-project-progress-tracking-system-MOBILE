@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { Text } from 'react-native';
 import type { GoogleSignInButtonProps } from './GoogleSignInButton';
 
+export function getGoogleSignInUnavailableReason(): string | null { return null; }
+
 interface GoogleIdentity {
   initialize: (options: { client_id: string; callback: (result: { credential: string }) => void; auto_select: boolean }) => void;
   renderButton: (element: HTMLElement, options: { type: string; theme: string; size: string; text: string; locale: string }) => void;
