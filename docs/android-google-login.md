@@ -2,15 +2,29 @@
 
 The owner created an Android OAuth client in the same Google Cloud project as the mobile Web/server client on 2026-11-03. Android client IDs do not need to be passed to GoogleSignin.configure or added as an invented EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID.
 
-## Debug identity verified from this project
+## Current Android identity
 
-- Application ID: `com.fpt.capstone.mobile` (read from `android/app/build.gradle`).
+- Application ID: `com.fpt.capstone.mobil`, explicitly chosen by the owner after the OAuth package mismatch; set in Expo `android.package` and the local generated Android application ID/namespace/Kotlin entry-point package.
+- iOS bundle remains `com.fpt.capstone.mobile`. An iOS bundle ID does not reserve an Android package/SHA-1 pair.
 - Debug keystore: `android/app/debug.keystore`, alias `androiddebugkey` (the generated Android Gradle debug signing configuration).
 - Certificate SHA-1 read with keytool: `5E:8F:16:06:2E:A3:CD:2C:4A:0D:54:78:76:BA:A6:F3:8C:AB:F6:25`.
 - Google Cloud Android client must have this package and SHA-1. SHA-1 is a public certificate fingerprint, not the OAuth client ID or a client secret.
 - This identity is for the current local debug build. A differently signed release/EAS/Play build needs its own actual certificate registered.
 
 The existing Web/server Client ID in `.env` is still used to request the ID token's server audience. iOS configuration is independent. Neither Client secret nor a Google access token is added to mobile source or env.
+
+## Verification of selected `com.fpt.capstone.mobil` identity
+
+- Expo config resolves Android package `com.fpt.capstone.mobil` and iOS bundle `com.fpt.capstone.mobile`.
+- Native x86_64 debug rebuild: **PASS**, `BUILD SUCCESSFUL in 37m 27s`, 485 actionable tasks (47 executed, 438 up-to-date). Existing vendor warnings remain.
+- Actual APK inspection with `aapt2 dump badging`: package `com.fpt.capstone.mobil`, launch activity `com.fpt.capstone.mobil.MainActivity`.
+- Actual APK signature verification: **PASS**, SHA-1 `5e8f16062ea3cd2c4a0d547876baa6f38cabf625`, unchanged from the existing debug signing certificate.
+- Output: `android/app/build/outputs/apk/debug/app-debug.apk`, 91,463,481 bytes. This is an emulator x86_64 development APK, not a universal release.
+- Installation on `emulator-5554`: **PASS**, `adb install -r` returned `Success`; `pm path com.fpt.capstone.mobil` confirms the new package is installed. The old app was not uninstalled or cleared, so its local data was not migrated/deleted by this change.
+- Launch: **PASS to Android permission prompt**. Metro is running on port 8081; a package-targeted development-client deep link opened the new app. It currently awaits the owner's manual nearby-device permission decision.
+- Google credential return and BE session for the new package: **NOT TESTED**, pending manual permission handling and Google sign-in. No Cloud settings or signing keys were modified. The previously confirmed BE DNS failure remains a separate blocker.
+
+The checked-in source of truth is Expo `app.json`. The owner's existing generated `android/` tree remains untracked as it was before this change; its local application ID/namespace/Kotlin packages were synchronized for the verified build. A fresh Expo prebuild uses the new checked-in Android package. The stale generated autolinking JSON was backed up under ignored `.expo/native-tools/autolinking-before-android-mobil.json`; the regenerated JSON and Java entry point now reference `com.fpt.capstone.mobil`.
 
 ## Build/run
 
@@ -44,7 +58,7 @@ gradlew.bat app:assembleDebug --max-workers=2 --no-parallel --build-cache -Preac
 
 This command targets the currently connected x86_64 emulator. Use the actual device architecture when building for another device. See [the library's Windows build guidance](https://docs.swmansion.com/react-native-reanimated/docs/guides/building-on-windows/) and [Ninja 1.13.2](https://github.com/ninja-build/ninja/releases/tag/v1.13.2).
 
-## Observed result on 2026-11-03
+## Historical result on 2026-11-03 — previous `com.fpt.capstone.mobile` APK
 
 - Native Android debug build: **PASS**, `BUILD SUCCESSFUL in 22m 13s` (485 actionable tasks). The Google Sign-In native module compiled successfully. Vendor deprecation/Kotlin/manifest warnings remain; this is not a warning-free build.
 - Output: `android/app/build/outputs/apk/debug/app-debug.apk`, 91,463,477 bytes, emulator x86_64 development build.
@@ -61,7 +75,7 @@ Metro remains available on localhost port 8081 through `adb reverse`. A successf
 
 The owner's next screenshot showed `DEVELOPER_ERROR` from Google and a separate server connectivity error. The installed APK was pulled from `emulator-5554` and inspected directly: its package is `com.fpt.capstone.mobile` and its certificate SHA-1 remains `5E:8F:16:06:2E:A3:CD:2C:4A:0D:54:78:76:BA:A6:F3:8C:AB:F6:25`. The owner reported that the Cloud Android client instead uses `com.fpt.capstone.mobil` (missing the final `e`). This is a confirmed mismatch from the supplied Cloud value; the Cloud package must match the installed application ID exactly. Keep the existing Web/server ID in mobile configuration; do not replace it with an Android client ID.
 
-Required external correction: fix the Android OAuth client's package to `com.fpt.capstone.mobile` (or create the correctly configured Android client if the field cannot be edited), with the verified SHA-1, in the project containing the mobile Web/server client. No Cloud settings were changed by the agent, and a successful retry has not been observed. Google's return of an ID token and the BE session remain **NOT VERIFIED**. See [the library's DEVELOPER_ERROR guidance](https://react-native-google-signin.github.io/docs/troubleshooting).
+The initial recommendation to align Cloud to the old APK was superseded by the owner's explicit choice to use `com.fpt.capstone.mobil` for Android. Expo and the local generated Android project have therefore been updated to that application ID; iOS retains `com.fpt.capstone.mobile`. Rebuild/install and verify the new APK before retrying Google. The Android Cloud client must use `com.fpt.capstone.mobil` with the verified signing SHA-1 in the project containing the mobile Web/server client. No Cloud settings were changed by the agent, and a successful retry has not been observed. Google's return of an ID token and the BE session remain **NOT VERIFIED**. See [the library's DEVELOPER_ERROR guidance](https://react-native-google-signin.github.io/docs/troubleshooting).
 
 The configured public BE URL was also rechecked outside the tool sandbox and still failed with `The remote name could not be resolved: 'quick-collecting-studies-apparently.trycloudflare.com'`. This independently blocks API login; no authenticated BE error or success is inferred.
 

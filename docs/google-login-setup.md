@@ -5,6 +5,7 @@ The owner authorized an additional BE configuration change on 2026-11-03 after t
 ## What is configured
 
 - iOS bundle: `com.fpt.capstone.mobile` (must match the Google iOS client).
+- Android application ID: `com.fpt.capstone.mobil`, explicitly selected by the owner after the earlier OAuth mismatch. It intentionally differs from the iOS bundle ID. The Android OAuth client must use this exact package plus the installed APK's actual signing SHA-1.
 - `EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID`: iOS client used for native authentication and the reversed callback URL scheme in `app.config.js`.
 - `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID`: server audience requested by the native SDK. This is also needed for a native mobile app; creating it does not modify the existing website.
 - Google returns an ID token; mobile sends only `{idToken}` to `POST /api/v1/auth/google`. The existing BE validates it and returns the application session. No Google profile is trusted as an application session, and no Google token/password is persisted or logged.
@@ -25,7 +26,7 @@ The old API tunnel failed DNS resolution on 2026-11-02. A reachable API running 
 
 In the same Google Cloud project, retain both the Web client and the iOS client. In Audience, add the approved student Gmail accounts under Test users while the OAuth app is in Testing. These accounts must also exist and be eligible in the BE's student roster. Client IDs are public identifiers; client secrets, passwords, ID tokens and application tokens must not be sent in chat or checked into Git.
 
-For Android, also create an Android OAuth client with package `com.fpt.capstone.mobile` and the **SHA-1 of the certificate actually signing the installed build** in that project. The supplied IDs alone do not configure Android signing. Do not pass an invented `androidClientId` to `GoogleSignin.configure`.
+For Android, use an Android OAuth client with package `com.fpt.capstone.mobil` and the **SHA-1 of the certificate actually signing the installed build** in that project. Earlier evidence for the old `com.fpt.capstone.mobile` APK is historical; changing the Cloud field alone does not change an already installed APK. The supplied IDs alone do not configure Android signing. Do not pass an invented `androidClientId` to `GoogleSignin.configure`.
 
 ## Prepare a development build
 

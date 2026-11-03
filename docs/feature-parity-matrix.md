@@ -6,6 +6,8 @@ Target changed by explicit user decision on 2026-11-01. API contract: public `/v
 
 Rechecked against the newly cloned FE `main` at `7078a14`; see [frontend-recheck.md](frontend-recheck.md). The latest public contract has the same path/method sets and audited mobile-facing schemas.
 
+Latest Android identity update (2026-11-03): owner selected `com.fpt.capstone.mobil`; iOS stays `com.fpt.capstone.mobile`. New Android native build/signature/install **PASS** on the emulator with the unchanged debug SHA-1. New package launch is at the manual permission prompt; Google credential return/BE session for this package is **NOT TESTED**. Provider UI/errors in the Google row below are historical observations of the previous Android package, not proof that the new identity has authenticated. BE DNS remains blocked. See [android-google-login.md](android-google-login.md).
+
 | Web feature / lecturer requirement | API | Roles | Mobile screen | Status |
 |---|---|---|---|---|
 | iPhone Expo Go compatibility | No BE change | Student; Leader membership | App entry | Upgraded to SDK 58; Doctor 20/20 and iOS manifest checked; physical device rendering not tested |

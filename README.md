@@ -4,6 +4,8 @@
 
 ## Cập nhật Google native — 2026-11-03
 
+Package Android hiện được đổi theo lựa chọn mới nhất của chủ ứng dụng: **`com.fpt.capstone.mobil`**. iOS giữ **`com.fpt.capstone.mobile`**. Đã build/cài bản Android mới thành công, kiểm tra package/activity và chữ ký APK khớp SHA-1 cũ; app mới đang ở hộp thoại quyền Android chờ người dùng xử lý rồi thử Google. Android OAuth phải khớp package mới và SHA-1 của bản cài; Web/server Client ID vẫn giữ nguyên. Kết quả APK mang package cũ bên dưới là checkpoint trước khi đổi, không xác nhận đăng nhập của package mới.
+
 Đã cấu hình hai OAuth Client ID do chủ ứng dụng cung cấp trong `.env` local và `.env.example`: Web ID dùng làm audience gửi BE, iOS ID cho bundle `com.fpt.capstone.mobile`. Callback iOS được tạo từ iOS ID qua config plugin. Có `expo-dev-client`, profile EAS development và kiểm tra cấu hình `npm run google:check`; mở Metro cho bản cài bằng `npm run start:dev`. Expo Go hiển thị thông báo và khóa nút Google ngay từ đầu. Đăng nhập Google vẫn chỉ gọi POST `/auth/google` với `{idToken}`; không dùng client secret và giữ nguyên bước BE xác minh token.
 
 **Android local đã build, cài và mở màn đăng nhập thành công** trên `emulator-5554` (x86_64, có Google Play Services). Chữ ký APK khớp SHA-1 debug đã cung cấp để đăng ký OAuth. Người dùng đã xử lý hộp thoại quyền; màn login hiển thị form staff và nút Google khả dụng, không còn lỗi yêu cầu development build. Chọn tài khoản Google và tạo phiên BE chưa được kiểm thử. Chi tiết công cụ build, SHA-1 và kết quả thực tế: [android-google-login.md](docs/android-google-login.md).
