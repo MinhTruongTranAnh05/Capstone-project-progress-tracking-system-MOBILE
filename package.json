@@ -12,8 +12,8 @@
     "google:check": "node --env-file-if-exists=.env scripts/check-google-config.cjs ios",
     "google:check:android": "node --env-file-if-exists=.env scripts/check-google-config.cjs android",
     "eas-build-post-install": "node scripts/check-google-config.cjs",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
     "web": "expo start --web",
     "lint": "eslint . --max-warnings 0",
     "build": "node scripts/export.cjs"
