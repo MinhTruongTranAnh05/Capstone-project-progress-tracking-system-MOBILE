@@ -20,7 +20,7 @@ The source patch must be built and started/deployed to take effect. An already r
 
 If BE runs on a teammate's machine/server, that host needs the patched build or the environment update. If the demo will run BE on this computer, an approved test DB connection/startup configuration is still needed; the mobile app does not need its own database. Do not start the old BE main contract just because its local configuration exists: mobile targets v2.9.
 
-The old API tunnel failed DNS resolution on 2026-11-02. A reachable API running the patched BE or accepting the new audience is still required. Update `EXPO_PUBLIC_API_URL` in `.env` only after its actual URL is known; retain `/api/v1`. No real OAuth login or BE database write has been performed with these new IDs.
+The owner supplied a new BE URL on 2026-11-03: `https://cortex-bristle-ferry.ngrok-free.dev/api/v1`. Its OpenAPI and public Google config return HTTP 200, and mobile `.env`/`.env.example` now use it. The old tunnel DNS failure is historical. Public Google config reports enabled but advertises another Web ID; this does not reveal all allowed audiences. Whether this remote BE accepts the mobile audience remains unverified until real Google token exchange. No real OAuth login or BE database write has been performed with these new IDs. See [backend-ngrok-recheck.md](backend-ngrok-recheck.md).
 
 ## Google Cloud
 

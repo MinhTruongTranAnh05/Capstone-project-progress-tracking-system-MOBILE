@@ -1,5 +1,9 @@
 # Mobile parity gap report — current target: deployed v2.9
 
+## New BE URL recheck — 2026-11-03
+
+The newly supplied ngrok OpenAPI and public Google config both return HTTP 200. All 76 path/method sets and the eight previously audited schemas match v2.9; no new topic/progress/guidance/document API is exposed. Mobile local/example API bases now point to `https://cortex-bristle-ferry.ngrok-free.dev/api/v1`. The old tunnel DNS blocker is superseded for public connectivity; mobile OAuth-audience acceptance and authenticated role flows remain unverified. The BE publishes a different Web client ID, which alone does not reveal its full accepted-audience list. See [backend-ngrok-recheck.md](backend-ngrok-recheck.md). BE/FE were not edited during this recheck.
+
 ## Authorized BE configuration change — 2026-11-03
 
 The user explicitly authorized adding the mobile Google client to BE, superseding the earlier mobile-only restriction **for this auth configuration change**. A separate BE worktree `../Capstone-project-progress-tracking-system-BE-mobile-google`, branch `fix/mobile-google-oauth`, is based on the matching deployed v2.9 source (`e0d89ec`). It appends the mobile Web/server audience to `app.google.client-ids` by default, preserving website IDs from GOOGLE_CLIENT_IDS first. The original BE main worktree and its pre-existing application.yml edit are preserved; FE is unchanged. **14 BE tests pass** (configuration/verifier boundary, Google login and password/session regression, H2 only). This is a local source change, not a remote deployment or real Google login. Existing native signing and API reachability blockers remain.

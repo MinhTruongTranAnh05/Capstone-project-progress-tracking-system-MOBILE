@@ -2,6 +2,8 @@
 
 Current target: deployed v2.9. FE is unchanged. The user subsequently authorized the BE Google configuration patch described below. No live authentication or real DB writes were performed.
 
+Latest BE URL recheck on 2026-11-03: new ngrok OpenAPI and GET `/api/v1/auth/google/config` both **HTTP 200**, Google `enabled=true`. All 76 path/method sets and eight audited schemas match the prior snapshot. Local/example API base now uses `https://cortex-bristle-ferry.ngrok-free.dev/api/v1`; snapshot provenance/hash updated. **43 mobile tests PASS** after the snapshot update. Public config advertises a different Web client ID; its full accepted-audience list is not exposed, so real mobile OAuth/BE authentication remains **NOT TESTED**. Old tunnel/DNS notes below are historical, superseded for public reachability by this check. See [backend-ngrok-recheck.md](backend-ngrok-recheck.md).
+
 Latest Android identity decision on 2026-11-03: owner explicitly selected **`com.fpt.capstone.mobil`** for Android, retaining iOS bundle **`com.fpt.capstone.mobile`**. Expo config resolves both values correctly. The generated local Android application ID, namespace and Kotlin entry points are synchronized; stale autolinking JSON was backed up and regenerated with the new namespace. **Native rebuild PASS** (`BUILD SUCCESSFUL in 37m 27s`, 47 executed/438 up-to-date tasks). Actual APK inspection confirms package `com.fpt.capstone.mobil`, launch activity `com.fpt.capstone.mobil.MainActivity`, and unchanged debug SHA-1 `5E:8F:16:06:2E:A3:CD:2C:4A:0D:54:78:76:BA:A6:F3:8C:AB:F6:25`. **Emulator install PASS** (`Success`, package confirmed by `pm path`). The new app opened to Android's nearby-device permission prompt; manual handling and Google retry remain pending. No old app was uninstalled/cleared. No OAuth Cloud setting, BE/FE file, signing key or Google Web/server ID was changed. Older successful APK/provider-screen checks below concern the previous Android package. See [android-google-login.md](android-google-login.md).
 
 Latest interactive Android check on 2026-11-03: the app **opened Google's native sign-in UI**. After the owner reported selecting an account, the observed screen remained on Google's email entry with the exact message `Couldn't find this account`. No account identifier is recorded here. **Provider credential return, BE token exchange and application session are not verified**; this is not a BE response. The owner must finish the Google account step manually. Earlier prerequisites below remain historical evidence, not a claim that the provider UI is still untested.
@@ -26,7 +28,8 @@ SDK compatibility was subsequently updated and rechecked on Expo 58 after the us
 
 | Check | Result | Limit |
 |---|---|---|
-| Deployed OpenAPI | Historical PASS on 2026-11-01 — HTTP 200, 76 paths, evidence in contracts/deployed-v29.json; current live verification BLOCKED pending new URL after DNS failure | Public contract inspection only; not authenticated endpoint testing |
+| Deployed OpenAPI | PASS on 2026-11-03 — new ngrok URL HTTP 200, unchanged 76 path/method sets and 8 audited schemas; current source/hash in contracts/deployed-v29.json | Public contract inspection only; not authenticated endpoint testing |
+| Public Google config | PASS — HTTP 200, enabled=true at new API base | Advertised client differs from mobile's; does not prove all allowed audiences or real login |
 | TypeScript | PASS — strict typecheck, unused locals/parameters enabled | Static types are not a device test |
 | Unit/contract tests | PASS — 43 tests | HTTP/storage/provider adapters; covers session races/401, deployed operation paths, membership/scope verification, per-user hints, 3–5 capacity, privacy, overview counts, application validation, staff authentication boundaries, login validation and native Google/config/BE-denial conditions |
 | ESLint | PASS — zero warnings allowed | No compiler rules disabled to hide errors; fixes include keyed forms, lazy initialization and async session hydration |
@@ -34,7 +37,7 @@ SDK compatibility was subsequently updated and rechecked on Expo 58 after the us
 | Native Android debug build/signature/install | PASS | x86_64 emulator only; vendor warnings remain; no IPA build |
 | Active source audit | PASS — no Instructor/GVHD/slot/booking logic, explicit any, runtime mocks or console calls | Historical docs/tests may mention removed contracts as evidence |
 | Visual/device QA | PARTIAL | Installed Android login UI and Google's native sign-in screen observed; Google currently displays `Couldn't find this account`; remaining screens and earlier browser QA remain incomplete |
-| Google login, Student read/write | NOT TESTED | Android signed app installed and login rendered; Google account selection remains interactive; needs reachable BE with allowed mobile audience |
+| Google login, Student read/write | NOT TESTED | New public API reachable; Google account selection remains interactive; mobile audience acceptance and authenticated role flows unverified |
 | Leader create/accept/Like/lock/kick/leave | NOT TESTED on real BE | Requires verified Student A/B sessions and disposable TEST- data; no success/denial inferred |
 | 3+ member cases | NOT TESTED | Only two Google accounts supplied |
 | Topic catalog/selection, weekly progress, guidance schedule, registration | BLOCKED BY BE | Required routes are absent from deployment/matching source; no fabricated 403/404 or fallback to old BE |

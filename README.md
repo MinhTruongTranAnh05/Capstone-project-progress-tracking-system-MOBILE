@@ -4,6 +4,8 @@
 
 ## Cập nhật Google native — 2026-11-03
 
+**BE mới đã kiểm tra:** API base `https://cortex-bristle-ferry.ngrok-free.dev/api/v1`. OpenAPI và GET `/auth/google/config` đều HTTP 200; Google config báo `enabled=true`. Toàn bộ 76 đường dẫn/method và 8 schema đã audit khớp contract hiện tại. `.env` local và `.env.example` đã cập nhật. Đây là kiểm tra API công khai, chưa xác nhận đăng nhập hay quyền STUDENT/Leader. Các ghi chú lỗi DNS bên dưới thuộc tunnel cũ; xem [backend-ngrok-recheck.md](docs/backend-ngrok-recheck.md).
+
 Package Android hiện được đổi theo lựa chọn mới nhất của chủ ứng dụng: **`com.fpt.capstone.mobil`**. iOS giữ **`com.fpt.capstone.mobile`**. Đã build/cài bản Android mới thành công, kiểm tra package/activity và chữ ký APK khớp SHA-1 cũ; app mới đang ở hộp thoại quyền Android chờ người dùng xử lý rồi thử Google. Android OAuth phải khớp package mới và SHA-1 của bản cài; Web/server Client ID vẫn giữ nguyên. Kết quả APK mang package cũ bên dưới là checkpoint trước khi đổi, không xác nhận đăng nhập của package mới.
 
 Đã cấu hình hai OAuth Client ID do chủ ứng dụng cung cấp trong `.env` local và `.env.example`: Web ID dùng làm audience gửi BE, iOS ID cho bundle `com.fpt.capstone.mobile`. Callback iOS được tạo từ iOS ID qua config plugin. Có `expo-dev-client`, profile EAS development và kiểm tra cấu hình `npm run google:check`; mở Metro cho bản cài bằng `npm run start:dev`. Expo Go hiển thị thông báo và khóa nút Google ngay từ đầu. Đăng nhập Google vẫn chỉ gọi POST `/auth/google` với `{idToken}`; không dùng client secret và giữ nguyên bước BE xác minh token.
@@ -17,8 +19,8 @@ Yêu cầu mở rộng portal Admin/giảng viên đã được ghi nhận ở t
 ## Contract đang sử dụng
 
 - Theo quyết định mới nhất của người dùng: **BE triển khai v2.9**, không phải BE `main` cũ trong workspace.
-- API: `https://quick-collecting-studies-apparently.trycloudflare.com/api/v1`.
-- Swagger: `https://quick-collecting-studies-apparently.trycloudflare.com/swagger-ui/index.html`.
+- API: `https://cortex-bristle-ferry.ngrok-free.dev/api/v1`.
+- OpenAPI đã kiểm tra: `https://cortex-bristle-ferry.ngrok-free.dev/v3/api-docs`.
 - Bằng chứng contract đã đọc: [deployed-v29.json](docs/contracts/deployed-v29.json). Tunnel có thể thay đổi; cần xác nhận lại trước khi kiểm thử thật.
 - Web tham chiếu: FE `origin/main` đang lưu cục bộ, commit `7078a14`, đọc bằng `git show`, không checkout hay chỉnh sửa FE.
 - Đã đối chiếu lại bản FE vừa clone: `main`, `7078a14`; chi tiết chênh lệch và các lỗi Web không sao chép nằm trong [frontend-recheck.md](docs/frontend-recheck.md).
