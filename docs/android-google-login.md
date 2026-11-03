@@ -16,6 +16,16 @@ The existing Web/server Client ID in `.env` is still used to request the ID toke
 
 Use JDK 17+ (the configured build for this machine uses the existing JBR 21 installation), Android SDK and an emulator with Google Play Services. The machine's default Java 8 is insufficient for the current Gradle/Android build. Expo Go cannot load the Google native module.
 
+Local JDK selection is now persisted in ignored `.env.local` as `JAVA_HOME=C:/Users/Minht/.jdks/jbr-21.0.11`. The installed Expo env loader permits tool roots in `.local` files and passes this value to Gradle. This fixes `npx expo run:android` launched from a fresh PowerShell on this machine without changing system Java or committing a machine-specific JDK path. Verified through the Expo env loader and the actual Gradle wrapper: both Launcher JVM and Daemon JVM report JBR 21.0.11. This was a JVM selection check, not another full APK build or Google login test.
+
+For a different machine, use its own JDK path in ignored `.env.local`. For direct `gradlew.bat` commands (which do not load Expo dotenv), or if the shell already defines a different `JAVA_HOME`, select the JDK in that PowerShell first:
+
+```powershell
+$env:JAVA_HOME = 'C:\Users\Minht\.jdks\jbr-21.0.11'
+$env:Path = "$env:JAVA_HOME\bin;$env:Path"
+npx expo run:android
+```
+
 ```sh
 npx expo run:android --device emulator-5554 --no-bundler
 npm run start:dev -- --localhost --port 8081
