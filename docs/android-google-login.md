@@ -57,6 +57,14 @@ This command targets the currently connected x86_64 emulator. Use the actual dev
 
 Metro remains available on localhost port 8081 through `adb reverse`. A successful native build and an opened app do not establish a successful Google or BE login.
 
+### Follow-up: Android OAuth package mismatch
+
+The owner's next screenshot showed `DEVELOPER_ERROR` from Google and a separate server connectivity error. The installed APK was pulled from `emulator-5554` and inspected directly: its package is `com.fpt.capstone.mobile` and its certificate SHA-1 remains `5E:8F:16:06:2E:A3:CD:2C:4A:0D:54:78:76:BA:A6:F3:8C:AB:F6:25`. The owner reported that the Cloud Android client instead uses `com.fpt.capstone.mobil` (missing the final `e`). This is a confirmed mismatch from the supplied Cloud value; the Cloud package must match the installed application ID exactly. Keep the existing Web/server ID in mobile configuration; do not replace it with an Android client ID.
+
+Required external correction: fix the Android OAuth client's package to `com.fpt.capstone.mobile` (or create the correctly configured Android client if the field cannot be edited), with the verified SHA-1, in the project containing the mobile Web/server client. No Cloud settings were changed by the agent, and a successful retry has not been observed. Google's return of an ID token and the BE session remain **NOT VERIFIED**. See [the library's DEVELOPER_ERROR guidance](https://react-native-google-signin.github.io/docs/troubleshooting).
+
+The configured public BE URL was also rechecked outside the tool sandbox and still failed with `The remote name could not be resolved: 'quick-collecting-studies-apparently.trycloudflare.com'`. This independently blocks API login; no authenticated BE error or success is inferred.
+
 The app uses its explicitly configured Web client to open Google directly. It then sends only `{idToken}` to POST `/api/v1/auth/google` and requires the BE session response; provider account selection alone is not an authenticated application session. User account/password/2FA/consent entry remains interactive. No tokens may be pasted into chat, logs or source.
 
 The previously supplied BE tunnel has failed DNS resolution. The authorized v2.9 BE patch exists in a separate worktree, but it has not been deployed or started against an approved DB. Do not claim real application login or data access until a reachable BE is used. A physical/emulated Android phone is not the Backend server.
