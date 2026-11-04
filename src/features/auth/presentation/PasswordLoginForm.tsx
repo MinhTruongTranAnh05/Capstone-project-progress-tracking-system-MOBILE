@@ -55,7 +55,7 @@ export function PasswordLoginForm({ disabled, onBusyChange }: { disabled: boolea
         <TextInput accessibilityLabel="Mật khẩu" accessibilityHint={fieldErrors.password} value={password} onChangeText={value => { setPassword(value); setFieldErrors(old => ({ ...old, password: undefined })); setError(null); }} placeholder="Nhập mật khẩu" placeholderTextColor={colors.textMuted}
           secureTextEntry={!visible} autoCapitalize="none" autoCorrect={false} autoComplete="current-password" textContentType="password"
           editable={!unavailable} returnKeyType="go" onSubmitEditing={() => void submit()}
-          style={{ flex: 1, minWidth: 0, minHeight: 46, color: colors.authText, fontSize: 13, paddingVertical: 12 }} />
+          style={{ flex: 1, minWidth: 0, minHeight: 48, color: colors.authText, fontSize: 16, paddingVertical: 12 }} />
         <TouchableOpacity accessibilityRole="button" accessibilityLabel={visible ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'} disabled={unavailable}
           onPress={() => setVisible(value => !value)} style={{ minWidth: 52, minHeight: 46, alignItems: 'center', justifyContent: 'center' }}>
           <Text style={[authStyles.label, { color: colors.authBody }]}>{visible ? 'Ẩn' : 'Hiện'}</Text>
