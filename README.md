@@ -2,7 +2,13 @@
 
 Ứng dụng sinh viên ghép nhóm đồ án, đã có sẵn và được chỉnh sửa tiếp trên nhánh `align-with-web-be`. Frontend chỉ được đọc để đối chiếu. Ngày 2026-11-03, người dùng cho phép bổ sung cấu hình Google vào BE; thay đổi được tách trên nhánh `fix/mobile-google-oauth`, worktree `../Capstone-project-progress-tracking-system-BE-mobile-google`, từ source v2.9. BE `main` gốc và thay đổi local có sẵn được giữ nguyên.
 
-## Cập nhật Google native — 2026-11-03
+## Cấu hình Google hiện tại — 2026-11-04
+
+Chỉ dùng Web Client ID bên BE cung cấp: browser dùng `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID` (`336326792584-…`), Android/native dùng `EXPO_PUBLIC_GOOGLE_MOBILE_WEB_CLIENT_ID` (`191002082253-…`). ID tự tạo đã được gỡ khỏi cấu hình local và `.env.example`; iOS đang chờ iOS OAuth client từ BE. Xóa OAuth clients trên Google Cloud và cập nhật biến EAS chưa được xác minh.
+
+Package Android hiện tại là **`com.fpt.capstone.mobile`**, theo ảnh Android OAuth client BE vừa cung cấp. Bản cũ `com.fpt.capstone.mobil` thiếu chữ `e`; đã sửa, build và cài APK mới thành công. Kiểm tra APK xác nhận package và SHA-1 khớp BE. Lần thử mới đã tới BE và nhận `Google ID token was not issued for this application`, thay cho `DEVELOPER_ERROR`; BE cần thêm Web/server ID mobile vào `GOOGLE_CLIENT_IDS` rồi restart. Chưa đăng nhập thành công. Chạy `npm run google:check:android`, `npm run google:check:web`, rồi `npm run start:dev -- --lan --port 8082`. Giá trị cấu hình BE và hướng dẫn hiện hành: [google-login-setup.md](docs/google-login-setup.md). Các checkpoint bên dưới là lịch sử.
+
+## Checkpoint Google native — 2026-11-03 (lịch sử)
 
 **BE mới đã kiểm tra:** API base `https://cortex-bristle-ferry.ngrok-free.dev/api/v1`. OpenAPI và GET `/auth/google/config` đều HTTP 200; Google config báo `enabled=true`. Toàn bộ 76 đường dẫn/method và 8 schema đã audit khớp contract hiện tại. `.env` local và `.env.example` đã cập nhật. Đây là kiểm tra API công khai, chưa xác nhận đăng nhập hay quyền STUDENT/Leader. Các ghi chú lỗi DNS bên dưới thuộc tunnel cũ; xem [backend-ngrok-recheck.md](docs/backend-ngrok-recheck.md).
 

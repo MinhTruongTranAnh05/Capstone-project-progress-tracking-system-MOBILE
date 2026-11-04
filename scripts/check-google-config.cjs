@@ -3,15 +3,16 @@ const { getConfig } = require('expo/config');
 function checkGoogleConfig(environment, app, platform) {
   const errors = [];
   const clientIdPattern = /^\d+-[A-Za-z0-9_-]+\.apps\.googleusercontent\.com$/;
-  if (!['ios', 'android'].includes(platform)) errors.push('Platform must be ios or android.');
+  if (!['ios', 'android', 'web'].includes(platform)) errors.push('Platform must be ios, android or web.');
   try {
     const url = new URL(environment.EXPO_PUBLIC_API_URL);
     if (!['http:', 'https:'].includes(url.protocol) || !url.pathname.replace(/\/$/, '').endsWith('/api/v1') || url.search || url.hash || url.username || url.password) {
       throw new Error('Invalid API URL');
     }
   } catch { errors.push('Set EXPO_PUBLIC_API_URL to the current BE URL ending in /api/v1.'); }
-  if (!clientIdPattern.test(environment.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID ?? '')) {
-    errors.push('Set EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID to the Web OAuth Client ID allowed by the BE.');
+  const serverClientKey = platform === 'web' ? 'EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID' : 'EXPO_PUBLIC_GOOGLE_MOBILE_WEB_CLIENT_ID';
+  if (!clientIdPattern.test(environment[serverClientKey] ?? '')) {
+    errors.push(`Set ${serverClientKey} to the BE-supplied Web OAuth Client ID for this platform.`);
   }
   if (platform === 'ios') {
     const clientId = environment.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID;

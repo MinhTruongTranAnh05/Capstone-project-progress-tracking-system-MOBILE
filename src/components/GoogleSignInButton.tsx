@@ -7,7 +7,8 @@ import { nativeGoogleUnavailableReason } from '@/features/auth/domain/google';
 import { getNativeGoogleCredential } from '@/features/auth/data/nativeGoogle';
 
 export function getGoogleSignInUnavailableReason(): string | null {
-  return nativeGoogleUnavailableReason(isRunningInExpoGo(), Platform.OS, process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID);
+  return nativeGoogleUnavailableReason(isRunningInExpoGo(), Platform.OS,
+    process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID, process.env.EXPO_PUBLIC_GOOGLE_MOBILE_WEB_CLIENT_ID);
 }
 
 export interface GoogleSignInButtonProps {

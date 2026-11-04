@@ -16,7 +16,7 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FBF9F5"
       },
-      "package": "com.fpt.capstone.mobil"
+      "package": "com.fpt.capstone.mobile"
     },
     "web": {
       "favicon": "./assets/favicon.png",

@@ -11,7 +11,7 @@ The owner supplied `https://cortex-bristle-ferry.ngrok-free.dev/v3/api-docs` as 
 - Roles remain `ADMIN`, `LECTURER`, `STUDENT`; leader remains group membership. No topic/progress/document/guidance endpoint was added by this deployment.
 - GET `/api/v1/auth/google/config`: **HTTP 200**, `enabled=true`, public `clientId=336326792584-via4aii2ugfnqg7qgee3st7amav9jg56.apps.googleusercontent.com`.
 
-The published BE client ID differs from the explicitly configured mobile Web/server ID (`767326459136-ue5gjkbhqajuavnill5ctk0a9hm97qo9.apps.googleusercontent.com`). This public response does not reveal every allowed audience and therefore does **not** establish that the mobile ID is accepted or denied. Keep the existing mobile ID paired with its Google Cloud Android/iOS clients; validate the real token exchange after interactive Google login. The separate local BE patch is not evidence that this remote deployment runs it.
+The response above advertises the browser client. On 2026-11-04 the owner selected BE's native server Web client `191002082253-suft0ihkl6o9vt2620g27sqg7atgu6qq.apps.googleusercontent.com` and retired the self-created clients. This endpoint does not reveal all allowed audiences and therefore does **not** establish native audience acceptance. Current configuration and Android registration requirements are in [google-login-setup.md](google-login-setup.md). The earlier local BE patch is historical and is not evidence that this remote deployment runs it.
 
 ## Mobile change and limits
 

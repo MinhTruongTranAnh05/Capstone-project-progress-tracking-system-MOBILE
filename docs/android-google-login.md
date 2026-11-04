@@ -1,8 +1,18 @@
 # Android Google login — local device check
 
-The owner created an Android OAuth client in the same Google Cloud project as the mobile Web/server client on 2026-11-03. Android client IDs do not need to be passed to GoogleSignin.configure or added as an invented EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID.
+On 2026-11-04 the owner supplied BE's Android OAuth client screenshot. It registers package **`com.fpt.capstone.mobile`** and the existing debug certificate SHA-1. The prior APK used `com.fpt.capstone.mobil`, explaining the package mismatch. The current source now follows BE's package; the earlier 2026-11-03 identity decisions and build checkpoints below are historical. Android OAuth client IDs are not passed to `GoogleSignin.configure` or added as an invented `EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID`.
 
-## Current Android identity
+## Current OAuth setup — 2026-11-04
+
+The native Android project is now included in version control with package `com.fpt.capstone.mobile`. Build outputs, SDK paths, caches and signing keystores remain local/ignored. A new checkout must supply its own local `android/app/debug.keystore` (or configure its signing key) and register that certificate's SHA-1 with BE's Android OAuth client before testing Google sign-in. The verified SHA-1 below belongs to this machine's existing local debug key, which is not uploaded.
+
+The owner retired the self-created OAuth clients. Native now reads `EXPO_PUBLIC_GOOGLE_MOBILE_WEB_CLIENT_ID` with BE's Web client `191002082253-suft0ihkl6o9vt2620g27sqg7atgu6qq.apps.googleusercontent.com`; the browser uses BE's separate Web client `336326792584-via4aii2ugfnqg7qgee3st7amav9jg56.apps.googleusercontent.com`. The retired iOS ID was removed from local/example configuration. Current Cloud cleanup status and registration requirements are in [google-login-setup.md](google-login-setup.md).
+
+Metro uses port **8082**. The failed trial used the old `com.fpt.capstone.mobil` APK. BE's newly supplied Android-client screenshot uses `com.fpt.capstone.mobile`, SHA-1 `5E:8F:16:06:2E:A3:CD:2C:4A:0D:54:78:76:BA:A6:F3:8C:AB:F6:25`, and a Client ID with project prefix `191002082253-`. Expo `android.package`, Gradle namespace/applicationId and Kotlin entry points have been aligned. Stale generated autolinking metadata was backed up to `.expo/native-tools/autolinking-before-be-mobile-20261104.json` before regeneration.
+
+Native x86_64 debug rebuild **PASS** (`BUILD SUCCESSFUL in 6m 6s`). Inspection of the actual APK with `aapt2` and `apksigner` confirms the exact BE package and SHA-1 above. Installation on `emulator-5554` **PASS** (`adb install -r`: `Success`), and `pm path com.fpt.capstone.mobile` confirms the installed package. The package-targeted launch uses Metro 8082; its manifest reports the new package. The development client initially stalled connecting to Metro; a matching native-style HTTP HEAD probe timed out. Restarting Metro restored HEAD HTTP 200 and the app rendered the login screen. The subsequent native Google attempt returned **`Google ID token was not issued for this application`** from the BE, replacing provider `DEVELOPER_ERROR`. This supports provider credential return, but the BE rejected the audience and no app session was established. The remote host must accept the configured native server Web ID in `GOOGLE_CLIENT_IDS`; see [current BE setup](google-login-setup.md). No token was inspected/logged, and no old application data or signing key was deleted.
+
+## Prior Android identity — 2026-11-03 (historical)
 
 - Application ID: `com.fpt.capstone.mobil`, explicitly chosen by the owner after the OAuth package mismatch; set in Expo `android.package` and the local generated Android application ID/namespace/Kotlin entry-point package.
 - iOS bundle remains `com.fpt.capstone.mobile`. An iOS bundle ID does not reserve an Android package/SHA-1 pair.
