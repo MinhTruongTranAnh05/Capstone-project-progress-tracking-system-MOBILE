@@ -1,5 +1,7 @@
 # Recheck against the newly cloned Frontend — 2026-11-01
 
+> Historical checkpoint. Current all-role scope, source versions and verification: [2026-11-05/06 parity report](parity-20261105.md). Statements below about staff exclusion/session-only scope are superseded.
+
 Frontend working tree: `main`, `7078a14` (previous checkout was `11fb91e`). The cached `7078a14` reference had already informed the earlier retarget, but this pass checks the actual cloned source and fixes remaining differences. FE's existing package-lock modification and BE's existing application.yml modification are untouched. All implementation edits are in mobile on `align-with-web-be`.
 
 Scope remains Student and verified group Leader. The additional Admin major-management pages in this FE are outside mobile scope. Coordinator remains deployed `LECTURER` with semester assignment, not a new mobile role.

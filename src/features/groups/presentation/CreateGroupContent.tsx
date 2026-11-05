@@ -17,7 +17,7 @@ function CreateGroupForm() {
   const f = useFormation();
   const router = useRouter();
   const [name, setName] = useState('');
-  const [tags, setTags] = useState<string[]>([]);
+  const [tags, setTags] = useState<string[]>(['ReactJS', 'NodeJS / Express', 'Spring Boot', 'UI/UX (Figma)']);
   const [custom, setCustom] = useState('');
   const [committed, setCommitted] = useState(true);
   const skills = tags.join(', ');
@@ -37,7 +37,7 @@ function CreateGroupForm() {
       <View style={ui.inset}><View style={ui.row}>{tags.map(tag => <TouchableOpacity accessibilityLabel={`Bỏ kỹ năng ${tag}`} accessibilityRole="button" key={tag} disabled={mutation.isPending} onPress={() => setTags(old => old.filter(value => value !== tag))} style={{ minHeight: 44, justifyContent: 'center' }}><Badge>{tag}  ×</Badge></TouchableOpacity>)}</View>
         <Field label="Thêm kỹ năng" value={custom} onChangeText={setCustom} placeholder="Nhập kỹ năng khác..." maxLength={100} editable={!mutation.isPending} onSubmitEditing={() => addSkill(custom)} />
         <Button title="+ Thêm kỹ năng" secondary disabled={!custom.trim() || mutation.isPending || [...tags, custom.trim()].join(', ').length > 500} onPress={() => addSkill(custom)} />
-        <Text style={[ui.text, { fontSize: 10 }]}>Gợi ý nhanh:</Text><View style={ui.row}>{['ReactJS', 'NodeJS / Express', 'Spring Boot', 'UI/UX (Figma)', 'Java', 'Python'].filter(tag => !tags.includes(tag)).map(tag => <TouchableOpacity key={tag} accessibilityRole="button" disabled={mutation.isPending} onPress={() => addSkill(tag)} style={{ minHeight: 44, justifyContent: 'center' }}><Text style={ui.tag}>+ {tag}</Text></TouchableOpacity>)}</View>
+        <Text style={[ui.text, { fontSize: 10 }]}>Gợi ý nhanh:</Text><View style={ui.row}>{['Next.js', 'Python/FastAPI', 'DevOps', 'Mobile Flutter'].filter(tag => !tags.includes(tag)).map(tag => <TouchableOpacity key={tag} accessibilityRole="button" disabled={mutation.isPending} onPress={() => addSkill(tag)} style={{ minHeight: 44, justifyContent: 'center' }}><Text style={ui.tag}>+ {tag}</Text></TouchableOpacity>)}</View>
       </View>
       <TouchableOpacity accessibilityRole="checkbox" accessibilityState={{ checked: committed }} onPress={() => setCommitted(!committed)} style={[ui.row, { flexWrap: 'nowrap', alignItems: 'flex-start', minHeight: 44 }]}><Text style={{ color: colors.primary, fontSize: 22 }}>{committed ? '☑' : '☐'}</Text><Text style={[ui.text, { flex: 1, fontSize: 11 }]}>Tôi cam kết thông tin khai báo là chính xác, đồng ý chịu trách nhiệm điều hành nhóm theo quy chế của Nhà trường và Khoa CNTT FPT.</Text></TouchableOpacity>
       {mutation.isError && <Text accessibilityRole="alert" style={ui.error}>{getErrorMessage(mutation.error)}</Text>}

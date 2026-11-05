@@ -11,7 +11,6 @@ export const studentPages = [
 ] as const;
 
 // The Web presents create/discover together until membership has been verified.
-// Keep the lecturer's required capstone entries separate from that formation menu.
 export function getStudentNavigation(hasGroup: boolean) {
   const main = hasGroup
     ? studentPages.filter(page => ['index', 'members', 'requests', 'management', 'profile'].includes(page.name))
@@ -19,6 +18,5 @@ export function getStudentNavigation(hasGroup: boolean) {
       { ...studentPages[0], label: 'Tạo nhóm mới', icon: '🚀', href: '/(tabs)?mode=create' as const },
       ...studentPages.filter(page => page.name === 'profile'),
     ];
-  const capstone = studentPages.filter(page => ['topics', 'topic-selection', 'progress', 'guidance'].includes(page.name));
-  return { main, capstone };
+  return { main };
 }

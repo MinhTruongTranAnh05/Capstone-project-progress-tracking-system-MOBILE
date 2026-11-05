@@ -1,5 +1,7 @@
 # Mobile parity gap report — current target: deployed v2.9
 
+> Historical checkpoint. Current all-role scope, source versions and verification: [2026-11-05/06 parity report](parity-20261105.md). Statements below about staff exclusion/session-only scope are superseded.
+
 ## New BE URL recheck — 2026-11-03
 
 The newly supplied ngrok OpenAPI and public Google config both return HTTP 200. All 76 path/method sets and the eight previously audited schemas match v2.9; no new topic/progress/guidance/document API is exposed. Mobile local/example API bases now point to `https://cortex-bristle-ferry.ngrok-free.dev/api/v1`. The old tunnel DNS blocker is superseded for public connectivity; mobile OAuth-audience acceptance and authenticated role flows remain unverified. The BE publishes a different Web client ID, which alone does not reveal its full accepted-audience list. See [backend-ngrok-recheck.md](backend-ngrok-recheck.md). BE/FE were not edited during this recheck.

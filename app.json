@@ -27,6 +27,8 @@
       "expo-secure-store",
       "expo-router",
       "expo-font",
+      "expo-document-picker",
+      "expo-sharing",
       [
         "expo-splash-screen",
         {

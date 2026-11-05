@@ -1,1 +1,1 @@
-export { default } from '@/features/auth/presentation/StaffSessionScreen';
+export { default } from '@/features/staff/presentation/StaffDashboardScreen';

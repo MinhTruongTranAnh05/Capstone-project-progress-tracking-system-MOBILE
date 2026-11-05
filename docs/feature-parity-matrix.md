@@ -1,5 +1,7 @@
 # Feature parity matrix — deployed v2.9
 
+> Historical checkpoint. Current all-role scope, source versions and verification: [2026-11-05/06 parity report](parity-20261105.md). Statements below about staff exclusion/session-only scope are superseded.
+
 Latest user-approved extension: Admin/Coordinator password login is allowed, with an account confirmation screen only. Staff business portals remain outside scope; student group routes and automatic queries are role-guarded. This supersedes earlier blanket staff-login exclusion.
 
 Target changed by explicit user decision on 2026-11-01. API contract: public `/v3/api-docs` at the supplied test tunnel, HTTP 200, 76 paths. Role wording: Student/Leader on mobile; Leader is membership, account remains STUDENT. Coordinator is LECTURER assigned to a semester, with ADMIN fallback; COUNCIL is not a deployed role. No staff portal is in scope.

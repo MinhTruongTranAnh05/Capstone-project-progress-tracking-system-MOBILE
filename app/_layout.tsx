@@ -10,7 +10,7 @@ import { SessionError } from '@/services/apiError';
 import { colors } from '@/constants/colors';
 import { requireOptionalNativeModule } from 'expo';
 import { FormationProvider } from '@/contexts/FormationContext';
-import { canUseStaffSession, canUseStudentFeatures } from '@/core/auth/access';
+import { canUseStaffSession, canUseStudentFeatures, getSessionDestination } from '@/core/auth/access';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -29,14 +29,14 @@ function RootNavigator() {
   return (
     <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.background } }}>
       <Stack.Screen name="index" />
-      <Stack.Protected guard={!isAuthenticated}>
+      <Stack.Protected guard={!isAuthenticated} redirectTo={getSessionDestination(user)}>
         <Stack.Screen name="(auth)" />
       </Stack.Protected>
-      <Stack.Protected guard={isAuthenticated && canUseStudentFeatures(user)}>
+      <Stack.Protected guard={isAuthenticated && canUseStudentFeatures(user)} redirectTo={getSessionDestination(user)}>
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="(groups)" />
       </Stack.Protected>
-      <Stack.Protected guard={isAuthenticated && canUseStaffSession(user)}>
+      <Stack.Protected guard={isAuthenticated && canUseStaffSession(user)} redirectTo={getSessionDestination(user)}>
         <Stack.Screen name="staff" />
       </Stack.Protected>
     </Stack>
@@ -45,18 +45,13 @@ function RootNavigator() {
 
 export default function RootLayout() {
   useEffect(() => {
-    // Hide the Expo Go floating gear/dev-menu button so it doesn't overlap content.
-    // The DevMenuPreferences module only exists in Expo Go / dev builds,
-    // so requireOptionalNativeModule returns null in production — safe to call.
+    // Keep Expo's floating tools button from covering the notification button.
+    if (!__DEV__) return;
     try {
-      const DevMenuPreferences = requireOptionalNativeModule('DevMenuPreferences');
-      if (DevMenuPreferences?.setPreferencesAsync) {
-        DevMenuPreferences.setPreferencesAsync({
-          showFloatingActionButton: false,
-        });
-      }
+      const devMenu = requireOptionalNativeModule<{ setToolsButtonVisible: (visible: boolean) => Promise<void> }>('ExpoDevMenu');
+      void devMenu?.setToolsButtonVisible(false).catch(() => undefined);
     } catch {
-      // Module unavailable — no-op in production builds
+      // The native development menu is optional.
     }
   }, []);
 

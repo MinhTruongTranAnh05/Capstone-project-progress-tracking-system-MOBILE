@@ -7,9 +7,9 @@
       "developmentClient": true,
       "distribution": "internal",
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://lyric-validation-better-purse.trycloudflare.com/api/v1",
-        "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "767326459136-ue5gjkbhqajuavnill5ctk0a9hm97qo9.apps.googleusercontent.com",
-        "EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID": "767326459136-2v2jrft09t0kukvdc855rgq7arn91fee.apps.googleusercontent.com"
+        "EXPO_PUBLIC_API_URL": "https://cortex-bristle-ferry.ngrok-free.dev/api/v1",
+        "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "336326792584-via4aii2ugfnqg7qgee3st7amav9jg56.apps.googleusercontent.com",
+        "EXPO_PUBLIC_GOOGLE_MOBILE_WEB_CLIENT_ID": "191002082253-suft0ihkl6o9vt2620g27sqg7atgu6qq.apps.googleusercontent.com"
       }
     },
     "development-simulator": {

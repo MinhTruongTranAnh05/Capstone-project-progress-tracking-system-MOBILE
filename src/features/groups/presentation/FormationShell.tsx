@@ -12,6 +12,7 @@ import { colors } from '@/constants/colors';
 import { getStudentNavigation } from '@/core/navigation';
 import { PHASE_LABELS, formatDate } from '../domain/rules';
 import { Avatar, Badge, Card, ConfirmButton, ErrorState, ui } from '@/core/ui/primitives';
+import { NotificationsPopup } from '@/features/notifications/presentation/NotificationsPopup';
 function DashboardSidebar({ onNavigate }: { onNavigate: () => void }) {
   const { user, logout } = useAuth();
   const f = useFormation();
@@ -29,10 +30,6 @@ function DashboardSidebar({ onNavigate }: { onNavigate: () => void }) {
         const active = pathname === item.path || (!f.group && item.path === '/' && ['/create', '/members'].includes(pathname));
         return <TouchableOpacity key={item.path} accessibilityRole="button" accessibilityState={{ selected: active }} onPress={() => { onNavigate(); router.navigate(item.href); }} style={{ flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14, minHeight: 48, borderRadius: 16, backgroundColor: active ? colors.primary : 'transparent' }}><Text>{item.icon}</Text><Text style={{ fontSize: 12, lineHeight: 19, fontWeight: '700', color: active ? 'white' : colors.textSecondary, flex: 1 }}>{item.label}</Text></TouchableOpacity>;
       })}</View>
-      <View style={{ borderTopWidth: 1, borderColor: colors.border, paddingTop: 16, gap: 6 }}>
-        <Text style={ui.eyebrow}>Chức năng đồ án · Chưa khả dụng</Text>
-        {nav.capstone.map(item => <TouchableOpacity key={item.path} accessibilityRole="button" accessibilityState={{ selected: pathname === item.path }} onPress={() => { onNavigate(); router.navigate(item.href); }} style={{ flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14, minHeight: 48, borderRadius: 16, backgroundColor: pathname === item.path ? colors.primary50 : 'transparent' }}><Text>{item.icon}</Text><Text style={{ flex: 1, fontSize: 12, lineHeight: 19, color: colors.textSecondary }}>{item.label}</Text></TouchableOpacity>)}
-      </View>
       <View style={{ flex: 1 }} />
       <View style={{ borderTopWidth: 1, borderColor: colors.border, paddingTop: 18, gap: 16 }}><View style={[ui.row, { flexWrap: 'nowrap' }]}><Avatar name={user?.fullName} uri={user?.avatarUrl} /><View style={{ flex: 1 }}><Text numberOfLines={1} style={ui.strong}>{user?.fullName}</Text><Text numberOfLines={1} style={[ui.text, { fontSize: 10 }]}>{user?.email}</Text></View></View><ConfirmButton title="Đăng xuất" tone="danger" message="Bạn có muốn đăng xuất khỏi MatchPoint FPT?" onConfirm={() => void logout()} /></View>
     </ScrollView>
@@ -47,6 +44,7 @@ export function FormationPage({ title, children, back = false, requiresFormation
   const f = useFormation();
   const [menu, setMenu] = useState(false);
   const [scopes, setScopes] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
   const unread = useQuery({ queryKey: ['formation', user?.id, 'unread'], queryFn: () => notificationService.getUnreadCount(), enabled: !!user, refetchInterval: 30000 });
   const validSize = !!f.group && isValidGroupSize(f.group.size);
   return <KeyboardAvoidingView style={{ flex: 1, flexDirection: 'row', backgroundColor: colors.background, paddingTop: insets.top, paddingLeft: insets.left, paddingRight: insets.right }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
@@ -57,7 +55,7 @@ export function FormationPage({ title, children, back = false, requiresFormation
         {back && <TouchableOpacity accessibilityLabel="Quay lại" accessibilityRole="button" onPress={() => router.canGoBack() ? router.back() : router.replace('/(tabs)')} style={shell.iconButton}><Ionicons name="arrow-back" size={22} color={colors.primary} /></TouchableOpacity>}
         <View style={{ flex: 1, gap: 2 }}><Text style={[ui.label, { color: colors.primary }]}>Đợt Lập Nhóm Đầu Kỳ</Text><Text style={{ fontSize: 10, color: colors.textSecondary }}>Khoa CNTT - Đại học FPT</Text></View>
         <TouchableOpacity accessibilityRole="button" accessibilityLabel="Làm mới nhóm" disabled={!!f.refreshing} onPress={() => void f.refresh()} style={shell.iconButton}>{f.refreshing ? <ActivityIndicator color={colors.primary} size="small" /> : <Ionicons name="refresh-outline" size={20} color={colors.primary} />}</TouchableOpacity>
-        <TouchableOpacity accessibilityRole="button" accessibilityLabel={`Thông báo, ${unread.data?.unread ?? 0} chưa đọc`} onPress={() => router.push('/(tabs)/notifications')} style={shell.iconButton}><Ionicons name="notifications-outline" size={22} color={colors.textSecondary} />{!!unread.data?.unread && <View style={shell.counter}><Text style={{ color: 'white', fontSize: 9, fontWeight: '800' }}>{unread.data.unread > 99 ? '99+' : unread.data.unread}</Text></View>}</TouchableOpacity>
+        <TouchableOpacity accessibilityRole="button" accessibilityLabel={`Thông báo, ${unread.data?.unread ?? 0} chưa đọc`} accessibilityState={{ expanded: notificationsOpen }} onPress={() => setNotificationsOpen(true)} style={shell.iconButton}><Ionicons name="notifications-outline" size={22} color={colors.textSecondary} />{!!unread.data?.unread && <View style={shell.counter}><Text style={{ color: 'white', fontSize: 9, fontWeight: '800' }}>{unread.data.unread > 99 ? '99+' : unread.data.unread}</Text></View>}</TouchableOpacity>
         {width >= 650 && <><View style={{ borderLeftWidth: 1, borderColor: colors.border, paddingLeft: 14 }}><Text style={ui.strong}>{user?.fullName}</Text><Text style={{ fontSize: 10, color: colors.textSecondary }}>{user?.email}</Text></View><Badge tone={f.isLeader ? 'success' : f.group ? 'orange' : 'warning'}>{!f.group ? '🎓 SINH VIÊN' : f.isLeader ? '👑 Trưởng nhóm' : '👤 Thành viên'}</Badge></>}
       </View>
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: wide ? 32 : 16, paddingBottom: insets.bottom + 28, gap: 20, width: '100%', maxWidth: 1344, alignSelf: 'center' }} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag" refreshControl={<RefreshControl refreshing={!!f.refreshing} onRefresh={() => void f.refresh()} colors={[colors.primary]} />}>
@@ -72,6 +70,7 @@ export function FormationPage({ title, children, back = false, requiresFormation
       </ScrollView>
     </View>
     <Modal visible={menu && !wide} transparent animationType="fade" onRequestClose={() => setMenu(false)}><View style={{ flex: 1, flexDirection: 'row', backgroundColor: colors.overlayDark }}><View style={{ width: Math.min(width - 40, 320), paddingTop: insets.top, paddingBottom: insets.bottom, backgroundColor: 'white' }}><View style={{ alignItems: 'flex-end', paddingRight: 12 }}><TouchableOpacity accessibilityRole="button" accessibilityLabel="Đóng menu" onPress={() => setMenu(false)} style={shell.iconButton}><Ionicons name="close" size={24} color={colors.textSecondary} /></TouchableOpacity></View><DashboardSidebar onNavigate={() => setMenu(false)} /></View><TouchableOpacity accessibilityRole="button" accessibilityLabel="Đóng menu" style={{ flex: 1 }} onPress={() => setMenu(false)} /></View></Modal>
+    {notificationsOpen && <NotificationsPopup onClose={() => setNotificationsOpen(false)} />}
   </KeyboardAvoidingView>;
 }
 const shell = StyleSheet.create({

@@ -1,101 +1,78 @@
 # MatchPoint FPT Mobile
 
-Ứng dụng sinh viên ghép nhóm đồ án, đã có sẵn và được chỉnh sửa tiếp trên nhánh `align-with-web-be`. Frontend chỉ được đọc để đối chiếu. Ngày 2026-11-03, người dùng cho phép bổ sung cấu hình Google vào BE; thay đổi được tách trên nhánh `fix/mobile-google-oauth`, worktree `../Capstone-project-progress-tracking-system-BE-mobile-google`, từ source v2.9. BE `main` gốc và thay đổi local có sẵn được giữ nguyên.
+Ứng dụng Expo/React Native đồng bộ portal Sinh viên, Trưởng nhóm, Admin và Điều phối viên của FE. Quyết định hiện hành của người dùng: **giữ BE v2.9 đang chạy, theo FE mới, đầy đủ vai trò**.
 
-## Cấu hình Google hiện tại — 2026-11-04
+## Bản đồng bộ 2026-11-05/06
 
-Chỉ dùng Web Client ID bên BE cung cấp: browser dùng `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID` (`336326792584-…`), Android/native dùng `EXPO_PUBLIC_GOOGLE_MOBILE_WEB_CLIENT_ID` (`191002082253-…`). ID tự tạo đã được gỡ khỏi cấu hình local và `.env.example`; iOS đang chờ iOS OAuth client từ BE. Xóa OAuth clients trên Google Cloud và cập nhật biến EAS chưa được xác minh.
+- FE tham chiếu: `../Capstone-project-progress-tracking-system-FE`, commit `936fb98`.
+- BE local đã đối chiếu: `../Capstone-project-progress-tracking-system-BE`, commit `079ee1b`. BE local khác hợp đồng đang triển khai; không dùng nó để thay thế API v2.9.
+- API đang cấu hình: `https://cortex-bristle-ferry.ngrok-free.dev/api/v1`.
+- OpenAPI công khai được chụp ngày 2026-11-05: [deployed-v29-full.json](docs/contracts/deployed-v29-full.json), 76 đường dẫn, 65 schema.
+- Ma trận chức năng, các khác biệt bắt buộc do API và kết quả kiểm tra: [parity-20261105.md](docs/parity-20261105.md).
 
-Package Android hiện tại là **`com.fpt.capstone.mobile`**, theo ảnh Android OAuth client BE vừa cung cấp. Bản cũ `com.fpt.capstone.mobil` thiếu chữ `e`; đã sửa, build và cài APK mới thành công. Kiểm tra APK xác nhận package và SHA-1 khớp BE. Lần thử mới đã tới BE và nhận `Google ID token was not issued for this application`, thay cho `DEVELOPER_ERROR`; BE cần thêm Web/server ID mobile vào `GOOGLE_CLIENT_IDS` rồi restart. Chưa đăng nhập thành công. Chạy `npm run google:check:android`, `npm run google:check:web`, rồi `npm run start:dev -- --lan --port 8082`. Giá trị cấu hình BE và hướng dẫn hiện hành: [google-login-setup.md](docs/google-login-setup.md). Các checkpoint bên dưới là lịch sử.
+Kiểm tra tự động gần nhất: **56/56 test**, typecheck, lint và export Web/Android/iOS đạt. Android đã build/cài và quan sát được nhóm, sidebar 5 mục, popup thông báo và màn quản lý. **Còn lỗi chưa xác minh xong:** người dùng báo đăng nhập Google trên emulator lại trở về màn login; đợt kiểm tra đã dừng theo yêu cầu push Git. Không xem kết quả build/test là xác nhận đăng nhập hoặc toàn bộ nghiệp vụ đã hoàn tất.
 
-## Checkpoint Google native — 2026-11-03 (lịch sử)
+Chỉ sửa MOBILE trong đợt này. Giữ nguyên source và thay đổi local có sẵn trong BE/FE. Các tài liệu checkpoint cũ ghi “staff chỉ xác nhận phiên” đã được thay thế bởi bản đồng bộ này.
 
-**BE mới đã kiểm tra:** API base `https://cortex-bristle-ferry.ngrok-free.dev/api/v1`. OpenAPI và GET `/auth/google/config` đều HTTP 200; Google config báo `enabled=true`. Toàn bộ 76 đường dẫn/method và 8 schema đã audit khớp contract hiện tại. `.env` local và `.env.example` đã cập nhật. Đây là kiểm tra API công khai, chưa xác nhận đăng nhập hay quyền STUDENT/Leader. Các ghi chú lỗi DNS bên dưới thuộc tunnel cũ; xem [backend-ngrok-recheck.md](docs/backend-ngrok-recheck.md).
+## Chức năng
 
-Package Android hiện được đổi theo lựa chọn mới nhất của chủ ứng dụng: **`com.fpt.capstone.mobil`**. iOS giữ **`com.fpt.capstone.mobile`**. Đã build/cài bản Android mới thành công, kiểm tra package/activity và chữ ký APK khớp SHA-1 cũ; app mới đang ở hộp thoại quyền Android chờ người dùng xử lý rồi thử Google. Android OAuth phải khớp package mới và SHA-1 của bản cài; Web/server Client ID vẫn giữ nguyên. Kết quả APK mang package cũ bên dưới là checkpoint trước khi đổi, không xác nhận đăng nhập của package mới.
+Sinh viên chưa có nhóm có workspace tạo nhóm/tìm nhóm và hồ sơ. Khi đã có nhóm, sidebar có đúng năm mục theo FE: **Tổng quan nhóm; Thành viên nhóm; Đơn ứng tuyển & Lời mời; Quản lý trạng thái & Rời nhóm; Hồ sơ cá nhân**. Đã bỏ khối menu chức năng đồ án chưa khả dụng. Chuông mở popup thông báo tại chỗ, hỗ trợ phân trang và đánh dấu đọc.
 
-Đã cấu hình hai OAuth Client ID do chủ ứng dụng cung cấp trong `.env` local và `.env.example`: Web ID dùng làm audience gửi BE, iOS ID cho bundle `com.fpt.capstone.mobile`. Callback iOS được tạo từ iOS ID qua config plugin. Có `expo-dev-client`, profile EAS development và kiểm tra cấu hình `npm run google:check`; mở Metro cho bản cài bằng `npm run start:dev`. Expo Go hiển thị thông báo và khóa nút Google ngay từ đầu. Đăng nhập Google vẫn chỉ gọi POST `/auth/google` với `{idToken}`; không dùng client secret và giữ nguyên bước BE xác minh token.
+Các luồng sinh viên dùng học kỳ/môn học thật, tạo nhóm, Apply/Invite, phản hồi/thu hồi, Like tư vấn, khóa/mở khóa, mời/xóa thành viên, rời nhóm/duyệt/thu hồi/khiếu nại, chuyển Trưởng nhóm và xem hồ sơ theo quyền từ BE. Nhóm có 3–5 thành viên; Trưởng nhóm vẫn có account role STUDENT, xác minh bằng leaderId và membership của nhóm.
 
-**Android local đã build, cài và mở màn đăng nhập thành công** trên `emulator-5554` (x86_64, có Google Play Services). Chữ ký APK khớp SHA-1 debug đã cung cấp để đăng ký OAuth. Người dùng đã xử lý hộp thoại quyền; màn login hiển thị form staff và nút Google khả dụng, không còn lỗi yêu cầu development build. Chọn tài khoản Google và tạo phiên BE chưa được kiểm thử. Chi tiết công cụ build, SHA-1 và kết quả thực tế: [android-google-login.md](docs/android-google-login.md).
+Admin có giám sát tổng quan, chuyên ngành, import sinh viên/điều kiện, học kỳ, tài khoản, yêu cầu rời nhóm, danh sách nhóm và hồ sơ. Có tạo/sửa chuyên ngành, học kỳ, phân công Điều phối viên, cấu hình môn học/TTL/thời hạn, preview/commit import file, sửa tài khoản/điều kiện và xuất Excel.
 
-**Chưa kiểm thử đăng nhập thật:** bản BE v2.9 ở worktree riêng đã được bổ sung mặc định Web Client ID mobile, giữ lại ID website từ env; cần chạy/deploy bản BE đã sửa thì thay đổi mới có hiệu lực. BE remote cũ không tự nhận thay đổi local. Tunnel cũ lỗi DNS ngày 2026-11-02; cần URL mới. Đã tạo/liên kết [Expo project capstone-mobile](https://expo.dev/accounts/minhtruongtrananh05/projects/capstone-mobile) và lưu hai OAuth ID công khai trong development environment; chưa đặt API URL cloud vì URL mới chưa được cung cấp. Chưa tạo signing hoặc IPA; cần Apple Developer cho bản iPhone qua EAS. Hướng dẫn từng bước và điều kiện Android/iPhone: [google-login-setup.md](docs/google-login-setup.md). `npm run build` vẫn chỉ export JS/Hermes, không tạo bản cài.
+Điều phối viên có điều phối nhóm, khiếu nại rời nhóm, phạm vi/thời hạn, điều phối chi tiết nhóm và hồ sơ. Có tạo nhóm từ sinh viên chưa có nhóm, thêm/chuyển/xóa thành viên, gộp nhóm, chỉ định Trưởng nhóm, giải tán nhóm dưới chuẩn, kiểm tra/chốt/mở lại danh sách và xuất Excel. Học kỳ được lấy theo phân công của BE. Xác nhận và lý do cho các thao tác quan trọng được thực hiện trong giao diện.
 
-Yêu cầu mở rộng portal Admin/giảng viên đã được ghi nhận ở trao đổi sau checkpoint login; chưa triển khai. Màn staff hiện vẫn là xác nhận tài khoản/làm mới/đăng xuất. Các mô tả phạm vi cũ bên dưới không phải xác nhận hoàn tất portal.
+Import dùng multipart file thật. Báo cáo chỉ được lưu khi máy chủ trả Excel hợp lệ; Android dùng hộp thoại chia sẻ/lưu, web tải file. Các API admin bị chặn ở client với tài khoản không có quyền; BE vẫn quyết định quyền và tính hợp lệ cuối cùng.
 
-## Contract đang sử dụng
+## Các giới hạn của BE v2.9
 
-- Theo quyết định mới nhất của người dùng: **BE triển khai v2.9**, không phải BE `main` cũ trong workspace.
-- API: `https://cortex-bristle-ferry.ngrok-free.dev/api/v1`.
-- OpenAPI đã kiểm tra: `https://cortex-bristle-ferry.ngrok-free.dev/v3/api-docs`.
-- Bằng chứng contract đã đọc: [deployed-v29.json](docs/contracts/deployed-v29.json). Tunnel có thể thay đổi; cần xác nhận lại trước khi kiểm thử thật.
-- Web tham chiếu: FE `origin/main` đang lưu cục bộ, commit `7078a14`, đọc bằng `git show`, không checkout hay chỉnh sửa FE.
-- Đã đối chiếu lại bản FE vừa clone: `main`, `7078a14`; chi tiết chênh lệch và các lỗi Web không sao chép nằm trong [frontend-recheck.md](docs/frontend-recheck.md).
+FE mới và BE v2.9 có vài điểm không khớp. Mobile dùng endpoint/payload thực sự được BE công bố; không giả thành công hoặc tạo dữ liệu thay thế. Ví dụ: tạo Giảng viên qua `/users/moderators`, quyết định yêu cầu qua `{approve,note}`, cập nhật điều kiện bằng enrollmentId, cập nhật thông tin sinh viên bằng semesterStudentId. Chi tiết có trong báo cáo đồng bộ.
 
-## Vai trò và giới hạn
+BE chưa công bố tự đăng ký, đề tài, tiến độ tuần và lịch tư vấn. Các chức năng đó không xuất hiện trên sidebar. Thông tin tạo tài khoản giải thích việc nhà trường cấp tài khoản, không gửi tới endpoint không tồn tại.
 
-- Cập nhật theo xác nhận mới nhất của người dùng: màn login có thêm Email/Mật khẩu cho `ADMIN` và `LECTURER`, gọi POST `/auth/login`. Sau đăng nhập, staff chỉ có màn xác nhận tài khoản/làm mới/đăng xuất; không mở portal quản trị hoặc các màn/API nhóm sinh viên. Quyết định này thay thế việc từ chối toàn bộ staff ở các checkpoint cũ.
-- Các luồng nghiệp vụ nhóm chỉ dành cho Sinh viên và Trưởng nhóm. Cả hai có account role `STUDENT`; Trưởng nhóm xác định từ `leaderId` **và** membership `leader` của nhóm đã xác minh. Staff có phiên đăng nhập/xác nhận tài khoản riêng theo phê duyệt mới.
-- Người điều phối trong BE là account `LECTURER` được gán cho học kỳ qua `moderatorId`. `ADMIN` có quyền thực hiện các tác vụ điều phối tương ứng. Không ánh xạ Người điều phối thành `COUNCIL`.
-- Không có portal quản trị/điều phối trên mobile. Không có luồng đặt/hủy lịch hẹn, vai trò hoặc giao diện Instructor.
-- Nhóm hợp lệ **3–5 người**, tối đa 5 bao gồm Trưởng nhóm. Quy tắc dùng constants chung và kiểm tra lại từ server.
+Bố cục mobile dùng drawer/card để vừa màn hình điện thoại; chưa có xác nhận so sánh hình ảnh từng pixel với toàn bộ FE. Các thao tác ghi của Admin/Điều phối chưa được kiểm thử trên tài khoản thật trong đợt này. Kiểm tra adapter và contract không thay thế kiểm thử nghiệp vụ trên BE.
 
-## Chức năng hiện có
+## Chạy
 
-- Google sign-in cho tài khoản có trong danh sách nhà trường; xác minh trạng thái/vai trò từ phản hồi BE và kiểm tra lại `/auth/me` khi khôi phục phiên.
-- Login theo mẫu ảnh: card trong mờ, logo nhỏ, tiêu đề đậm, Email/Mật khẩu có Hiện/Ẩn, nút cam và phần Google riêng. Không lưu mật khẩu. Form staff và Google cùng khóa khi một luồng đang xử lý; lỗi BE được giữ nguyên.
-- Chọn học kỳ/môn học từ `/me/semesters`; xác minh membership/scope khi lấy nhóm. Known group ID lưu theo user chỉ là gợi ý chọn scope, không cấp quyền từ cache và không đoán nhóm từ danh sách tuyển.
-- Tạo nhóm, tìm nhóm/sinh viên, Apply/Invite, chấp nhận/từ chối/thu hồi, Like tư vấn. Theo v2.9, chấp nhận Apply hoặc Invite qua `/requests/{id}/accept` làm sinh viên gia nhập ngay; không dùng quy trình approve → invite của BE cũ.
-- Khóa/mở khóa, mời/xóa thành viên, rời nhóm/yêu cầu/thu hồi/khiếu nại, chuyển Trưởng nhóm theo quyền và phase thực tế.
-- Hồ sơ phone/skills/strengths/weaknesses/profilePrivate theo BE; dữ liệu riêng tư hiển thị theo `full` từ server. Không gửi field `bio` của BE cũ.
-- Thông báo phân trang, chưa đọc, đánh dấu đọc, retry và refresh. Hồ sơ/thông báo không bị chặn hiển thị chỉ vì nhóm tải lỗi.
-- Bảng màu, ảnh nền và shell responsive hiện có được giữ lại; menu dùng một định nghĩa chung.
-- Menu chưa có nhóm theo workspace Tạo nhóm mới/Tìm nhóm đang tuyển của Web; menu có nhóm gồm Tổng quan, Thành viên, Đơn ứng tuyển & Lời mời, Quản lý trạng thái và Hồ sơ. Lịch sử đơn vẫn truy cập được từ màn tìm nhóm.
-- Tổng quan hiển thị thành viên/vị trí trống, cảnh báo khóa và bộ đếm yêu cầu thật; không gán 0 khi API lỗi. Trước khi Apply cần lưu kỹ năng; lời giới thiệu mặc định dùng kỹ năng đã lưu.
-
-## Chức năng bị BE chặn
-
-BE triển khai không công bố endpoint cho tự đăng ký, danh mục đề tài, chọn/đề xuất đề tài, báo cáo tiến độ tuần hoặc lịch tư vấn/hướng dẫn đồ án. Các màn tương ứng thông báo rõ chưa khả dụng, không tạo dữ liệu demo và không giả thành công.
-
-Màn thông tin tạo tài khoản dùng cùng ảnh nền/card trắng/banner cam với Web; giải thích việc nhà trường cấp tài khoản. Không có form thu thập mật khẩu hoặc nút gửi tới endpoint không tồn tại. Register.jsx của FE tham chiếu hiện bị comment và không được route.
-
-Theo yêu cầu giao diện mobile, khối giới thiệu màu cam được ẩn trên Android/iOS và Web màn hình nhỏ; chỉ giữ ở Web màn hình rộng. Form đăng nhập/thông tin tài khoản dùng một cột gọn trên mobile.
-
-Chi tiết endpoint, quyền và trạng thái: [gap-report.md](docs/gap-report.md), [feature-parity-matrix.md](docs/feature-parity-matrix.md), [verification.md](docs/verification.md). Hạn lập nhóm không được dùng thay cho lịch hướng dẫn. Mọi lỗi/denial từ BE được giữ nguyên thông điệp; trạng thái chưa thử không được ghi thành 403/404 giả.
-
-## Chạy và kiểm tra
-
-Project dùng **Expo SDK 58**, React Native 0.88 và React 19.3, tương thích về SDK với Expo Go 58 trên iPhone. Node cần bản được SDK 58 hỗ trợ (22.13+, 24.3+ hoặc 26+; không dùng các nhánh lẻ).
+Expo SDK 58, React Native 0.88.1, React 19.3. Dùng Node được Expo SDK 58 hỗ trợ.
 
 ```sh
 npm ci
 npm start
-npm run web
+npm run start:dev
 npm run android
-npm run lint
+npm run web
+```
+
+`npm start` tạo QR **Expo Go** trên cổng 8082. Google Sign-In native cần bản development đã cài và `npm run start:dev`. Máy tính/điện thoại cần truy cập được nhau; nếu LAN bị chặn có thể chạy `npm run start:tunnel` cho Expo Go hoặc `npm run start:dev:tunnel` cho development build.
+
+Copy `.env.example` thành `.env` khi thiết lập máy mới. API URL phải có `/api/v1`; runtime đọc env. Không lưu token hoặc mật khẩu vào source. Android package hiện tại: **com.fpt.capstone.mobile**. Giữ lại signing hiện có.
+
+Browser và native dùng hai audience do BE cung cấp: `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID` và `EXPO_PUBLIC_GOOGLE_MOBILE_WEB_CLIENT_ID`. iOS đang thiếu OAuth client riêng. Development env trong eas.json đã được sửa theo API/ID hiện hành; không xác nhận thay đổi biến cloud EAS hay cấu hình Google Cloud. Chi tiết: [google-login-setup.md](docs/google-login-setup.md).
+
+Trên emulator đang chạy, bản development được mở với Metro cổng 8083. Cần giữ Metro chạy; APK debug này không chứa bundle standalone để dùng offline.
+
+## Kiểm tra
+
+```sh
 npm run typecheck
+npm run lint
 npm test
 npm run build
 ```
 
-Nếu Expo Go còn báo project SDK 57, dừng Metro cũ bằng `Ctrl+C`, chạy `npm start -- --clear --go`, rồi quét QR mới. iPhone và máy chạy Metro cần truy cập được nhau qua mạng LAN. Nâng SDK chỉ xử lý lỗi phiên bản; Google Sign-In native vẫn cần development build như phần dưới.
+`npm test` chạy test source thật với storage/HTTP adapter trong Node; không ghi vào DB. Bao gồm hợp đồng staff đối chiếu OpenAPI độc lập, phân quyền, payload, phân trang, import/export, validation và render các màn của hai portal staff.
 
-Copy `.env.example` thành `.env` nếu chưa có. `EXPO_PUBLIC_API_URL` phải chứa `/api/v1`. API base URL không hard-code trong code runtime. Bản làm việc này đã đổi riêng giá trị đó sang test tunnel đã được cung cấp; URL cũ lưu trong `.expo/api-url-before-alignment.txt` (không commit).
+`npm run build` xuất JS/Hermes cho Web/Android/iOS vào `.expo/alignment-build`; không phải bản cài. APK Android debug local ở `android/app/build/outputs/apk/debug/app-debug.apk`. Bản build kiểm tra emulator dùng ABI x86_64.
 
-Google native cần development build có module Google Sign-In, không hoạt động trong Expo Go. Hai public OAuth ID đã có trong `.env.example`; `.env` local vẫn được ignore. EAS cloud cần ba biến EXPO_PUBLIC_* trong development environment vì không tự nhận `.env` local. Khi có Web ID riêng trong env, nút mở Google trực tiếp bằng ID đó; chỉ gọi `/auth/google/config` để tìm ID nếu env chưa có. POST `/auth/google` vẫn xác thực token và giữ nguyên mọi lỗi từ BE. Origin cho bản Web, native client, signing và BE audience phải hợp lệ; không đưa token vào chat/log. Xem [google-login-setup.md](docs/google-login-setup.md).
+## Cấu trúc
 
-`npm run build` export Web/Android/iOS vào `.expo/alignment-build`; đây là bundle JS/Hermes, **không phải APK/IPA**. Kiểm tra thiết bị/native build và đăng nhập thật là bước riêng. `npm test` dùng adapter HTTP/storage trong Node và contract đã chụp, không ghi vào DB thật.
-
-## Cấu trúc và rollback
-
-- `app/`: Expo route wrappers.
+- `app/`: Expo route wrappers, route guard phân tách staff/sinh viên.
 - `src/features/<feature>/presentation`: màn hình/context; `domain`: models/quy tắc; `data`: API/recovery.
-- `src/core/http`, `src/core/auth`, `src/core/ui`, `src/core/validation`: API client, session store, UI primitives, schemas chung.
-- Các path cũ trong `src/services`, `src/types`, `src/contexts`, `src/screens` và `FormationUI` là re-export mỏng giữ import tương thích; không có bản sao logic/API.
-- Palette/tokens tại `src/constants/colors.ts`, quy mô nhóm tại `src/constants/group.ts`.
-- Snapshot trước khi sửa: commit **`90eed1b`**. Các thay đổi từng vùng được commit riêng. Không reset hoặc ghi đè thay đổi có sẵn trong BE/FE.
+- `src/core/http`, `src/core/auth`, `src/core/ui`, `src/core/validation`: HTTP, phiên, UI và schema chung.
+- `src/services`, `src/types`, `src/contexts`, `src/screens`: các import tương thích và services hiện có.
+- `docs/contracts/`: bằng chứng OpenAPI độc lập phục vụ kiểm tra.
 
-## Tình trạng kiểm thử thật
-
-Chưa có đăng nhập OAuth hoặc ghi dữ liệu BE trong đợt này. Computer Use bị dừng vì không xác định chắc chắn URL hiện tại của Chrome; không tiếp tục tự động hóa trình duyệt trong turn đó. Kiểm tra ảnh render và hành vi thực tế chưa được ký duyệt.
-
-Chỉ dùng dữ liệu `TEST-` trên test DB được cho phép; không sửa bản ghi khác. Hai tài khoản được cung cấp cần người dùng đăng nhập Google trực tiếp. Luồng cần 3+ thành viên ghi **not tested**. Chưa thực hiện đăng nhập staff bằng công cụ; portal staff được yêu cầu sau checkpoint ban đầu và còn chưa triển khai.
+Các checkpoint trước 2026-11-05 trong docs là lịch sử. Dùng báo cáo đồng bộ mới để xác định phạm vi và tình trạng hiện hành.
