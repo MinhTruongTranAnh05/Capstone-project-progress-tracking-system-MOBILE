@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Text, View } from 'react-native';
+import { ActivityIndicator, Platform, Text, View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { GoogleSignInButton, getGoogleSignInUnavailableReason } from './GoogleSignInButton';
 import { Button, ui } from './FormationUI';
@@ -8,14 +8,16 @@ import { authService } from '@/services/authService';
 import { getErrorMessage } from '@/services/apiError';
 import { colors } from '@/constants/colors';
 import { authStyles } from '@/features/auth/presentation/authStyles';
+import { googleServerClientId } from '@/features/auth/domain/google';
 
 export function GoogleAuthSection({ compact = false, disabled = false, onBusyChange }: { compact?: boolean; disabled?: boolean; onBusyChange?: (busy: boolean) => void }) {
   const { loginWithGoogle } = useAuth();
   const unavailable = getGoogleSignInUnavailableReason();
-  const configuredClientId = process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID?.trim();
-  // A configured native/web client can open Google directly. BE still validates the
-  // credential at POST /auth/google; the public config endpoint is a discovery fallback.
-  const settings = useQuery({ queryKey: ['public', 'googleConfig'], queryFn: authService.getGoogleConfig, enabled: !unavailable && !configuredClientId });
+  const configuredClientId = googleServerClientId(Platform.OS,
+    process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID, process.env.EXPO_PUBLIC_GOOGLE_MOBILE_WEB_CLIENT_ID);
+  // The public endpoint advertises the browser client, so native builds use their
+  // own explicit server audience. BE still validates the token at POST /auth/google.
+  const settings = useQuery({ queryKey: ['public', 'googleConfig'], queryFn: authService.getGoogleConfig, enabled: Platform.OS === 'web' && !unavailable && !configuredClientId });
   const clientId = configuredClientId || (settings.data?.enabled ? settings.data.clientId : null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<unknown>(null);

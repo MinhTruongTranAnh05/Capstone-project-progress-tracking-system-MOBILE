@@ -13,6 +13,7 @@
     "start:dev:tunnel": "expo start --dev-client --tunnel ngrok --port 8082",
     "google:check": "node --env-file-if-exists=.env scripts/check-google-config.cjs ios",
     "google:check:android": "node --env-file-if-exists=.env scripts/check-google-config.cjs android",
+    "google:check:web": "node --env-file-if-exists=.env scripts/check-google-config.cjs web",
     "eas-build-post-install": "node scripts/check-google-config.cjs",
     "android": "expo run:android",
     "ios": "expo run:ios",
