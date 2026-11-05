@@ -1,9 +1,16 @@
 {
+  "cli": {
+    "appVersionSource": "remote"
+  },
   "build": {
     "development": {
       "developmentClient": true,
       "distribution": "internal",
-      "environment": "development"
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://lyric-validation-better-purse.trycloudflare.com/api/v1",
+        "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "767326459136-ue5gjkbhqajuavnill5ctk0a9hm97qo9.apps.googleusercontent.com",
+        "EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID": "767326459136-2v2jrft09t0kukvdc855rgq7arn91fee.apps.googleusercontent.com"
+      }
     },
     "development-simulator": {
       "extends": "development",

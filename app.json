@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "MatchPoint FPT",
-    "slug": "capstone-mobile",
+    "slug": "monaz1",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -41,9 +41,8 @@
     },
     "extra": {
       "eas": {
-        "projectId": "0f5d9332-5ac4-4fe8-8a78-42c5c6f6faa8"
+        "projectId": "302ff580-d2e0-436a-ada7-69978530d921"
       }
-    },
-    "owner": "minhtruongtrananh05"
+    }
   }
 }

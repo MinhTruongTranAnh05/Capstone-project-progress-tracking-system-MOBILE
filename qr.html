@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>MatchPoint FPT - Quét QR mở Expo Go</title>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; background-color: #f7f9fc; color: #333; }
+    .card { background: white; padding: 32px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); text-align: center; max-width: 420px; width: 90%; }
+    h1 { font-size: 20px; margin-bottom: 8px; color: #ff6600; }
+    p { font-size: 14px; color: #666; margin: 6px 0 20px; }
+    canvas { border-radius: 8px; border: 1px solid #eee; }
+    .url-box { margin-top: 20px; padding: 12px; background: #f0f4f8; border-radius: 8px; font-family: monospace; font-size: 13px; word-break: break-all; color: #0056b3; }
+    .note { margin-top: 16px; font-size: 12px; color: #888; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>MatchPoint FPT Mobile</h1>
+    <p>Dùng Camera hoặc Expo Go trên iPhone để quét mã QR:</p>
+    <canvas id="qrcode"></canvas>
+    <div class="url-box" id="urlText">exp://tsqr7ya-monaz1-8082.exp.direct</div>
+    <div class="note">Hoặc mở Safari trên iPhone và truy cập URL trên để mở trực tiếp trong Expo Go.</div>
+  </div>
+  <script>
+    const url = "exp://tsqr7ya-monaz1-8082.exp.direct";
+    QRCode.toCanvas(document.getElementById('qrcode'), url, { width: 280, margin: 2 }, function (error) {
+      if (error) console.error(error);
+    });
+  </script>
+</body>
+</html>
